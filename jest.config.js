@@ -12,6 +12,7 @@ module.exports = {
         '!<rootDir>/coverage/**',
     ],
     coveragePathIgnorePatterns: [
+        '<rootDir>/__mocks__',
         '<rootDir>/app/components/Map.tsx',
     ],
     moduleNameMapper: {
@@ -28,14 +29,13 @@ module.exports = {
 
         // Handle module aliases
         '^@/components/(.*)$': '<rootDir>/components/$1',
-
-        "react-leaflet": "<rootDir>/__mocks__/reactLeafletMock.js",
     },
     // Add more setup options before each test is run
     // setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
     testPathIgnorePatterns: [
         '<rootDir>/node_modules/',
         '<rootDir>/.next/',
+        '<rootDir>/__mocks__/',
     ],
     testEnvironment: 'jsdom',
     transform: {
@@ -44,7 +44,7 @@ module.exports = {
         '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', {presets: ['next/babel']}],
     },
     transformIgnorePatterns: [
-        '/node_modules/',
+        'node_modules\/(?!(react-leaflet|@react-leaflet))',
         '^.+\\.module\\.(css|sass|scss)$',
     ],
     setupFilesAfterEnv: ['<rootDir>/jest-setup.js']

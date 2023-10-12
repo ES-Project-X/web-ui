@@ -23,7 +23,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
     return (
         <>
             <MapContainer
-                id={"map-container"} data-testid={"map-container"} ref={mapRef}
+                id={"map-container"} ref={mapRef}
                 style={{zIndex: 0, height: "100%", width: "100%"}}
                 center={center} zoom={13} scrollWheelZoom={true}
                 rotate={true} bearing={0}
@@ -33,12 +33,12 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
             </MapContainer>
             <ButtonGroup style={{zIndex: 1, bottom: "3em", left: ".5em"}}>
-                <Button id={"map-rotate-left-btn"} data-testid={"map-rotate-left-btn"}
+                <Button id={"map-rotate-left-btn"}
                         variant={"light"} style={{border: ".1em solid black"}}
                         onClick={() => addToBearing(-10)}>
                     Rotate Left
                 </Button>
-                <Button id={"map-rotate-right-btn"} data-testid={"map-rotate-left-btn"}
+                <Button id={"map-rotate-right-btn"}
                         variant={"light"} style={{border: ".1em solid black"}}
                         onClick={() => addToBearing(10)}>
                     Rotate Right
