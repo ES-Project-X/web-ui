@@ -47,5 +47,6 @@ module.exports = {
         'node_modules\/(?!(react-leaflet|@react-leaflet))',
         '^.+\\.module\\.(css|sass|scss)$',
     ],
-    setupFilesAfterEnv: ['<rootDir>/jest-setup.js']
+    setupFilesAfterEnv: ['<rootDir>/jest-setup.js'],
+    testResultsProcessor: "jest-sonar-reporter"
 }
