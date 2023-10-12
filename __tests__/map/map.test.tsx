@@ -2,7 +2,7 @@ import {Builder, By, Capabilities, until} from "selenium-webdriver"
 import chrome from "selenium-webdriver/chrome"
 import chromedriver from "chromedriver"
 
-describe("Map", () => {
+describe("MapPage", () => {
 
     chrome.setDefaultService(new chrome.ServiceBuilder(chromedriver.path).build())
 

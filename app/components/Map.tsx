@@ -7,7 +7,7 @@ import {useRef} from "react";
 import "leaflet/dist/leaflet.css"
 import "leaflet-rotate"
 
-export default function MapComponent() {
+export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
     const center = new LatLng(40.64427, -8.64554);
 
@@ -23,23 +23,23 @@ export default function MapComponent() {
     return (
         <>
             <MapContainer
-                id={"map-container"} ref={mapRef}
+                id={"map-container"} data-testid={"map-container"} ref={mapRef}
                 style={{zIndex: 0, height: "100%", width: "100%"}}
                 center={center} zoom={13} scrollWheelZoom={true}
                 rotate={true} bearing={0}
                 // @ts-ignore
                 rotateControl={{closeOnZeroBearing: false}} touchRotate={true}
             >
-                <TileLayer
-                    url="https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png"
-                />
+                {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
             </MapContainer>
             <ButtonGroup style={{zIndex: 1, bottom: "3em", left: ".5em"}}>
-                <Button id={"map-rotate-left-btn"} variant={"light"} style={{border: ".1em solid black"}}
+                <Button id={"map-rotate-left-btn"} data-testid={"map-rotate-left-btn"}
+                        variant={"light"} style={{border: ".1em solid black"}}
                         onClick={() => addToBearing(-10)}>
                     Rotate Left
                 </Button>
-                <Button id={"map-rotate-right-btn"} variant={"light"} style={{border: ".1em solid black"}}
+                <Button id={"map-rotate-right-btn"} data-testid={"map-rotate-left-btn"}
+                        variant={"light"} style={{border: ".1em solid black"}}
                         onClick={() => addToBearing(10)}>
                     Rotate Right
                 </Button>
