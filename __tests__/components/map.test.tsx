@@ -28,4 +28,18 @@ describe("MapComponent", () => {
         const rotateLeft = findById("map-rotate-left-btn")
         expect(rotateLeft).toBeDefined()
     })
+
+    it("rotates to the right", () => {
+        const rotateRight = findById("map-rotate-right-btn")
+        expect(rotateRight).toBeDefined()
+
+        fireEvent.click(rotateRight!)
+    })
+
+    it("rotates to the left", () => {
+        const rotateLeft = findById("map-rotate-left-btn")
+        expect(rotateLeft).toBeDefined()
+
+        fireEvent.click(rotateLeft!)
+    })
 })
