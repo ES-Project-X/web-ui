@@ -11,6 +11,9 @@ module.exports = {
         '!<rootDir>/*.config.js',
         '!<rootDir>/coverage/**',
     ],
+    coveragePathIgnorePatterns: [
+        '<rootDir>/app/components/Map.tsx',
+    ],
     moduleNameMapper: {
         // Handle CSS imports (with CSS modules)
         // https://jestjs.io/docs/webpack#mocking-css-modules
@@ -33,7 +36,6 @@ module.exports = {
     testPathIgnorePatterns: [
         '<rootDir>/node_modules/',
         '<rootDir>/.next/',
-        '<rootDir>/app/components/Map'
     ],
     testEnvironment: 'jsdom',
     transform: {
