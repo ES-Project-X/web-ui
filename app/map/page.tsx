@@ -5,6 +5,6 @@ const MapComponent = dynamic(() => import('../components/Map'), {
 })
 export default function MapPage() {
     return <>
-        <MapComponent/>
+        <MapComponent tileLayerURL={"https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png"}/>
     </>
 }
