@@ -13,7 +13,7 @@ module.exports = {
     ],
     coveragePathIgnorePatterns: [
         '<rootDir>/__mocks__',
-        '<rootDir>/app/components/Map.tsx',
+        '<rootDir>/tailwind.config.ts',
     ],
     moduleNameMapper: {
         // Handle CSS imports (with CSS modules)
