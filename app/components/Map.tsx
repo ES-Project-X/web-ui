@@ -23,7 +23,7 @@ export default function MapComponent() {
     return (
         <>
             <MapContainer
-                data-testid={"map-container"} ref={mapRef}
+                id={"map-container"} ref={mapRef}
                 style={{zIndex: 0, height: "100%", width: "100%"}}
                 center={center} zoom={13} scrollWheelZoom={true}
                 rotate={true} bearing={0}
@@ -35,11 +35,11 @@ export default function MapComponent() {
                 />
             </MapContainer>
             <ButtonGroup style={{zIndex: 1, bottom: "3em", left: ".5em"}}>
-                <Button data-testid={"map-rotate-left-btn"} variant={"light"} style={{border: ".1em solid black"}}
+                <Button id={"map-rotate-left-btn"} variant={"light"} style={{border: ".1em solid black"}}
                         onClick={() => addToBearing(-10)}>
                     Rotate Left
                 </Button>
-                <Button data-testid={"map-rotate-right-btn"} variant={"light"} style={{border: ".1em solid black"}}
+                <Button id={"map-rotate-right-btn"} variant={"light"} style={{border: ".1em solid black"}}
                         onClick={() => addToBearing(10)}>
                     Rotate Right
                 </Button>
