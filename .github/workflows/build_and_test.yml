@@ -43,7 +43,7 @@ jobs:
         run: npm start &
 
       - name: Run Project Tests
-        run: npm test
+        run: npm test --coverage
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
