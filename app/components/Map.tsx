@@ -3,13 +3,35 @@
 import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
 import {Button, ButtonGroup} from "react-bootstrap";
-import {useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 import "leaflet/dist/leaflet.css"
 import "leaflet-rotate"
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
+    const [userPosition, setUserPosition] = useState({});
     const center = new LatLng(40.64427, -8.64554);
+
+    useEffect(() => {
+        if (navigator.geolocation){
+            focusOnUserPosition();
+        }
+    }, []) // Runs only once, when component is mounted
+
+    const focusOnUserPosition = () => {
+        navigator.geolocation.getCurrentPosition(position => {
+            const {latitude, longitude} = position.coords;
+            setUserPosition({latitude, longitude});
+            focusOnPosition(latitude, longitude);
+        })
+    }
+
+    const focusOnPosition = (latitude: number, longitude: number) => {
+        if (mapRef.current) {
+            // @ts-ignore
+            mapRef.current.flyTo(new LatLng(latitude, longitude), 17);
+        }
+    }
 
     const addToBearing = (amount: number) => {
         if (mapRef.current) {
