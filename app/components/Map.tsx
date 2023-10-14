@@ -3,7 +3,7 @@
 import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
 import {Button, ButtonGroup} from "react-bootstrap";
-import AddMarkers from "./MarkersManager";
+import MarkersManager from "./MarkersManager";
 import {useRef, useState} from "react";
 import "leaflet/dist/leaflet.css"
 import "leaflet-rotate"
@@ -34,7 +34,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string}) {
                 rotateControl={{closeOnZeroBearing: false}} touchRotate={true}
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
-                <AddMarkers creatingRoute={!creatingRoute} />
+                <MarkersManager creatingRoute={!creatingRoute} />
             </MapContainer>
             <ButtonGroup style={{zIndex: 1, bottom: "3em", left: ".5em"}}>
                 <Button id={"map-rotate-left-btn"}
