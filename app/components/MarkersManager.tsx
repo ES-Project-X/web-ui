@@ -5,7 +5,7 @@ import { Marker, Popup } from "react-leaflet";
 import { LatLng } from "leaflet";
 import { useState } from "react";
 
-export default function AddMarkers({ creatingRoute = false }: { creatingRoute?: boolean }) {
+export default function MarkersManager({ creatingRoute = false }: { creatingRoute?: boolean }) {
 
     const [redPosition, setRedPosition] = useState<LatLng | null>(null)
     const [greenPosition, setGreenPosition] = useState<LatLng | null>(null)
