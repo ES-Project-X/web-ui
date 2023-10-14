@@ -12,7 +12,7 @@ import "leaflet-rotate"
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
-    const [userPosition, setUserPosition] = useState({latitude: undefined, longitude: undefined});
+    const [userPosition, setUserPosition] = useState<{ [key: string]: undefined | number }>({latitude: undefined, longitude: undefined});
     const center = new LatLng(40.64427, -8.64554);
 
     useEffect(() => {
