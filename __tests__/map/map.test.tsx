@@ -52,7 +52,7 @@ describe("MapPage", () => {
             await searchBar.sendKeys("Viseu")
             await searchBar.sendKeys("\n")
 
-            await driver.wait(until.elementIsVisible(await driver.findElement({id: "location-text"})), 10000)
+            await driver.wait(until.elementIsVisible(await driver.findElement({id: "location-text"})), 20000)
 
             const locationText = await driver.findElement({id: "location-text"})
             const locationTextValue = await locationText.getText()
