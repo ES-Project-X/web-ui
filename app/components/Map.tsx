@@ -1,37 +1,18 @@
 "use client"
 
-import {MapContainer, TileLayer, Marker, Popup} from "react-leaflet"
+import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
 import {Button, ButtonGroup} from "react-bootstrap";
+import AddMarkers from "./AddMarkers";
 import {useRef, useState} from "react";
 import "leaflet/dist/leaflet.css"
 import "leaflet-rotate"
-import "leaflet/dist/images/marker-shadow.png";
-import RedMarker from "./icons/RedMarker";
-import { useMapEvents } from "react-leaflet";
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string}) {
     const mapRef = useRef(null);
     const center = new LatLng(40.64427, -8.64554);
 
-    const [position, setPosition] = useState<LatLng | null>(null);
-
-    function AddMarkerToClick() {
-        const map = useMapEvents({
-            click: (e) => {
-                console.log(e.latlng)
-                setPosition(e.latlng)
-            }
-        })
-
-        return position === null ? null : (
-            <Marker position={position} icon={RedMarker}>
-                <Popup>
-                    You are at {position.lat.toFixed(4)}, {position.lng.toFixed(4)}
-                </Popup>
-            </Marker>
-        )
-    }
+    const [creatingRoute, setCreatingRoute] = useState(false);
 
     const addToBearing = (amount: number) => {
         if (mapRef.current) {
@@ -53,7 +34,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string}) {
                 rotateControl={{closeOnZeroBearing: false}} touchRotate={true}
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
-                <AddMarkerToClick/>
+                <AddMarkers creatingRoute={creatingRoute} />
             </MapContainer>
             <ButtonGroup style={{zIndex: 1, bottom: "3em", left: ".5em"}}>
                 <Button id={"map-rotate-left-btn"}
