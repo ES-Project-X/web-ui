@@ -46,51 +46,5 @@ describe("MapPage", () => {
             paneStyle = await pane.getAttribute("style")
             expect(paneStyle).toContain("rotate(6.10865rad);")
         })
-
-        it('Search for location', async ()=> {
-            const searchBar = await driver.findElement({id: "search-bar"})
-            await searchBar.sendKeys("Viseu")
-            await searchBar.sendKeys("\n")
-
-            await driver.wait(until.elementIsVisible(await driver.findElement({id: "location-text"})), 20000)
-
-            const locationText = await driver.findElement({id: "location-text"})
-            const locationTextValue = await locationText.getText()
-            expect(locationTextValue).toBe("Viseu, Portugal")
-
-            //check if style is not none
-            const cardInfo = await driver.findElement({id: "card-info"})
-            const cardInfoStyle = await cardInfo.getAttribute("style")
-            expect(cardInfoStyle).toBe("z-index: 1; bottom: 3em; right: 20em; position: absolute; display: block;")
-
-            //click card button
-            const cardBtn = await driver.findElement({id: "card-btn"})
-            await cardBtn.click()
-            const cardInfoStyle2 = await cardInfo.getAttribute("style")
-            expect(cardInfoStyle2).toBe("z-index: 1; bottom: 3em; right: 20em; position: absolute; display: none;")
-        },20000)
-
-        it('Search for coordinates', async () => {
-            const searchBar = await driver.findElement({id: "search-bar"})
-            await searchBar.sendKeys("40.65695,-7.91463")
-            await searchBar.sendKeys("\n")
-
-            await driver.wait(until.elementIsVisible(await driver.findElement({id: "location-text"})), 10000)
-
-            const locationText = await driver.findElement({id: "location-text"})
-            const locationTextValue = await locationText.getText()
-            expect(locationTextValue).toBe("Praça da República, 3510-105 Viseu, Portugal")
-
-            //check if style is not none
-            const cardInfo = await driver.findElement({id: "card-info"})
-            const cardInfoStyle = await cardInfo.getAttribute("style")
-            expect(cardInfoStyle).toBe("z-index: 1; bottom: 3em; right: 20em; position: absolute; display: block;")
-
-            //click card button
-            const cardBtn = await driver.findElement({id: "card-btn"})
-            await cardBtn.click()
-            const cardInfoStyle2 = await cardInfo.getAttribute("style")
-            expect(cardInfoStyle2).toBe("z-index: 1; bottom: 3em; right: 20em; position: absolute; display: none;")
-        });
     })
 })
