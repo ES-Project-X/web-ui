@@ -73,6 +73,29 @@ describe("MarkersManager", () => {
         const redMarker2 = findByClass("red-marker-icon")
         expect(redMarker2).toBeUndefined()
     })
+
+    it ("add a green marker and a red marker, then removes the green marker", () => {
+        const mapContainer = findById("map-container")
+        expect(mapContainer).toBeDefined()
+
+        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
+        fireEvent.click(mapContainer!, { clientX: 200, clientY: 200 });
+
+        const greenMarker = findByClass("green-marker-icon")
+        expect(greenMarker).toBeDefined()
+
+        const redMarker = findByClass("red-marker-icon")
+        expect(redMarker).toBeDefined()
+
+        fireEvent.click(greenMarker!)
+
+        const greenMarker2 = findByClass("green-marker-icon")
+        expect(greenMarker2).toBeUndefined()
+
+        const redMarker2 = findByClass("red-marker-icon")
+        expect(redMarker2).toBeDefined()
+    })
+    
     // TODO: fix when Creating Route is implemented
     /*
     it("add a single red marker", () => {

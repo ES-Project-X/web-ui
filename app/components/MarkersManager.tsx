@@ -42,6 +42,12 @@ export default function MarkersManager({ creatingRoute = false }: { creatingRout
                 </Marker>
             )
         }
+        else if (redPosition !== null) {
+            return (
+                <Marker position={redPosition} icon={RedMarker} interactive={true} eventHandlers={{ click: () => setGreenPosition(null) }}>
+                </Marker>
+            )
+        }
         return null
     }
     return redPosition === null ? null : (
