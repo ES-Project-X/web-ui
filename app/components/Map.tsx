@@ -1,7 +1,6 @@
 "use client"
 
 import "leaflet/dist/leaflet.css"
-import "leaflet/dist/leaflet.css"
 
 import {useEffect, useRef, useState} from "react";
 import {Button, ButtonGroup, Form, Card, Row, CloseButton} from "react-bootstrap";
