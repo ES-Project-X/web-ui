@@ -1,7 +1,6 @@
-import { useMapEvents } from "react-leaflet";
+import { Marker, Popup, useMapEvents } from "react-leaflet";
 import RedMarker from "./icons/RedMarker";
 import GreenMarker from "./icons/GreenMarker";
-import { Marker, Popup } from "react-leaflet";
 import { LatLng } from "leaflet";
 import { useState } from "react";
 
@@ -10,7 +9,7 @@ export default function MarkersManager({ creatingRoute = false }: { creatingRout
     const [redPosition, setRedPosition] = useState<LatLng | null>(null)
     const [greenPosition, setGreenPosition] = useState<LatLng | null>(null)
 
-    const map = useMapEvents({
+    useMapEvents({
         click: (e) => {
             if (creatingRoute) {
                 if (greenPosition === null) {
