@@ -51,7 +51,9 @@ describe("MapPage", () => {
             const searchBar = await driver.findElement({id: "search-bar"})
             await searchBar.sendKeys("Viseu")
             await searchBar.sendKeys("\n")
-            await new Promise(r => setTimeout(r, 3000));
+
+            await driver.wait(until.elementIsVisible(await driver.findElement({id: "location-text"})), 10000)
+
             const locationText = await driver.findElement({id: "location-text"})
             const locationTextValue = await locationText.getText()
             expect(locationTextValue).toBe("Viseu, Portugal")
