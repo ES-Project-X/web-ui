@@ -9,7 +9,8 @@ export default function LocateControl() {
     const map = useMap();
     const lc = control.locate({
         clickBehavior: {inView: 'setView'},
-        flyTo: true
+        flyTo: true,
+        onLocationError: () => {}
     });
 
     useEffect(() => {

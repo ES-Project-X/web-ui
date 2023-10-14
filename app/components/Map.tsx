@@ -4,15 +4,23 @@ import "leaflet/dist/leaflet.css"
 
 import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
-import LocateControl from "@/app/components/LocateControl";
-import {Button, ButtonGroup} from "react-bootstrap";
-import {useRef} from "react";
+import LocateControl from "./LocateControl";
+import {Button, ButtonGroup, Card, Col, Container, Row} from "react-bootstrap";
+import {useEffect, useRef, useState} from "react";
 import "leaflet-rotate"
 
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
+    const [userPosition, setUserPosition] = useState({});
     const center = new LatLng(40.64427, -8.64554);
+
+    useEffect(() => {
+        navigator.geolocation.watchPosition((location) => {
+            const {latitude, longitude} = location.coords;
+            setUserPosition({latitude, longitude})
+        });
+    }, [])
 
     const addToBearing = (amount: number) => {
         if (mapRef.current) {
@@ -48,6 +56,27 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                     Rotate Right
                 </Button>
             </ButtonGroup>
+            <Card className={"text-center"}
+                  style={{zIndex: 1, bottom: "100%", left: "25%", width: "50%"}}>
+                <Card.Body>
+                    {"latitude" in userPosition && "longitude" in userPosition
+                        ?
+                        <>
+                            <Card.Title>Current Location</Card.Title>
+                            <Card.Text>
+                                {`Latitude: ${userPosition.latitude}, Longitude: ${userPosition.longitude}`}
+                            </Card.Text>
+                        </>
+                        :
+                        <>
+                            <Card.Title>Enable Location</Card.Title>
+                            <Card.Text>
+                                Please enable location to see your current location.
+                            </Card.Text>
+                        </>
+                    }
+                </Card.Body>
+            </Card>
         </>
     )
 }
