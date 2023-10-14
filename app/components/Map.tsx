@@ -2,11 +2,9 @@
 
 import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
-import {Button, ButtonGroup} from "react-bootstrap";
 import MarkersManager from "./MarkersManager";
 import {useRef, useState} from "react";
 import {Button, ButtonGroup, Form, Card, Row, CloseButton} from "react-bootstrap";
-import {useRef} from "react";
 import "leaflet/dist/leaflet.css"
 import "leaflet-rotate"
 
@@ -15,7 +13,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string}) {
     const center = new LatLng(40.64427, -8.64554);
 
     const [creatingRoute, setCreatingRoute] = useState(false);
-    
+
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
     const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
