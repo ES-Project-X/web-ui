@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css"
 import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
 import LocateControl from "./LocateControl";
-import {Button, ButtonGroup, Card, Col, Container, Row} from "react-bootstrap";
+import {Button, ButtonGroup, Card} from "react-bootstrap";
 import {useEffect, useRef, useState} from "react";
 import "leaflet-rotate"
 
