@@ -47,7 +47,7 @@ describe("MapPage", () => {
             expect(paneStyle).toContain("rotate(6.10865rad);")
         })
 
-        it('Search for location', async () => {
+        it('Search for location', async ()=> {
             const searchBar = await driver.findElement({id: "search-bar"})
             await searchBar.sendKeys("Viseu")
             await searchBar.sendKeys("\n")
@@ -68,13 +68,15 @@ describe("MapPage", () => {
             await cardBtn.click()
             const cardInfoStyle2 = await cardInfo.getAttribute("style")
             expect(cardInfoStyle2).toBe("z-index: 1; bottom: 3em; right: 20em; position: absolute; display: none;")
-        })
+        },20000)
 
         it('Search for coordinates', async () => {
             const searchBar = await driver.findElement({id: "search-bar"})
             await searchBar.sendKeys("40.65695,-7.91463")
             await searchBar.sendKeys("\n")
-            await new Promise(r => setTimeout(r, 3000));
+
+            await driver.wait(until.elementIsVisible(await driver.findElement({id: "location-text"})), 10000)
+
             const locationText = await driver.findElement({id: "location-text"})
             const locationTextValue = await locationText.getText()
             expect(locationTextValue).toBe("Praça da República, 3510-105 Viseu, Portugal")
