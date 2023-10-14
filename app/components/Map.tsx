@@ -1,11 +1,14 @@
 "use client"
 
+import "leaflet/dist/leaflet.css"
+
 import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
+import LocateControl from "@/app/components/LocateControl";
 import {Button, ButtonGroup} from "react-bootstrap";
 import {useRef} from "react";
-import "leaflet/dist/leaflet.css"
 import "leaflet-rotate"
+
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
@@ -31,6 +34,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 rotateControl={{closeOnZeroBearing: false}} touchRotate={true}
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
+                <LocateControl/>
             </MapContainer>
             <ButtonGroup style={{zIndex: 1, bottom: "3em", left: ".5em"}}>
                 <Button id={"map-rotate-left-btn"}
