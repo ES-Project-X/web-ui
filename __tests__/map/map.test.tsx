@@ -51,7 +51,7 @@ describe("MapPage", () => {
             const searchBar = await driver.findElement({id: "search-bar"})
             await searchBar.sendKeys("Viseu")
             await searchBar.sendKeys("\n")
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 10000));
             const locationText = await driver.findElement({id: "location-text"})
             const locationTextValue = await locationText.getText()
             expect(locationTextValue).toBe("Viseu, Portugal")
@@ -72,7 +72,7 @@ describe("MapPage", () => {
             const searchBar = await driver.findElement({id: "search-bar"})
             await searchBar.sendKeys("40.65695,-7.91463")
             await searchBar.sendKeys("\n")
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 10000));
             const locationText = await driver.findElement({id: "location-text"})
             const locationTextValue = await locationText.getText()
             expect(locationTextValue).toBe("Praça da República, 3510-105 Viseu, Portugal")
