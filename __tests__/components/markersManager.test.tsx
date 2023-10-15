@@ -1,6 +1,5 @@
 import MapComponent from "../../app/components/Map"
-import MarkersManager from "../../app/components/MarkersManager"
-import {fireEvent, render, screen} from "@testing-library/react"
+import {fireEvent, render} from "@testing-library/react"
 
 describe("MarkersManager", () => {
 
@@ -15,8 +14,16 @@ describe("MarkersManager", () => {
     }
 
     beforeEach(() => {
-        const {container} = render(<MapComponent/>)
-        component = container
+        global.navigator.geolocation = {
+            watchPosition: jest.fn()
+                .mockImplementationOnce((success) => Promise.resolve(success({
+                    coords: {
+                        latitude: 40.64427,
+                        longitude: -8.64554
+                    }
+                })))
+        }
+        component = render(<MapComponent/>).container
     })
 
     it("adds a green marker", () => {

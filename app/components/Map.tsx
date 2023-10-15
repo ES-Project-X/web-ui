@@ -1,23 +1,34 @@
 "use client"
 
+import "leaflet/dist/leaflet.css"
+
+import {useEffect, useRef, useState} from "react";
+import {Button, ButtonGroup, Form, Card, Row, CloseButton} from "react-bootstrap";
 import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
-import MarkersManager from "./MarkersManager";
-import {useRef, useState} from "react";
-import {Button, ButtonGroup, Form, Card, Row, CloseButton} from "react-bootstrap";
-import "leaflet/dist/leaflet.css"
 import "leaflet-rotate"
 
-export default function MapComponent({tileLayerURL}: { tileLayerURL?: string}) {
+import LocateControl from "./LocateControl";
+import MarkersManager from "./MarkersManager";
+
+export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
     const center = new LatLng(40.64427, -8.64554);
 
+    const [userPosition, setUserPosition] = useState<{ [key: string]: undefined | number }>({latitude: undefined, longitude: undefined});
     const [creatingRoute, setCreatingRoute] = useState(false);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
     const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
 
+
+    useEffect(() => {
+        navigator.geolocation.watchPosition((location) => {
+            const {latitude, longitude} = location.coords;
+            setUserPosition({latitude, longitude})
+        });
+    }, [])
 
     const addToBearing = (amount: number) => {
         if (mapRef.current) {
@@ -84,6 +95,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string}) {
                 rotateControl={{closeOnZeroBearing: false}} touchRotate={true}
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
+                <LocateControl/>
                 <MarkersManager creatingRoute={!creatingRoute} />
             </MapContainer>
             <Form style={{zIndex: 1, top: "3em", right: "50em", position: "absolute"}}>
@@ -107,6 +119,18 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string}) {
                     Rotate Right
                 </Button>
             </ButtonGroup>
+            <Card className={"text-center"}
+                  style={{zIndex: 1, bottom: "100%", left: "25%", width: "50%"}}>
+                <Card.Body>
+                    <Card.Title>User Position</Card.Title>
+                    <Card.Text id={"map-user-position"}>
+                        {userPosition.latitude !== undefined && userPosition.longitude !== undefined
+                            ? `Latitude: ${userPosition.latitude} | Longitude: ${userPosition.longitude}`
+                            : "Please enable location to see your current location"
+                        }
+                    </Card.Text>
+                </Card.Body>
+            </Card>
         </>
     )
 }
