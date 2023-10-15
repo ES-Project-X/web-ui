@@ -6,14 +6,18 @@ import {useEffect, useRef, useState} from "react";
 import {Button, ButtonGroup, Form, Card, Row, CloseButton} from "react-bootstrap";
 import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
-import LocateControl from "./LocateControl";
-
 import "leaflet-rotate"
+
+import LocateControl from "./LocateControl";
+import MarkersManager from "./MarkersManager";
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
-    const [userPosition, setUserPosition] = useState<{ [key: string]: undefined | number }>({latitude: undefined, longitude: undefined});
     const center = new LatLng(40.64427, -8.64554);
+
+    const [userPosition, setUserPosition] = useState<{ [key: string]: undefined | number }>({latitude: undefined, longitude: undefined});
+    const [creatingRoute, setCreatingRoute] = useState(false);
+
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
     const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
@@ -92,6 +96,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
+                <MarkersManager creatingRoute={!creatingRoute} />
             </MapContainer>
             <Form style={{zIndex: 1, top: "3em", right: "50em", position: "absolute"}}>
                 <Form.Group controlId={"search-bar"}>
