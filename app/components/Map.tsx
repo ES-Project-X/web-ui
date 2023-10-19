@@ -10,7 +10,7 @@ import "leaflet-rotate"
 
 import LocateControl from "./LocateControl";
 import MarkersManager from "./MarkersManager";
-import FilterBoard from "@/app/components/FilterBoard";
+import FilterBoardComponent from "./FilterBoard";
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
@@ -22,10 +22,17 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
     });
     const [creatingRoute, setCreatingRoute] = useState(false);
 
+    const [types, setTypes] = useState([
+        {label: "Bicycle Parking", value: "bicycle_parking", selected: true},
+        {label: "Bicycle Shop", value: "bicycle_shop", selected: true},
+        {label: "Drinking Water", value: "drinking_water", selected: true},
+        {label: "Toilets", value: "toilets", selected: true},
+        {label: "Bench", value: "bench", selected: true}
+    ]);
+
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
     const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
-
 
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
@@ -43,8 +50,16 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
-    const fetchPOIs = (types: string[]) => {
-        console.log(types)
+    const updateTypes = (types: {label: string, value: string, selected: boolean}[]) => {
+        setTypes(types)
+        fetchPOIs()
+    }
+
+    const fetchPOIs = () => {
+        const typesFetch = types
+            .filter(type => type.selected)
+            .map(type => type.value)
+        console.log(typesFetch)
         // TODO: implement
     }
 
@@ -143,7 +158,10 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
                         <Card>
                             <Card.Body>
-                                <FilterBoard fetchPOIs={fetchPOIs}/>
+                                <FilterBoardComponent
+                                    id={"filter-board"}
+                                    types={types}
+                                    updateTypes={updateTypes}/>
                             </Card.Body>
                         </Card>
                     </Col>

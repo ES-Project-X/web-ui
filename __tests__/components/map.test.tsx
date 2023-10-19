@@ -44,6 +44,9 @@ describe("MapComponent", () => {
 
         const cardInfo = findById("card-info")
         expect(cardInfo).toBeDefined()
+
+        const filterBoard = findById("filter-board")
+        expect(filterBoard).toBeDefined()
     })
 
     describe("Rotation", () => {
