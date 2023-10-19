@@ -156,10 +156,9 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
 
                     </Col>
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
-                        <Card>
+                        <Card id={"filter-board"}>
                             <Card.Body>
                                 <FilterBoardComponent
-                                    id={"filter-board"}
                                     types={types}
                                     updateTypes={updateTypes}/>
                             </Card.Body>
