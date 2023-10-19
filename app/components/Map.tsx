@@ -4,13 +4,16 @@ import "leaflet/dist/leaflet.css"
 
 import {useEffect, useRef, useState} from "react";
 import {Button, ButtonGroup, Form, Card, Row, CloseButton, Container, Col} from "react-bootstrap";
-import {MapContainer, TileLayer} from "react-leaflet"
+import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
 import "leaflet-rotate"
 
 import LocateControl from "./LocateControl";
 import MarkersManager from "./MarkersManager";
 import FilterBoardComponent from "./FilterBoard";
+import {BasicPOI} from "../structs/poi";
+import RedMarker from "@/app/components/icons/RedMarker";
+
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
@@ -30,7 +33,14 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         {label: "Bench", value: "bench", selected: true}
     ]);
 
+    const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([
+        {id: 0, name: "UA Psycology Department Bicycle Parking", type: "bicycle_parking", latitude: 40.63195, longitude: -8.65799},
+        {id: 1, name: "UA Environmental Department Bicycle Parking", type: "bicycle_parking", latitude: 40.63265, longitude: -8.65881},
+        {id: 2, name: "UA Catacumbas Bathroom", type: "bathroom", latitude: 40.63071, longitude: -8.65875}
+    ])
+
     const API_KEY = process.env.PUBLIC_KEY_HERE;
+    const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
     const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
 
@@ -59,8 +69,15 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         const typesFetch = types
             .filter(type => type.selected)
             .map(type => type.value)
-        console.log(typesFetch)
-        // TODO: implement
+
+        const url = new URL(URL_API + "poi");
+        typesFetch.forEach(type => url.searchParams.append("type", type))
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                setBasicPOIs(data)
+            })
     }
 
     const getGeoLocation = (query: string) => {
@@ -121,6 +138,22 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
                 <MarkersManager creatingRoute={!creatingRoute}/>
+                {/*
+                    DISPLAY POIs
+                */}
+                {basicPOIs.map(poi => {
+                    return (
+                        <Marker
+                            key={poi.id}
+                            icon={RedMarker} // TODO: change icon based on type
+                            position={new LatLng(poi.latitude, poi.longitude)}
+                        >
+                            <Popup>
+                                {poi.name} <br/> {poi.type}
+                            </Popup>
+                        </Marker>
+                    )
+                })}
             </MapContainer>
             <Container className={"map-ui d-flex flex-column h-100"} fluid>
                 {/*
