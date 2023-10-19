@@ -98,7 +98,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 <LocateControl/>
                 <MarkersManager creatingRoute={!creatingRoute} />
             </MapContainer>
-            <Form style={{zIndex: 1, top: "3em", right: "50em", position: "absolute"}}>
+            <Button id={"ori-dst-btn"} variant={"light"} style={{zIndex: 1, scale:"100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black"}}>Route</Button>
+            <Form style={{zIndex: 1, top: "5%", left: "42.5%", width:"15%", position: "absolute"}}>
                 <Form.Group controlId={"search-bar"}>
                     <Form.Control type={"text"} placeholder={"Search"} onKeyDown={handleKeyDown}/>
                 </Form.Group>
@@ -120,7 +121,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 </Button>
             </ButtonGroup>
             <Card className={"text-center"}
-                  style={{zIndex: 1, bottom: "100%", left: "25%", width: "50%"}}>
+                  style={{zIndex: 1, bottom: "20%", left: "25%", width: "50%"}}>
                 <Card.Body>
                     <Card.Title>User Position</Card.Title>
                     <Card.Text id={"map-user-position"}>
