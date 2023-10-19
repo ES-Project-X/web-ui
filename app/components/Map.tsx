@@ -3,19 +3,23 @@
 import "leaflet/dist/leaflet.css"
 
 import {useEffect, useRef, useState} from "react";
-import {Button, ButtonGroup, Form, Card, Row, CloseButton} from "react-bootstrap";
+import {Button, ButtonGroup, Form, Card, Row, CloseButton, Container, Col} from "react-bootstrap";
 import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
 import "leaflet-rotate"
 
 import LocateControl from "./LocateControl";
 import MarkersManager from "./MarkersManager";
+import FilterBoard from "@/app/components/FilterBoard";
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
     const center = new LatLng(40.64427, -8.64554);
 
-    const [userPosition, setUserPosition] = useState<{ [key: string]: undefined | number }>({latitude: undefined, longitude: undefined});
+    const [userPosition, setUserPosition] = useState<{ [key: string]: undefined | number }>({
+        latitude: undefined,
+        longitude: undefined
+    });
     const [creatingRoute, setCreatingRoute] = useState(false);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
@@ -44,7 +48,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             .then(response => response.json())
             .then(data => {
                 console.log(data);
-                if(data.items.length === 0) {
+                if (data.items.length === 0) {
                     window.alert("No results");
                     return;
                 }
@@ -60,7 +64,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 // @ts-ignore
                 document.getElementById("card-info").style.display = "block";
                 // @ts-ignore
-                mapRef.current.setView(new LatLng(lat, lng), 15);
+                mapRef.current.flyTo(new LatLng(lat, lng), 15);
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -88,7 +92,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         <>
             <MapContainer
                 id={"map-container"} ref={mapRef}
-                style={{zIndex: 0, height: "100%", width: "100%"}}
+                className={"map"}
                 center={center} zoom={13} scrollWheelZoom={true}
                 rotate={true} bearing={0}
                 // @ts-ignore
@@ -96,41 +100,83 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
-                <MarkersManager creatingRoute={!creatingRoute} />
+                <MarkersManager creatingRoute={!creatingRoute}/>
             </MapContainer>
-            <Form style={{zIndex: 1, top: "3em", right: "50em", position: "absolute"}}>
-                <Form.Group controlId={"search-bar"}>
-                    <Form.Control type={"text"} placeholder={"Search"} onKeyDown={handleKeyDown}/>
-                </Form.Group>
-            </Form>
-            <Card id={"card-info"} style={{zIndex: 1, bottom: "3em", right: "20em", position: "absolute", display: "none"}}>
-                <Card.Header><CloseButton id={"card-btn"} onClick={hidecard}/></Card.Header>
-                <Card.Body><Row id={"location-text"}></Row><Row id={"lat-text"}></Row><Row id={"lng-txt"}></Row></Card.Body>
-            </Card>
-            <ButtonGroup style={{zIndex: 1, bottom: "3em", left: ".5em"}}>
-                <Button id={"map-rotate-left-btn"}
-                        variant={"light"} style={{border: ".1em solid black"}}
-                        onClick={() => addToBearing(-10)}>
-                    Rotate Left
-                </Button>
-                <Button id={"map-rotate-right-btn"}
-                        variant={"light"} style={{border: ".1em solid black"}}
-                        onClick={() => addToBearing(10)}>
-                    Rotate Right
-                </Button>
-            </ButtonGroup>
-            <Card className={"text-center"}
-                  style={{zIndex: 1, bottom: "100%", left: "25%", width: "50%"}}>
-                <Card.Body>
-                    <Card.Title>User Position</Card.Title>
-                    <Card.Text id={"map-user-position"}>
-                        {userPosition.latitude !== undefined && userPosition.longitude !== undefined
-                            ? `Latitude: ${userPosition.latitude} | Longitude: ${userPosition.longitude}`
-                            : "Please enable location to see your current location"
-                        }
-                    </Card.Text>
-                </Card.Body>
-            </Card>
+            <Container className={"d-flex flex-column h-100 mapUi"} fluid>
+                {/*
+                    POPUP CARD
+                */}
+                <Card id={"card-info"} style={{position:"absolute", top: "10em", left: "50%", display: "none"}}>
+                    <Card.Header>
+                        <CloseButton id={"card-btn"} onClick={hidecard}/>
+                    </Card.Header>
+                    <Card.Body>
+                        <Row id={"location-text"}></Row>
+                        <Row id={"lat-text"}></Row>
+                        <Row id={"lng-txt"}></Row>
+                    </Card.Body>
+                </Card>
+                {/*
+                    UPPER PART OF THE UI
+                */}
+                <Row className={"pt-2"}>
+                    <Col xs={"auto"} className={"mx-auto"}>
+                        <Form>
+                            <Form.Group controlId={"search-bar"}>
+                                <Form.Control type={"text"} placeholder={"Search"} onKeyDown={handleKeyDown}/>
+                            </Form.Group>
+                        </Form>
+                    </Col>
+                </Row>
+                {/*
+                    MIDDLE PART OF THE UI
+                */}
+                <Row className={"flex-grow-1"}>
+                    <Col xs={"auto"} className={"flex-grow-1"}>
+
+                    </Col>
+                    <Col xs={"auto"} className={"d-flex align-items-center"}>
+                        <Card>
+                            <Card.Body>
+                                <FilterBoard/>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+                {/*
+                    LOWER PART OF THE UI
+                */}
+                <Row className={"pb-2"}>
+                    <Col xs={2} className={"d-flex align-items-end"}>
+                        <ButtonGroup>
+                            <Button id={"map-rotate-left-btn"} variant={"light"}
+                                    onClick={() => addToBearing(-10)}>
+                                Rotate Left
+                            </Button>
+                            <Button id={"map-rotate-right-btn"} variant={"light"}
+                                    onClick={() => addToBearing(10)}>
+                                Rotate Right
+                            </Button>
+                        </ButtonGroup>
+                    </Col>
+                    <Col xs={"auto"} className={"mx-auto"}>
+                        <Card className={"text-center"}>
+                            <Card.Body>
+                                <Card.Title>User Position</Card.Title>
+                                <Card.Text id={"map-user-position"}>
+                                    {userPosition.latitude !== undefined && userPosition.longitude !== undefined
+                                        ? `Latitude: ${userPosition.latitude} | Longitude: ${userPosition.longitude}`
+                                        : "Please enable location to see your current location"
+                                    }
+                                </Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    <Col xs={2}>
+
+                    </Col>
+                </Row>
+            </Container>
         </>
     )
 }
