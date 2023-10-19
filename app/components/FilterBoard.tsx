@@ -1,4 +1,4 @@
-import {Button, Form} from "react-bootstrap";
+import {Form} from "react-bootstrap";
 
 export default function FilterBoard({fetchPOIs}: { fetchPOIs: (types :string[]) => void }) {
     const typesForm = [
