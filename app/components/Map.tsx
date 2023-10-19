@@ -43,6 +43,11 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
+    const fetchPOIs = (types: string[]) => {
+        console.log(types)
+        // TODO: implement
+    }
+
     const getGeoLocation = (query: string) => {
         fetch(query)
             .then(response => response.json())
@@ -102,11 +107,11 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 <LocateControl/>
                 <MarkersManager creatingRoute={!creatingRoute}/>
             </MapContainer>
-            <Container className={"d-flex flex-column h-100 mapUi"} fluid>
+            <Container className={"map-ui d-flex flex-column h-100"} fluid>
                 {/*
                     POPUP CARD
                 */}
-                <Card id={"card-info"} style={{position:"absolute", top: "10em", left: "50%", display: "none"}}>
+                <Card id={"card-info"} style={{position: "absolute", top: "10em", left: "50%", display: "none"}}>
                     <Card.Header>
                         <CloseButton id={"card-btn"} onClick={hidecard}/>
                     </Card.Header>
@@ -138,7 +143,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
                         <Card>
                             <Card.Body>
-                                <FilterBoard/>
+                                <FilterBoard fetchPOIs={fetchPOIs}/>
                             </Card.Body>
                         </Card>
                     </Col>

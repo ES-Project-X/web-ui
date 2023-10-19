@@ -1,33 +1,38 @@
 import {Button, Form} from "react-bootstrap";
-// @ts-ignore
-import Multiselect from "react-bootstrap-multiselect";
 
-export default function FilterBoard() {
-    const types = [
-        {value: "parking", selected: true},
-        {value: "bathroom"},
-
+export default function FilterBoard({fetchPOIs}: { fetchPOIs: (types :string[]) => void }) {
+    const typesForm = [
+        {label: "Bicycle Parking", value: "bicycle_parking", selected: true},
+        {label: "Bicycle Shop", value: "bicycle_shop", selected: true},
+        {label: "Drinking Water", value: "drinking_water", selected: true},
+        {label: "Toilets", value: "toilets", selected: true},
+        {label: "Bench", value: "bench", selected: true}
     ]
 
     return (
-        <Form>
-            <Multiselect ></Multiselect>
+        <>
+            <Form>
+                <Form.Group className="mb-3">
+                    <Form.Label>POI Types</Form.Label>
+                    {typesForm.map(type =>
+                        <Form.Check
+                            type="checkbox"
+                            id={`filter-type-${type.value}`}
+                            key={type.value}
+                            label={type.label}
+                            defaultChecked={type.selected}
+                            onChange={() => {
+                                type.selected = !type.selected
+                                const types = typesForm
+                                    .filter(type => type.selected)
+                                    .map(type => type.value)
+                                fetchPOIs(types)
+                            }}
+                        />
+                    )}
+                </Form.Group>
+            </Form>
+        </>
 
-            <Form.Group className="mb-3" controlId="formBasicEmail">
-                <Form.Label>Email address</Form.Label>
-                <Form.Control type="email" placeholder="Enter email" />
-                <Form.Text className="text-muted">
-                    We'll never share your email with anyone else.
-                </Form.Text>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="formBasicPassword">
-                <Form.Label>Password</Form.Label>
-                <Form.Control type="password" placeholder="Password" />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="formBasicCheckbox">
-                <Form.Check type="checkbox" label="Check me out" />
-            </Form.Group>
-        </Form>
     )
 }
