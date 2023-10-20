@@ -20,6 +20,9 @@ import {
     ToiletsMarker,
     BenchMarker
 } from "./icons/TypeMarkers";
+import Sidebar from "./Sidebar";
+import { posix } from "path";
+import { alignPropType } from "react-bootstrap/esm/types";
 
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
@@ -122,6 +125,10 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 document.getElementById("card-info").style.display = "block";
                 // @ts-ignore
                 mapRef.current.flyTo(new LatLng(lat, lng), 15);
+                // @ts-ignore
+                // might be useful in the future (clears search bar after search)
+                // for now it's commented out
+                // document.getElementById("search-bar").value = "";
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -145,8 +152,15 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         document.getElementById("card-info").style.display = "none";
     }
 
+
     return (
         <>
+            {/* Sidebar */} 
+            
+            <Sidebar/>
+
+            {/* eventually change this to the main page, but for now fica aqui */}
+
             <MapContainer
                 id={"map-container"} ref={mapRef}
                 className={"map"}
@@ -222,17 +236,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                     LOWER PART OF THE UI
                 */}
                 <Row className={"pb-2"}>
-                    <Col xs={2} className={"d-flex align-items-end"}>
-                        <ButtonGroup>
-                            <Button id={"map-rotate-left-btn"} variant={"light"}
-                                    onClick={() => addToBearing(-10)}>
-                                Rotate Left
-                            </Button>
-                            <Button id={"map-rotate-right-btn"} variant={"light"}
-                                    onClick={() => addToBearing(10)}>
-                                Rotate Right
-                            </Button>
-                        </ButtonGroup>
+                    <Col xs={2}>
+                        
                     </Col>
                     <Col xs={"auto"} className={"mx-auto"}>
                         <Card className={"text-center"}>
@@ -247,8 +252,18 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col xs={2}>
 
+                    <Col xs={2} className={"d-flex align-items-end"}>
+                        <ButtonGroup>
+                            <Button id={"map-rotate-left-btn"} variant={"light"}
+                                    onClick={() => addToBearing(-10)}>
+                                Rotate Left
+                            </Button>
+                            <Button id={"map-rotate-right-btn"} variant={"light"}
+                                    onClick={() => addToBearing(10)}>
+                                Rotate Right
+                            </Button>
+                        </ButtonGroup>
                     </Col>
                 </Row>
             </Container>
