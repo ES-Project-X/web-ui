@@ -175,8 +175,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             console.log("not odmap")
             setodmap(true)
             setCreatingRoute(true)
-            setOrigin(null)
-            setDestination(null)
+            setOrigin("")
+            setDestination("")
             // @ts-ignore
             document.getElementById("origin-input").value = "";
             // @ts-ignore
