@@ -4,18 +4,20 @@ import GreenMarker from "./icons/GreenMarker";
 import { LatLng } from "leaflet";
 import { useState } from "react";
 
-export default function MarkersManager({ creatingRoute = false }: { creatingRoute?: boolean }) {
+export default function MarkersManager(props) {
 
     const [redPosition, setRedPosition] = useState<LatLng | null>(null)
     const [greenPosition, setGreenPosition] = useState<LatLng | null>(null)
 
     useMapEvents({
         click: (e) => {
-            if (creatingRoute) {
+            if (props.creatingRoute) {
                 if (greenPosition === null) {
                     setGreenPosition(e.latlng)
+                    props.setOrigin(e.latlng.lat + "," + e.latlng.lng)
                 } else {
                     setRedPosition(e.latlng)
+                    props.setDestination(e.latlng.lat + "," + e.latlng.lng)
                 }
             }
             else {
@@ -24,7 +26,7 @@ export default function MarkersManager({ creatingRoute = false }: { creatingRout
         }
     })
 
-    if (creatingRoute) {
+    if (props.creatingRoute) {
         if (greenPosition !== null && redPosition !== null) {
             return (
                 <>
