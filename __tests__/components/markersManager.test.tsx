@@ -1,7 +1,10 @@
 import MapComponent from "../../app/components/Map"
 import {fireEvent, render} from "@testing-library/react"
+import {enableFetchMocks} from "jest-fetch-mock";
 
 describe("MarkersManager", () => {
+
+    enableFetchMocks()
 
     let component: HTMLElement
 
