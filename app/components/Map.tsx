@@ -171,7 +171,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
-                <MarkersManager creatingRoute={!creatingRoute}/>
+                <MarkersManager creatingRoute={creatingRoute}/>
                 {/*
                     DISPLAY POIs
                 */}

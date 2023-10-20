@@ -1,0 +1,18 @@
+-> ES-10; Start;
+	-> create menu;				        - CHECK
+
+	-> fix buttons to the right;		- 
+
+	-> Add stuff to menu;			    - CHECK;
+		> Origin and destino inputs;
+		> btn to calculate route;
+		> ?
+
+	-> Create POI btn;			        - 	
+		> Create a btn that opens a modal when we click somwhere to add a POI;
+            > ONLY on 2ND click ???????
+		> Create a form inside the modal to actually create a POI;
+		> Send the validated POI back to the API;
+
+
+	-> FIX INPUT BOXES COLORS AND closing btns colors!!!
