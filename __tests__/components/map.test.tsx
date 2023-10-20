@@ -1,6 +1,7 @@
-import { enableFetchMocks } from 'jest-fetch-mock'
+import {enableFetchMocks} from 'jest-fetch-mock'
 import MapComponent from "../../app/components/Map"
-import {fireEvent, render} from "@testing-library/react"
+import {fireEvent, render, waitFor} from "@testing-library/react"
+import {act} from "react-dom/test-utils";
 
 describe("MapComponent", () => {
 
@@ -14,6 +15,10 @@ describe("MapComponent", () => {
 
     const findByClass = (className: string) => {
         return component.querySelector(`.${className}`) ?? undefined
+    }
+
+    const findAllByClass = (className: string) => {
+        return component.querySelectorAll(`.${className}`)
     }
 
     beforeEach(() => {
@@ -119,94 +124,189 @@ describe("MapComponent", () => {
         })
     })
 
-    it("searches for an address", () => {
-        const searchBar = findById("search-bar")
-        expect(searchBar).toBeDefined()
+    describe("Search", () => {
 
-        // mock fetch
-        fetchMock.mockResponseOnce(JSON.stringify({
-            items: [
-                {
-                    position: {
-                        lat: 40.64427,
-                        lng: -8.64554
-                    },
-                    address: {
-                        label: "Aveiro, Portugal"
+        beforeEach(() => {
+            global.navigator.geolocation = {
+                watchPosition: jest.fn()
+                    .mockImplementationOnce((success) => Promise.resolve(success({
+                        coords: {
+                            latitude: 40.64427,
+                            longitude: -8.64554
+                        }
+                    })))
+            }
+            component = render(<MapComponent/>).container
+        })
+
+        it("searches for an address", () => {
+            const searchBar = findById("search-bar")
+            expect(searchBar).toBeDefined()
+
+            // mock fetch
+            fetchMock.mockResponseOnce(JSON.stringify({
+                items: [
+                    {
+                        position: {
+                            lat: 40.64427,
+                            lng: -8.64554
+                        },
+                        address: {
+                            label: "Aveiro, Portugal"
+                        }
                     }
-                }
-            ]
-        }))
+                ]
+            }))
 
-        fireEvent.change(searchBar!, {target: {value: "Aveiro"}})
-        fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
+            fireEvent.change(searchBar!, {target: {value: "Aveiro"}})
+            fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
 
-        const card = findById("card-info")
-        expect(card).toBeDefined()
+            const card = findById("card-info")
+            expect(card).toBeDefined()
 
-        const cardbtn = findById("card-btn")
-        fireEvent.click(cardbtn!)
+            const cardbtn = findById("card-btn")
+            fireEvent.click(cardbtn!)
+        })
+
+        it("searches for coordinates", () => {
+            const searchBar = findById("search-bar")
+            expect(searchBar).toBeDefined()
+
+            // mock fetch
+            fetchMock.mockResponseOnce(JSON.stringify({
+                items: [
+                    {
+                        position: {
+                            lat: 40.64427,
+                            lng: -8.64554
+                        },
+                        address: {
+                            label: "Aveiro, Portugal"
+                        }
+                    }
+                ]
+            }))
+
+            fireEvent.change(searchBar!, {target: {value: "40.64427,-8.64554"}})
+            fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
+
+            const card = findById("card-info")
+            expect(card).toBeDefined()
+
+            const cardbtn = findById("card-btn")
+            fireEvent.click(cardbtn!)
+        })
+
+        it("no results", () => {
+            window.alert = jest.fn();
+
+            const searchBar = findById("search-bar")
+            expect(searchBar).toBeDefined()
+
+            // mock fetch
+            fetchMock.mockResponseOnce(JSON.stringify({
+                items: []
+            }))
+
+            fireEvent.change(searchBar!, {target: {value: "Aveiro"}})
+            fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
+
+            expect(window.alert)
+
+        });
+
+        it("returns error", () => {
+            console.error = jest.fn();
+
+            const searchBar = findById("search-bar")
+            expect(searchBar).toBeDefined()
+
+            // mock fetch
+            fetchMock.mockRejectOnce(new Error("error"))
+
+            fireEvent.change(searchBar!, {target: {value: "Aveiro"}})
+            fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
+
+            expect(console.error)
+        });
     })
 
-    it("searches for coordinates", () => {
-        const searchBar = findById("search-bar")
-        expect(searchBar).toBeDefined()
+    describe("Filter", () => {
 
-        // mock fetch
-        fetchMock.mockResponseOnce(JSON.stringify({
-            items: [
+        beforeEach(async () => {
+            global.navigator.geolocation = {
+                watchPosition: jest.fn()
+                    .mockImplementationOnce((success) => Promise.resolve(success({
+                        coords: {
+                            latitude: 40.64427,
+                            longitude: -8.64554
+                        }
+                    })))
+            }
+            fetchMock.mockResponse(JSON.stringify([
                 {
-                    position: {
-                        lat: 40.64427,
-                        lng: -8.64554
-                    },
-                    address: {
-                        label: "Aveiro, Portugal"
-                    }
+                    id: "0",
+                    name: "UA Psycology Department Bicycle Parking",
+                    type: "bicycle-parking",
+                    latitude: 40.63195,
+                    longitude: -8.65799
+                },
+                {
+                    id: "1",
+                    name: "UA Environmental Department Bicycle Parking",
+                    type: "bicycle-parking",
+                    latitude: 40.63265,
+                    longitude: -8.65881
+                },
+                {
+                    id: "2",
+                    name: "UA Catacumbas Bathroom",
+                    type: "toilets",
+                    latitude: 40.63071,
+                    longitude: -8.65875
                 }
-            ]
-        }))
+            ]))
+            await act(async () => {
+                component = render(<MapComponent/>).container
+            })
+        })
 
-        fireEvent.change(searchBar!, {target: {value: "40.64427,-8.64554"}})
-        fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
+        it("fetches POIs", () => {
+            const mapContainer = findById("map-container")
+            expect(mapContainer).toBeDefined()
 
-        const card = findById("card-info")
-        expect(card).toBeDefined()
+            const bicycleParkingMarkers = findAllByClass("bicycle-parking-marker-icon")
+            expect(bicycleParkingMarkers.length).toBe(2)
 
-        const cardbtn = findById("card-btn")
-        fireEvent.click(cardbtn!)
-    })
+            const toiletsMarkers = findAllByClass("toilets-marker-icon")
+            expect(toiletsMarkers.length).toBe(1)
+        })
 
-    it("no results", () => {
-        window.alert = jest.fn();
+        it("filters POIs", async () => {
+            const mapContainer = findById("map-container")
+            expect(mapContainer).toBeDefined()
 
-        const searchBar = findById("search-bar")
-        expect(searchBar).toBeDefined()
+            const bicycleParkingFilter = findById("filter-type-bicycle-parking")
+            expect(bicycleParkingFilter).toBeDefined()
 
-        // mock fetch
-        fetchMock.mockResponseOnce(JSON.stringify({
-            items: []
-        }))
+            fetchMock.mockResponse(JSON.stringify([
+                {
+                    id: "2",
+                    name: "UA Catacumbas Bathroom",
+                    type: "toilets",
+                    latitude: 40.63071,
+                    longitude: -8.65875
+                }
+            ]))
+            await act(async () => {
+                fireEvent.click(bicycleParkingFilter!)
+            })
 
-        fireEvent.change(searchBar!, {target: {value: "Aveiro"}})
-        fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
+            const bicycleParkingMarkers = findAllByClass("bicycle-parking-marker-icon")
+            expect(bicycleParkingMarkers.length).toBe(0)
 
-        expect(window.alert)
-
-    });
-
-    it("returns error", () => {
-        console.error = jest.fn();
-
-        const searchBar = findById("search-bar")
-        expect(searchBar).toBeDefined()
-
-        // mock fetch
-        fetchMock.mockRejectOnce(new Error("error"))
-
-        fireEvent.change(searchBar!, {target: {value: "Aveiro"}})
-        fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
-
-        expect(console.error)
+            const toiletsMarkers = findAllByClass("toilets-marker-icon")
+            expect(toiletsMarkers.length).toBe(1)
+        })
     });
 })

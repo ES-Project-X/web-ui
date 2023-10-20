@@ -13,9 +13,9 @@ describe("FilterBoardComponent", () => {
         component = render(
             <FilterBoardComponent
                 types={[
-                    {label: "Bicycle Parking", value: "bicycle_parking", selected: true},
-                    {label: "Bicycle Shop", value: "bicycle_shop", selected: true},
-                    {label: "Drinking Water", value: "drinking_water", selected: true},
+                    {label: "Bicycle Parking", value: "bicycle-parking", selected: true},
+                    {label: "Bicycle Shop", value: "bicycle-shop", selected: true},
+                    {label: "Drinking Water", value: "drinking-water", selected: true},
                     {label: "Toilets", value: "toilets", selected: true},
                     {label: "Bench", value: "bench", selected: true}
                 ]}
@@ -24,7 +24,7 @@ describe("FilterBoardComponent", () => {
     })
 
     it("updates checkbox", () => {
-        const checkbox = findById("filter-type-bicycle_parking")
+        const checkbox = findById("filter-type-bicycle-parking")
         expect(checkbox).toBeDefined()
         expect(checkbox).toBeChecked()
 
