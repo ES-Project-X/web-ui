@@ -17,6 +17,9 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
 
     const [userPosition, setUserPosition] = useState<{ [key: string]: undefined | number }>({latitude: undefined, longitude: undefined});
     const [creatingRoute, setCreatingRoute] = useState(false);
+    const [origin, setOrigin] = useState<string>(null);
+    const [destination, setDestination] = useState<string>(null);
+    const [odmap, setodmap] = useState(false);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
@@ -79,9 +82,61 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
+    const createRoute = () => {
+        var card = document.getElementById("card-ori-dest")
+        if (!(card) || card.style.display === "none") {
+            if ("style" in card) {
+                card.style.display = "block";
+            }
+        }
+        else {
+            card.style.display = "none";
+        }
+    }
+
+    const getFromMap = () => {
+        if(odmap) {
+            console.log("odmap")
+            setodmap(false)
+            setCreatingRoute(false)
+            setOrigin(null)
+            setDestination(null)
+            // @ts-ignore
+            document.getElementById("origin-input").value = "";
+            // @ts-ignore
+            document.getElementById("origin-input").style.readonly = false;
+            // @ts-ignore
+            document.getElementById("destination-input").value = "";
+            // @ts-ignore
+            document.getElementById("destination-input").style.readonly = false;
+        } else {
+            console.log("not odmap")
+            setodmap(true)
+            setCreatingRoute(true)
+            setOrigin(null)
+            setDestination(null)
+            // @ts-ignore
+            document.getElementById("origin-input").value = "";
+            // @ts-ignore
+            document.getElementById("origin-input").style.readonly = true;
+            // @ts-ignore
+            document.getElementById("destination-input").value = "";
+            // @ts-ignore
+            document.getElementById("destination-input").style.readonly = true;
+        }
+    }
+
     const hidecard = () => {
         // @ts-ignore
         document.getElementById("card-info").style.display = "none";
+    }
+
+    const updateOrigin = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setOrigin(event.target.value);
+    }
+
+    const updateDestination = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setDestination(event.target.value);
     }
 
     return (
@@ -96,10 +151,32 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
-                <MarkersManager creatingRoute={!creatingRoute} />
+                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
             </MapContainer>
-            <Button id={"ori-dst-btn"} variant={"light"} style={{zIndex: 1, scale:"100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black"}}>Route</Button>
-            <Form style={{zIndex: 1, top: "5%", left: "42.5%", width:"15%", position: "absolute"}}>
+            <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{zIndex: 1, scale:"100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black"}}>Route</Button>
+            <Card id={"card-ori-dest"} style={{zIndex: 1, top: "1%", left: "5%", width:"15%", position: "absolute", display: "none"}}>
+                    <Card.Body>
+                        <Form>
+                            <Form.Group>
+                                <Form.Label>Origin</Form.Label>
+                                <Form.Control id={"origin-input"} type={"text"} placeholder={"Origin"} onChange={updateOrigin} value={origin} readOnly={false}/>
+                            </Form.Group>
+                            <br/>
+                            <Form.Group>
+                                <Form.Label>Destination</Form.Label>
+                                <Form.Control id={"destination-input"} type={"text"} placeholder={"Destination"} onChange={updateDestination} value={destination} readOnly={false}/>
+                            </Form.Group>
+                            <br/>
+                            <Form.Group className="mb-3" >
+                                <Form.Check id="mapcbox" type="checkbox" onChange={getFromMap} label="Select in Map" />
+                            </Form.Group>
+                            <Form.Group>
+                                <Button id={"get-route-btn"} variant={"light"} style={{border: ".1em solid black"}}>Get Route</Button>
+                            </Form.Group>
+                        </Form>
+                    </Card.Body>
+            </Card>
+            <Form id={"searchbar"} style={{zIndex: 1, top: "5%", left: "42.5%", width:"15%", position: "absolute"}}>
                 <Form.Group controlId={"search-bar"}>
                     <Form.Control type={"text"} placeholder={"Search"} onKeyDown={handleKeyDown}/>
                 </Form.Group>
