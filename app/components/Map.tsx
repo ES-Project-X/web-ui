@@ -31,8 +31,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         longitude: undefined
     });
     const [creatingRoute, setCreatingRoute] = useState(false);
-    const [origin, setOrigin] = useState<string>(null);
-    const [destination, setDestination] = useState<string>(null);
+    const [origin, setOrigin] = useState<string>("");
+    const [destination, setDestination] = useState<string>("");
     const [odmap, setodmap] = useState(false);
 
     const [types, setTypes] = useState([
