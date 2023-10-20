@@ -1,5 +1,5 @@
 export interface BasicPOI {
-    id: number,
+    id: string,
     name: string,
     type: string,
     latitude: number,

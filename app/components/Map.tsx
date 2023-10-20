@@ -12,7 +12,14 @@ import LocateControl from "./LocateControl";
 import MarkersManager from "./MarkersManager";
 import FilterBoardComponent from "./FilterBoard";
 import {BasicPOI} from "../structs/poi";
-import RedMarker from "@/app/components/icons/RedMarker";
+import RedMarker from "./icons/RedMarker";
+import {
+    BicycleParkingMarker,
+    BicycleShopMarker,
+    DrinkingWaterMarker,
+    ToiletsMarker,
+    BenchMarker
+} from "./icons/TypeMarkers";
 
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
@@ -26,18 +33,14 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
     const [creatingRoute, setCreatingRoute] = useState(false);
 
     const [types, setTypes] = useState([
-        {label: "Bicycle Parking", value: "bicycle_parking", selected: true},
-        {label: "Bicycle Shop", value: "bicycle_shop", selected: true},
-        {label: "Drinking Water", value: "drinking_water", selected: true},
+        {label: "Bicycle Parking", value: "bicycle-parking", selected: true},
+        {label: "Bicycle Shop", value: "bicycle-shop", selected: true},
+        {label: "Drinking Water", value: "drinking-water", selected: true},
         {label: "Toilets", value: "toilets", selected: true},
         {label: "Bench", value: "bench", selected: true}
     ]);
 
-    const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([
-        {id: 0, name: "UA Psycology Department Bicycle Parking", type: "bicycle_parking", latitude: 40.63195, longitude: -8.65799},
-        {id: 1, name: "UA Environmental Department Bicycle Parking", type: "bicycle_parking", latitude: 40.63265, longitude: -8.65881},
-        {id: 2, name: "UA Catacumbas Bathroom", type: "bathroom", latitude: 40.63071, longitude: -8.65875}
-    ])
+    const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([])
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
@@ -49,6 +52,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             const {latitude, longitude} = location.coords;
             setUserPosition({latitude, longitude})
         });
+        fetchPOIs()
     }, [])
 
     const addToBearing = (amount: number) => {
@@ -60,7 +64,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
-    const updateTypes = (types: {label: string, value: string, selected: boolean}[]) => {
+    const updateTypes = (types: { label: string, value: string, selected: boolean }[]) => {
         setTypes(types)
         fetchPOIs()
     }
@@ -73,11 +77,27 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         const url = new URL(URL_API + "poi");
         typesFetch.forEach(type => url.searchParams.append("type", type))
 
-        fetch(url)
+        fetch(url.toString())
             .then(response => response.json())
-            .then(data => {
-                setBasicPOIs(data)
-            })
+            .then(data => setBasicPOIs(data))
+            .catch(() => {})
+    }
+
+    const getIcon = (poiType: string) => {
+        switch (poiType) {
+            case "bicycle-parking":
+                return BicycleParkingMarker;
+            case "bicycle-shop":
+                return BicycleShopMarker;
+            case "drinking-water":
+                return DrinkingWaterMarker;
+            case "toilets":
+                return ToiletsMarker;
+            case "bench":
+                return BenchMarker;
+            default:
+                return RedMarker;
+        }
     }
 
     const getGeoLocation = (query: string) => {
@@ -145,7 +165,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                     return (
                         <Marker
                             key={poi.id}
-                            icon={RedMarker} // TODO: change icon based on type
+                            icon={getIcon(poi.type)}
                             position={new LatLng(poi.latitude, poi.longitude)}
                         >
                             <Popup>
