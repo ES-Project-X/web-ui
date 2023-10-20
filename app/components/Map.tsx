@@ -145,12 +145,13 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
 
     const createRoute = () => {
         var card = document.getElementById("card-ori-dest")
-        if (!(card) || card.style.display === "none") {
-            if ("style" in card) {
-                card.style.display = "block";
-            }
+        // @ts-ignore
+        if (card.style.display === "none") {
+            // @ts-ignore
+            card.style.display = "block";
         }
         else {
+            // @ts-ignore
             card.style.display = "none";
         }
     }
