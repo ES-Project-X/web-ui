@@ -14,8 +14,8 @@ export default function MarkersManager({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isPOIModalOpen, setIsPOIModalOpen] = useState<boolean>(false);
 
-  var [poiLat, setPoiLat] = useState<number>(0);
-  var [poiLon, setPoiLon] = useState<number>(0);
+  let [poiLat, setPoiLat] = useState<number>(0);
+  let [poiLon, setPoiLon] = useState<number>(0);
 
   // close modal when btn is clicked
   const closeModal = () => {
@@ -65,9 +65,12 @@ export default function MarkersManager({
     }
     if (isModalOpen) {
       modal.showModal();
+      // if the modal is open, it means i need to store the lat and lon of the POI
+      // before clicking the button to create the POI!!!
+      storePos(redPosition!.lat, redPosition!.lng);
     } else {
       modal.close();
-      // 
+      //
       setIsModalOpen(false);
     }
   }, [isModalOpen]);
@@ -199,9 +202,9 @@ export default function MarkersManager({
             Here are the coordinates of the marker you clicked:
             <br />
             <br />
-            Latitude: {redPosition.lat.toFixed(3)}
+            Latitude: {poiLat.toFixed(3)}
             <br />
-            Longitude: {redPosition.lng.toFixed(3)}
+            Longitude: {poiLon.toFixed(3)}
             <br />
           </p>
           <div className="modal-action">
