@@ -9,8 +9,6 @@
 		> ?
 
 	-> Create POI btn;			        - 	
-		> Create a btn that opens a modal when we click somwhere to add a POI;
-            > ONLY on 2ND click ???????
 		> Create a form inside the modal to actually create a POI;
 		> Send the validated POI back to the API;
 

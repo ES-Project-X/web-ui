@@ -59,6 +59,21 @@ export default function MarkersManager({
     // get name and type from form
     const name = (document.getElementById("name") as HTMLInputElement).value;
     const type = (document.getElementById("type") as HTMLInputElement).value;
+
+    // validate name and type are not empty strings
+    if (name === "" || type === "") {
+      alert("Name and type cannot be empty!");
+      closePOIModal();
+      return;
+    }
+
+    // validate that name and type are not too long
+    if (name.length > 20 || type.length > 20) {
+      alert("Name and type cannot be longer than 20 characters!");
+      closePOIModal();
+      return;
+    }
+
     console.log("name:", name);
     console.log("type:", type);
     console.log("lat:", poiLat.toFixed(3));
