@@ -3,6 +3,8 @@ import RedMarker from "./icons/RedMarker";
 import GreenMarker from "./icons/GreenMarker";
 import { LatLng } from "leaflet";
 import { useEffect, useState } from "react";
+import CreatePOIModal from "./CreatePOIModal";
+import SavePOIModal from "./SavePOIModal";
 
 export default function MarkersManager({
   creatingRoute = false,
@@ -178,93 +180,22 @@ export default function MarkersManager({
 
       {/* Modal with btn to create POI */}
 
-      <dialog id="my_modal_1" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Hello!</h3>
-          <p className="py-4">
-            Here are the coordinates of the marker you clicked:
-            <br />
-            <br />
-            Latitude: {redPosition.lat.toFixed(3)}
-            <br />
-            Longitude: {redPosition.lng.toFixed(3)}
-          </p>
-          <div className="modal-action">
-            <button
-              className="btn glass"
-              onKeyDown={handleKeyDown}
-              // set lat and lon of POI to create in state
-              onClick={() => {
-                createPOI();
-              }}
-            >
-              Create POI
-            </button>
-            <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
-              <button
-                className="btn"
-                onClick={closeModal}
-                onKeyDown={handleKeyDown}
-              >
-                Close
-              </button>
-            </form>
-          </div>
-        </div>
-      </dialog>
+      <CreatePOIModal
+        latitude={poiLat}
+        longitude={poiLon}
+        onClose={closeModal}
+        onCreatePOI={createPOI}
+      />
 
       {/* Modal to fill form to save POI */}
 
-      <dialog id="my_modal_2" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg text-center">Create POI</h3>
-          <form method="dialog">
-            <div className="py-4">
-              Here are the coordinates of the marker you clicked:
-              <br />
-              <br />
-              Latitude: {poiLat.toFixed(3)}
-              <br />
-              Longitude: {poiLon.toFixed(3)}
-              <div className="mb-4">
-                <label htmlFor="name">Name:</label>
-                <input
-                  type="text"
-                  id="name"
-                  placeholder="Type the name here"
-                  className="input input-bordered w-full max-w-xs"
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="type">Type:</label>
-                <input
-                  type="text"
-                  id="type"
-                  placeholder="Write the type here"
-                  className="input input-bordered w-full max-w-xs"
-                />
-              </div>
-            </div>
-            <div className="modal-action">
-              <button
-                className="btn glass"
-                onKeyDown={handleKeyDown}
-                onClick={savePOI}
-              >
-                Save POI
-              </button>
-              <button
-                className="btn"
-                onClick={closePOIModal}
-                onKeyDown={handleKeyDown}
-              >
-                Close
-              </button>
-            </div>
-          </form>
-        </div>
-      </dialog>
+      <SavePOIModal
+        poiLat={poiLat}
+        poiLon={poiLon}
+        onClose={closePOIModal}
+        onSavePOI={savePOI}
+        handleKeyDown={handleKeyDown}
+        />
     </>
   );
 }
