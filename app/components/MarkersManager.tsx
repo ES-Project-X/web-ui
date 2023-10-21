@@ -40,10 +40,6 @@ export default function MarkersManager({
   };
 
   const storePos = (lat: number, lon: number) => {
-    console.log("store pos func ");
-    console.log("lat:", lat.toFixed(3));
-    console.log("lon:", lon.toFixed(3));
-
     setPoiLat(lat);
     setPoiLon(lon);
   };
@@ -55,6 +51,19 @@ export default function MarkersManager({
     // open modal to create POI
     setIsPOIModalOpen(true);
     closeModal();
+  };
+
+  const savePOI = () => {
+    console.log("save POI to DB");
+    // after saving POI, close modals
+    // get name and type from form
+    const name = (document.getElementById("name") as HTMLInputElement).value;
+    const type = (document.getElementById("type") as HTMLInputElement).value;
+    console.log("name:", name);
+    console.log("type:", type);
+    console.log("lat:", poiLat.toFixed(3));
+    console.log("lon:", poiLon.toFixed(3));
+    closePOIModal();
   };
 
   /* useEffect modal popup */
@@ -100,7 +109,6 @@ export default function MarkersManager({
         }
       } else {
         setRedPosition(e.latlng);
-        console.log(e.latlng);
         setIsModalOpen(true);
       }
     },
@@ -196,22 +204,39 @@ export default function MarkersManager({
       <dialog id="my_modal_2" className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg text-center">Create POI</h3>
-          <p className="py-4">
-            Here isjhon CENA
-            <br />
-            Here are the coordinates of the marker you clicked:
-            <br />
-            <br />
-            Latitude: {poiLat.toFixed(3)}
-            <br />
-            Longitude: {poiLon.toFixed(3)}
-            <br />
-          </p>
-          <div className="modal-action">
-            <form method="dialog">
-              {/* if there is a button in form, it will close the modal */}
-
-              <button className="btn glass" onKeyDown={handleKeyDown}>
+          <form method="dialog">
+            <div className="py-4">
+              Here are the coordinates of the marker you clicked:
+              <br />
+              <br />
+              Latitude: {poiLat.toFixed(3)}
+              <br />
+              Longitude: {poiLon.toFixed(3)}
+              <div className="mb-4">
+                <label htmlFor="name">Name:</label>
+                <input
+                  type="text"
+                  id="name"
+                  placeholder="Type the name here"
+                  className="input input-bordered w-full max-w-xs"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="type">Type:</label>
+                <input
+                  type="text"
+                  id="type"
+                  placeholder="Write the type here"
+                  className="input input-bordered w-full max-w-xs"
+                />
+              </div>
+            </div>
+            <div className="modal-action">
+              <button
+                className="btn glass"
+                onKeyDown={handleKeyDown}
+                onClick={savePOI}
+              >
                 Save POI
               </button>
               <button
@@ -221,8 +246,8 @@ export default function MarkersManager({
               >
                 Close
               </button>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </dialog>
     </>
