@@ -1,18 +1,48 @@
 import {Form} from "react-bootstrap";
+import {useEffect, useState} from "react";
+import {FilterType} from "../structs/poi";
 
 export default function FilterBoardComponent(
     {
-        types,
-        updateTypes
+        fetchPOIs
     }: {
-        types: { label: string, value: string, selected: boolean }[]
-        updateTypes: (types: { label: string, value: string, selected: boolean }[]) => void
+        fetchPOIs: (
+            name: string,
+            types: FilterType[]
+        ) => void
     }
 ) {
+    const FETCH_TIMEOUT = 1000; // ms before updating with new filters
+
+    const [name, setName] = useState("")
+    const [types, setTypes] = useState<FilterType[]>([
+        {label: "Bicycle Parking", value: "bicycle-parking", selected: true},
+        {label: "Bicycle Shop", value: "bicycle-shop", selected: true},
+        {label: "Drinking Water", value: "drinking-water", selected: true},
+        {label: "Toilets", value: "toilets", selected: true},
+        {label: "Bench", value: "bench", selected: true}
+    ]);
+
+    useEffect(() => {
+        const timeOutId = setTimeout(() => fetchPOIs(name, types), FETCH_TIMEOUT);
+        return () => clearTimeout(timeOutId);
+    }, [name, types]);
+
     return (
         <>
             <Form>
                 <Form.Group className="mb-3">
+                    <Form.Label>POI Name</Form.Label>
+                    <Form.Control
+                        type="text"
+                        id="filter-name"
+                        placeholder="Enter POI Name"
+                        onChange={event => {
+                            setName(event.target.value)
+                        }}
+                    />
+                </Form.Group>
+                <Form.Group>
                     <Form.Label>POI Types</Form.Label>
                     {types.map(type =>
                         <Form.Check
@@ -23,7 +53,7 @@ export default function FilterBoardComponent(
                             defaultChecked={type.selected}
                             onChange={() => {
                                 type.selected = !type.selected
-                                updateTypes(types)
+                                setTypes([...types])
                             }}
                         />
                     )}
