@@ -20,6 +20,7 @@ import {
     ToiletsMarker,
     BenchMarker
 } from "./icons/TypeMarkers";
+import {list} from "postcss";
 
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
@@ -49,6 +50,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
     const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
     const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
+    const URL_ROUTING = "http://localhost:8989/route?points_encoded=false&profile=bike";
 
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
@@ -188,6 +190,58 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
+    function geoCode(query: string): string {
+        // @ts-ignore
+        return fetch(query)
+            .then(response => response.json())
+            .then(data => {
+                if (data.items.length === 0) {
+                    window.alert("No results");
+                    return "";
+                }
+                const lat = data.items[0].position.lat;
+                const lng = data.items[0].position.lng;
+                return lat + "," + lng;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                return "";
+            });
+    }
+
+    const getRoute = async () => {
+        if (origin === "" || destination === "") {
+            window.alert("Please fill in both fields");
+            return;
+        }
+        let url = "";
+        if (origin.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/) && destination.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/)) {
+            console.log("HERE1")
+            url = URL_ROUTING + "&point=" + origin + "&point=" + destination;
+        } else if (origin.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/) && !destination.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/)) {
+            console.log("HERE2")
+            let dest = await geoCode(URL_GEO + "&q=" + destination);
+            url = URL_ROUTING + "&point=" + origin + "&point=" + dest;
+        } else if (!origin.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/) && destination.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/)) {
+            console.log("HERE3")
+            let ori = await geoCode(URL_GEO + "&q=" + origin);
+            url = URL_ROUTING + "&point=" + ori + "&point=" + destination;
+        } else {
+            console.log("HERE4")
+            let ori = await geoCode(URL_GEO + "&q=" + origin);
+            let dest = await geoCode(URL_GEO + "&q=" + destination);
+            url = URL_ROUTING + "&point=" + ori + "&point=" + dest;
+        }
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
     const hidecard = () => {
         // @ts-ignore
         document.getElementById("card-info").style.display = "none";
@@ -249,7 +303,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                             <Form.Check id="mapcbox" type="checkbox" onChange={getFromMap} label="Select in Map" />
                         </Form.Group>
                         <Form.Group>
-                            <Button id={"get-route-btn"} variant={"light"} style={{border: ".1em solid black"}}>Get Route</Button>
+                            <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{border: ".1em solid black"}}>Get Route</Button>
                         </Form.Group>
                     </Form>
                 </Card.Body>
