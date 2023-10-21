@@ -30,9 +30,16 @@ describe("MarkersManager", () => {
     })
 
     it("adds a green marker", () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+
         const mapContainer = findById("map-container")
         expect(mapContainer).toBeDefined()
-
         fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
 
         const greenMarker = findByClass("green-marker-icon")
@@ -40,6 +47,14 @@ describe("MarkersManager", () => {
     })
 
     it ("adds a green marker and a red marker", () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+
         const mapContainer = findById("map-container")
         expect(mapContainer).toBeDefined()
 
@@ -54,6 +69,14 @@ describe("MarkersManager", () => {
     })
 
     it("removes a green marker", () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+
         const mapContainer = findById("map-container")
         expect(mapContainer).toBeDefined()
 
@@ -69,6 +92,14 @@ describe("MarkersManager", () => {
     })
 
     it("removes a red marker", () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+
         const mapContainer = findById("map-container")
         expect(mapContainer).toBeDefined()
 
@@ -85,6 +116,14 @@ describe("MarkersManager", () => {
     })
 
     it ("add a green marker and a red marker, then removes the green marker", () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+
         const mapContainer = findById("map-container")
         expect(mapContainer).toBeDefined()
 
