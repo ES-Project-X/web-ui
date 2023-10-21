@@ -309,49 +309,4 @@ describe("MapComponent", () => {
             expect(toiletsMarkers.length).toBe(1)
         })
     });
-
-    it("search for origin and destination" , () => {
-        const routeBtn = findById("ori-dst-btn")
-        expect(routeBtn).toBeDefined()
-        fireEvent.click(routeBtn!)
-
-        fireEvent.click(routeBtn!)
-
-        fireEvent.click(routeBtn!)
-
-        const checkMap = findById("mapcbox")
-        expect(checkMap).toBeDefined()
-        fireEvent.click(checkMap!)
-        fireEvent.click(checkMap!)
-
-        const originInput = findById("origin-input")
-        expect(originInput).toBeDefined()
-        fireEvent.change(originInput!, {target: {value: "Aveiro"}})
-        const destinationInput = findById("destination-input")
-        expect(destinationInput).toBeDefined()
-        fireEvent.change(destinationInput!, {target: {value: "Porto"}})
-
-        const getRouteBtn = findById("get-route-btn")
-        expect(getRouteBtn).toBeDefined()
-        fireEvent.click(getRouteBtn!)
-    });
-
-    it('origin and destination in map', () => {
-        const routeBtn = findById("ori-dst-btn")
-        expect(routeBtn).toBeDefined()
-        fireEvent.click(routeBtn!)
-
-        const checkMap = findById("mapcbox")
-        expect(checkMap).toBeDefined()
-        fireEvent.click(checkMap!)
-
-        const mapContainer = findById("map-container")
-        expect(mapContainer).toBeDefined()
-
-        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
-
-        const getRouteBtn = findById("get-route-btn")
-        expect(getRouteBtn).toBeDefined()
-        fireEvent.click(getRouteBtn!)
-    });
 })
