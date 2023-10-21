@@ -4,8 +4,18 @@ import {FilterType} from "../structs/poi";
 
 export default function FilterBoardComponent(
     {
+        initName = "",
+        initTypes = [
+            {label: "Bicycle Parking", value: "bicycle-parking", selected: true},
+            {label: "Bicycle Shop", value: "bicycle-shop", selected: true},
+            {label: "Drinking Water", value: "drinking-water", selected: true},
+            {label: "Toilets", value: "toilets", selected: true},
+            {label: "Bench", value: "bench", selected: true}
+        ],
         fetchPOIs
     }: {
+        initName: string,
+        initTypes: FilterType[],
         fetchPOIs: (
             name: string,
             types: FilterType[]
@@ -14,14 +24,8 @@ export default function FilterBoardComponent(
 ) {
     const FETCH_TIMEOUT = 1000; // ms before updating with new filters
 
-    const [name, setName] = useState("")
-    const [types, setTypes] = useState<FilterType[]>([
-        {label: "Bicycle Parking", value: "bicycle-parking", selected: true},
-        {label: "Bicycle Shop", value: "bicycle-shop", selected: true},
-        {label: "Drinking Water", value: "drinking-water", selected: true},
-        {label: "Toilets", value: "toilets", selected: true},
-        {label: "Bench", value: "bench", selected: true}
-    ]);
+    const [name, setName] = useState(initName)
+    const [types, setTypes] = useState<FilterType[]>(initTypes);
 
     useEffect(() => {
         const timeOutId = setTimeout(() => fetchPOIs(name, types), FETCH_TIMEOUT);
