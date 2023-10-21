@@ -2,32 +2,19 @@ import { Marker, Popup, useMapEvents } from "react-leaflet";
 import RedMarker from "./icons/RedMarker";
 import GreenMarker from "./icons/GreenMarker";
 import { LatLng } from "leaflet";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import CreatePOIModal from "./CreatePOIModal";
 import SavePOIModal from "./SavePOIModal";
 
 export default function MarkersManager({
-  creatingRoute = false,
+    setOrigin,
+    setDestination,
+    creatingRoute,
 }: {
-  creatingRoute?: boolean;
-}) {
-  const [redPosition, setRedPosition] = useState<LatLng | null>(null);
-  const [greenPosition, setGreenPosition] = useState<LatLng | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isPOIModalOpen, setIsPOIModalOpen] = useState<boolean>(false);
-
-  let [poiLat, setPoiLat] = useState<number>(0);
-  let [poiLon, setPoiLon] = useState<number>(0);
-
-  // close modal when btn is clicked
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const closePOIModal = () => {
-    setIsPOIModalOpen(false);
-    closeModal();
-  };
+    setOrigin: (origin: string) => void
+    setDestination: (destination: string) => void
+    creatingRoute: boolean
+                                       }) {
 
   // close modal when ESC key is pressed
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -41,6 +28,23 @@ export default function MarkersManager({
     }
   };
 
+    const [redPosition, setRedPosition] = useState<LatLng | null>(null);
+    const [greenPosition, setGreenPosition] = useState<LatLng | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [isPOIModalOpen, setIsPOIModalOpen] = useState<boolean>(false);
+
+    let [poiLat, setPoiLat] = useState<number>(0);
+    let [poiLon, setPoiLon] = useState<number>(0);
+
+    // close modal when btn is clicked
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+    const closePOIModal = () => {
+        setIsPOIModalOpen(false);
+        closeModal();
+    };
   const storePos = (lat: number, lon: number) => {
     setPoiLat(lat);
     setPoiLon(lon);
@@ -115,21 +119,23 @@ export default function MarkersManager({
       setIsPOIModalOpen(false);
     }
   }, [isPOIModalOpen]);
-
-  useMapEvents({
-    click: (e) => {
-      if (creatingRoute) {
-        if (greenPosition === null) {
-          setGreenPosition(e.latlng);
-        } else {
-          setRedPosition(e.latlng);
+    useMapEvents({
+        click: (e) => {
+            if (creatingRoute) {
+                if (greenPosition === null) {
+                    setGreenPosition(e.latlng)
+                    setOrigin(e.latlng.lat + "," + e.latlng.lng)
+                } else {
+                    setRedPosition(e.latlng)
+                    setDestination(e.latlng.lat + "," + e.latlng.lng)
+                }
+            }
+            else {
+                setRedPosition(e.latlng)
+                setIsModalOpen(true);
+            }
         }
-      } else {
-        setRedPosition(e.latlng);
-        setIsModalOpen(true);
-      }
-    },
-  });
+    })
 
   if (creatingRoute) {
     if (greenPosition !== null && redPosition !== null) {

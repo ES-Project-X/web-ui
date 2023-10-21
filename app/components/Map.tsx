@@ -21,9 +21,6 @@ import {
     BenchMarker
 } from "./icons/TypeMarkers";
 import Sidebar from "./Sidebar";
-import { posix } from "path";
-import { alignPropType } from "react-bootstrap/esm/types";
-
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
@@ -34,6 +31,9 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         longitude: undefined
     });
     const [creatingRoute, setCreatingRoute] = useState(false);
+    const [origin, setOrigin] = useState<string>("");
+    const [destination, setDestination] = useState<string>("");
+    const [odmap, setodmap] = useState(false);
 
     const [types, setTypes] = useState([
         {label: "Bicycle Parking", value: "bicycle-parking", selected: true},
@@ -125,10 +125,6 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 document.getElementById("card-info").style.display = "block";
                 // @ts-ignore
                 mapRef.current.flyTo(new LatLng(lat, lng), 15);
-                // @ts-ignore
-                // might be useful in the future (clears search bar after search)
-                // for now it's commented out
-                // document.getElementById("search-bar").value = "";
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -147,16 +143,69 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
+    const createRoute = () => {
+        var card = document.getElementById("card-ori-dest")
+        // @ts-ignore
+        if (card.style.display === "none") {
+            // @ts-ignore
+            card.style.display = "block";
+        }
+        else {
+            // @ts-ignore
+            card.style.display = "none";
+        }
+    }
+
+    const getFromMap = () => {
+        if(odmap) {
+            console.log("odmap")
+            setodmap(false)
+            setCreatingRoute(false)
+            setOrigin("")
+            setDestination("")
+            // @ts-ignore
+            document.getElementById("origin-input").value = "";
+            // @ts-ignore
+            document.getElementById("origin-input").style.readonly = false;
+            // @ts-ignore
+            document.getElementById("destination-input").value = "";
+            // @ts-ignore
+            document.getElementById("destination-input").style.readonly = false;
+        } else {
+            console.log("not odmap")
+            setodmap(true)
+            setCreatingRoute(true)
+            setOrigin("")
+            setDestination("")
+            // @ts-ignore
+            document.getElementById("origin-input").value = "";
+            // @ts-ignore
+            document.getElementById("origin-input").style.readonly = true;
+            // @ts-ignore
+            document.getElementById("destination-input").value = "";
+            // @ts-ignore
+            document.getElementById("destination-input").style.readonly = true;
+        }
+    }
+
     const hidecard = () => {
         // @ts-ignore
         document.getElementById("card-info").style.display = "none";
     }
 
+    const updateOrigin = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setOrigin(event.target.value);
+    }
+
+    const updateDestination = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setDestination(event.target.value);
+    }
+
 
     return (
         <>
-            {/* Sidebar */} 
-            
+            {/* Sidebar */}
+
             <Sidebar/>
 
             {/* eventually change this to the main page, but for now fica aqui */}
@@ -171,7 +220,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
-                <MarkersManager creatingRoute={creatingRoute}/>
+                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
                 {/*
                     DISPLAY POIs
                 */}
@@ -189,6 +238,29 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                     )
                 })}
             </MapContainer>
+            <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{zIndex: 1, scale:"100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black"}}>Route</Button>
+            <Card id={"card-ori-dest"} style={{zIndex: 1, top: "1%", left: "5%", width:"15%", position: "absolute", display: "none"}}>
+                <Card.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Origin</Form.Label>
+                            <Form.Control id={"origin-input"} type={"text"} placeholder={"Origin"} onChange={updateOrigin} value={origin} readOnly={false}/>
+                        </Form.Group>
+                        <br/>
+                        <Form.Group>
+                            <Form.Label>Destination</Form.Label>
+                            <Form.Control id={"destination-input"} type={"text"} placeholder={"Destination"} onChange={updateDestination} value={destination} readOnly={false}/>
+                        </Form.Group>
+                        <br/>
+                        <Form.Group className="mb-3" >
+                            <Form.Check id="mapcbox" type="checkbox" onChange={getFromMap} label="Select in Map" />
+                        </Form.Group>
+                        <Form.Group>
+                            <Button id={"get-route-btn"} variant={"light"} style={{border: ".1em solid black"}}>Get Route</Button>
+                        </Form.Group>
+                    </Form>
+                </Card.Body>
+            </Card>
             <Container className={"map-ui d-flex flex-column h-100"} fluid>
                 {/*
                     POPUP CARD
@@ -237,7 +309,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 */}
                 <Row className={"pb-2"}>
                     <Col xs={2}>
-                        
+
                     </Col>
                     <Col xs={"auto"} className={"mx-auto"}>
                         <Card className={"text-center"}>
