@@ -14,8 +14,8 @@ export default function FilterBoardComponent(
         ],
         fetchPOIs
     }: {
-        initName: string,
-        initTypes: FilterType[],
+        initName?: string,
+        initTypes?: FilterType[],
         fetchPOIs: (
             name: string,
             types: FilterType[]
