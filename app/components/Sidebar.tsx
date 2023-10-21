@@ -7,7 +7,7 @@ export default () => {
 
 
   const searchRoute = () => {
-    console.log("searching route from origin to destiny: ");
+    console.log("searching route from origin to destiny");
     console.log("org:", (document.getElementById("origin_input") as HTMLInputElement)?.value);
     console.log("dest:", (document.getElementById("dest_input") as HTMLInputElement)?.value);
     // clear inputs after search
