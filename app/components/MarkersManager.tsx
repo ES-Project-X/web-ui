@@ -12,7 +12,7 @@ export default function MarkersManager({
     setOrigin: (origin: string) => void
     setDestination: (destination: string) => void
     creatingRoute: boolean
-                                       }) {
+}) {
 
 
     const [redPosition, setRedPosition] = useState<LatLng | null>(null)
@@ -35,36 +35,26 @@ export default function MarkersManager({
         }
     })
 
+
     if (creatingRoute) {
-        if (greenPosition !== null && redPosition !== null) {
-            return (
-                <>
-                    <Marker position={greenPosition} icon={GreenMarker} interactive={true} eventHandlers={{ click: () => setGreenPosition(null) }}>
-                    </Marker>
-                    <Marker position={redPosition} icon={RedMarker} interactive={true} eventHandlers={{ click: () => setRedPosition(null) }}>
-                    </Marker>
-                </>
-            )
-        }
-        else if (greenPosition !== null) {
-            return (
-                <Marker position={greenPosition} icon={GreenMarker} interactive={true} eventHandlers={{ click: () => setGreenPosition(null) }}>
-                </Marker>
-            )
-        }
-        else if (redPosition !== null) {
-            return (
-                <Marker position={redPosition} icon={RedMarker} interactive={true} eventHandlers={{ click: () => setGreenPosition(null) }}>
-                </Marker>
-            )
-        }
-        return null
+        const redMarker = redPosition && <Marker position={redPosition} icon={RedMarker} interactive={true} eventHandlers={{ click: () => setRedPosition(null) }}></Marker>
+        const greenMarker = greenPosition && <Marker position={greenPosition} icon={GreenMarker} interactive={true} eventHandlers={{ click: () => setGreenPosition(null) }}></Marker>
+
+        return (
+            <>
+                {greenMarker}
+                {redMarker}
+            </>
+        )
     }
-    return redPosition === null ? null : (
-        <Marker position={redPosition} icon={RedMarker}>
-            <Popup>
-                You are at {redPosition.lat.toFixed(4)}, {redPosition.lng.toFixed(4)}
-            </Popup>
-        </Marker>
-    )
+    else if (redPosition) {
+        return (
+            <Marker position={redPosition} icon={RedMarker}>
+                <Popup>
+                    You are at {redPosition.lat.toFixed(4)}, {redPosition.lng.toFixed(4)}
+                </Popup>
+            </Marker>
+        )
+    }
+    return null;
 }

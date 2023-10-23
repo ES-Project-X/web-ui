@@ -200,7 +200,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
-                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
+                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={!creatingRoute} />
                 {/*
                     DISPLAY POIs
                 */}
