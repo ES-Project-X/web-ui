@@ -35,7 +35,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
     const [destination, setDestination] = useState<string>("");
     const [odmap, setodmap] = useState(false);
 
-    const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([])
+    const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([]);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
@@ -200,7 +200,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
-                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={!creatingRoute} />
+                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={!creatingRoute} markers={basicPOIs} />
                 {/*
                     DISPLAY POIs
                 */}
