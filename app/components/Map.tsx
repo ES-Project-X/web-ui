@@ -20,6 +20,7 @@ import {
     ToiletsMarker,
     BenchMarker
 } from "./icons/TypeMarkers";
+import DisplayPOIs from "./DisplayPOIs";
 
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
@@ -200,10 +201,11 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
-                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={!creatingRoute} markers={basicPOIs} />
+                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={!creatingRoute} />
                 {/*
                     DISPLAY POIs
                 */}
+                <DisplayPOIs markers={basicPOIs}/>
                 {basicPOIs.map(poi => {
                     return (
                         <Marker
