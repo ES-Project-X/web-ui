@@ -1,11 +1,10 @@
 import { Marker, Popup, useMapEvents } from "react-leaflet";
 import RedMarker from "./icons/RedMarker";
 import GreenMarker from "./icons/GreenMarker";
-import { LatLng } from "leaflet";
+import { Draggable, LatLng } from "leaflet";
 import { useState, useEffect } from "react";
 import CreatePOIModal from "./CreatePOIModal";
 import SavePOIModal from "./SavePOIModal";
-
 export default function MarkersManager({
   setOrigin,
   setDestination,
@@ -102,7 +101,6 @@ export default function MarkersManager({
       storePos(redPosition!.lat, redPosition!.lng);
     } else {
       modal.close();
-      //
       setIsModalOpen(false);
     }
   }, [isModalOpen]);
@@ -148,13 +146,27 @@ export default function MarkersManager({
             position={greenPosition}
             icon={GreenMarker}
             interactive={true}
-            eventHandlers={{ click: () => setGreenPosition(null) }}
+            draggable={true}
+            eventHandlers={{
+              click: () => setGreenPosition(null),
+              dragend: (e) => {
+                console.log("hey!!!");
+                // just need to update the coordinates of the marker here
+              },
+            }}
           ></Marker>
           <Marker
             position={redPosition}
             icon={RedMarker}
             interactive={true}
-            eventHandlers={{ click: () => setRedPosition(null) }}
+            draggable={true}
+            eventHandlers={{
+              click: () => setRedPosition(null),
+              dragend: (e) => {
+                console.log("hey!!!");
+                // just need to update the coordinates of the marker here
+              },
+            }}
           ></Marker>
         </>
       );
@@ -210,6 +222,44 @@ export default function MarkersManager({
         </>
       )}
 
+      {!isModalOpen && (
+        <>
+          {/* add the marker */}
+
+          <Marker
+            position={[poiLat, poiLon]}
+            icon={RedMarker}
+            draggable={true}
+            eventHandlers={{
+              dragend: (e) => {
+                const marker = e.target;
+                const newPosition = marker.getLatLng();
+
+                // Update the poiLat and poiLon using the callback function
+                setPoiLat((prevLat) => {
+                  console.log("Previous lat:", prevLat);
+                  console.log("New lat:", newPosition.lat);
+                  return newPosition.lat;
+                });
+
+                setPoiLon((prevLon) => {
+                  console.log("Previous lon:", prevLon);
+                  console.log("New lon:", newPosition.lng);
+                  return newPosition.lng;
+                });
+                setRedPosition(newPosition);
+                
+              },
+            }}
+          >
+            <Popup>
+              You are at {redPosition.lat.toFixed(4)},{" "}
+              {redPosition.lng.toFixed(4)}
+            </Popup>
+          </Marker>
+        </>
+      )}
+
       {/* Modal to fill form to save POI - 2nd modal*/}
       {isPOIModalOpen && (
         <>
@@ -221,15 +271,14 @@ export default function MarkersManager({
             </Popup>
           </Marker>
           <SavePOIModal
-        poiLat={poiLat}
-        poiLon={poiLon}
-        onClose={closePOIModal}
-        onSavePOI={savePOI}
-        handleKeyDown={handleKeyDown}
-      />
+            poiLat={poiLat}
+            poiLon={poiLon}
+            onClose={closePOIModal}
+            onSavePOI={savePOI}
+            handleKeyDown={handleKeyDown}
+          />
         </>
       )}
-      
     </>
   );
 }

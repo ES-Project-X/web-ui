@@ -26,6 +26,7 @@
     "react-bootstrap-multiselect": "^2.4.1",
     "react-burger-menu": "^3.0.9",
     "react-dom": "^18.2.0",
+    "react-draggable": "^4.4.6",
     "react-leaflet": "^4.2.1",
     "swr": "^2.2.4"
   },
