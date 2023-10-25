@@ -12,14 +12,6 @@ import LocateControl from "./LocateControl";
 import MarkersManager from "./MarkersManager";
 import FilterBoardComponent from "./FilterBoard";
 import {BasicPOI, FilterType} from "../structs/poi";
-import RedMarker from "./icons/RedMarker";
-import {
-    BicycleParkingMarker,
-    BicycleShopMarker,
-    DrinkingWaterMarker,
-    ToiletsMarker,
-    BenchMarker
-} from "./icons/TypeMarkers";
 import DisplayPOIs from "./DisplayPOIs";
 
 
@@ -72,23 +64,6 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             .then(response => response.json())
             .then(data => setBasicPOIs(data))
             .catch(() => {})
-    }
-
-    const getIcon = (poiType: string) => {
-        switch (poiType) {
-            case "bicycle-parking":
-                return BicycleParkingMarker;
-            case "bicycle-shop":
-                return BicycleShopMarker;
-            case "drinking-water":
-                return DrinkingWaterMarker;
-            case "toilets":
-                return ToiletsMarker;
-            case "bench":
-                return BenchMarker;
-            default:
-                return RedMarker;
-        }
     }
 
     const getGeoLocation = (query: string) => {
@@ -203,19 +178,6 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 <LocateControl/>
                 <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
                 <DisplayPOIs markers={basicPOIs} mapRef={mapRef} />
-                {basicPOIs.map(poi => {
-                    return (
-                        <Marker
-                            key={poi.id}
-                            icon={getIcon(poi.type)}
-                            position={new LatLng(poi.latitude, poi.longitude)}
-                        >
-                            <Popup>
-                                {poi.name} <br/> {poi.type}
-                            </Popup>
-                        </Marker>
-                    )
-                })}
             </MapContainer>
             <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{zIndex: 1, scale:"100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black"}}>Route</Button>
             <Card id={"card-ori-dest"} style={{zIndex: 1, top: "1%", left: "5%", width:"15%", position: "absolute", display: "none"}}>

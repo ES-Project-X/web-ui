@@ -1,8 +1,16 @@
 import { useEffect } from "react";
 import { BasicPOI } from "../structs/poi";
-import L from "leaflet";
-import "leaflet.markercluster"; 
-import { useMapEvents } from "react-leaflet";
+import L, { LatLng } from "leaflet";
+import "leaflet.markercluster";
+import { useMapEvents, Marker, Popup } from "react-leaflet";
+import RedMarker from "./icons/RedMarker";
+import {
+    BicycleParkingMarker,
+    BicycleShopMarker,
+    DrinkingWaterMarker,
+    ToiletsMarker,
+    BenchMarker
+} from "./icons/TypeMarkers";
 
 export default function DisplayPOIs({
     markers,
@@ -11,12 +19,29 @@ export default function DisplayPOIs({
     markers: BasicPOI[]
     mapRef: React.MutableRefObject<L.Map | null>
 }) {
-    
+
     let max_lat: number | null = null;
     let min_lat: number | null = null;
     let max_lng: number | null = null;
     let min_lng: number | null = null;
 
+    const getIcon = (poiType: string) => {
+        switch (poiType) {
+            case "bicycle-parking":
+                return BicycleParkingMarker;
+            case "bicycle-shop":
+                return BicycleShopMarker;
+            case "drinking-water":
+                return DrinkingWaterMarker;
+            case "toilets":
+                return ToiletsMarker;
+            case "bench":
+                return BenchMarker;
+            default:
+                return RedMarker;
+        }
+    }
+/*
     useMapEvents({
         moveend: (e) => {
 
@@ -39,7 +64,7 @@ export default function DisplayPOIs({
             console.log("max_lat: " + max_lat + " min_lat: " + min_lat + " max_lng: " + max_lng + " min_lng: " + min_lng);
         }
     })
-/*
+
     useEffect(() => {
         if (mapRef.current) {
             const clusterGroup = L.markerClusterGroup();
@@ -52,5 +77,15 @@ export default function DisplayPOIs({
         }
     }, [markers]);
 */
-    return null;
+    return (
+        <>
+            {markers.map((marker) => (
+                <Marker key={marker.id} position={[marker.latitude, marker.longitude]} icon={getIcon(marker.type)}>
+                    <Popup>
+                        {marker.name}
+                    </Popup>
+                </Marker>
+            ))}
+        </>
+    )
 }
