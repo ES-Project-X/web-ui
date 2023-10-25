@@ -7,18 +7,18 @@ import CreatePOIModal from "./CreatePOIModal";
 import SavePOIModal from "./SavePOIModal";
 
 export default function MarkersManager({
-    setOrigin,
-    setDestination,
-    creatingRoute,
+  setOrigin,
+  setDestination,
+  creatingRoute,
 }: {
-    setOrigin: (origin: string) => void
-    setDestination: (destination: string) => void
-    creatingRoute: boolean
-                                       }) {
-
+  setOrigin: (origin: string) => void;
+  setDestination: (destination: string) => void;
+  creatingRoute: boolean;
+}) {
   // close modal when ESC key is pressed
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "Escape") {
+      e.preventDefault();
       // check which modal is open
       if (isModalOpen) {
         closeModal();
@@ -28,23 +28,25 @@ export default function MarkersManager({
     }
   };
 
-    const [redPosition, setRedPosition] = useState<LatLng | null>(null);
-    const [greenPosition, setGreenPosition] = useState<LatLng | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [isPOIModalOpen, setIsPOIModalOpen] = useState<boolean>(false);
+  const [redPosition, setRedPosition] = useState<LatLng | null>(null);
+  const [greenPosition, setGreenPosition] = useState<LatLng | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isPOIModalOpen, setIsPOIModalOpen] = useState<boolean>(false);
+  const [canCreateMarker, setCanCreateMarker] = useState<boolean>(true); // set to true at the beginning
 
-    let [poiLat, setPoiLat] = useState<number>(0);
-    let [poiLon, setPoiLon] = useState<number>(0);
+  let [poiLat, setPoiLat] = useState<number>(0);
+  let [poiLon, setPoiLon] = useState<number>(0);
 
-    // close modal when btn is clicked
-    const closeModal = () => {
-        setIsModalOpen(false);
-    };
+  // close modal when btn is clicked
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setCanCreateMarker(false);
+  };
 
-    const closePOIModal = () => {
-        setIsPOIModalOpen(false);
-        closeModal();
-    };
+  const closePOIModal = () => {
+    setIsPOIModalOpen(false);
+    closeModal();
+  };
   const storePos = (lat: number, lon: number) => {
     setPoiLat(lat);
     setPoiLon(lon);
@@ -119,23 +121,24 @@ export default function MarkersManager({
       setIsPOIModalOpen(false);
     }
   }, [isPOIModalOpen]);
-    useMapEvents({
-        click: (e) => {
-            if (creatingRoute) {
-                if (greenPosition === null) {
-                    setGreenPosition(e.latlng)
-                    setOrigin(e.latlng.lat + "," + e.latlng.lng)
-                } else {
-                    setRedPosition(e.latlng)
-                    setDestination(e.latlng.lat + "," + e.latlng.lng)
-                }
-            }
-            else {
-                setRedPosition(e.latlng)
-                setIsModalOpen(true);
-            }
+
+  useMapEvents({
+    click: (e) => {
+      if (creatingRoute) {
+        if (greenPosition === null) {
+          setGreenPosition(e.latlng);
+          setOrigin(e.latlng.lat + "," + e.latlng.lng);
+        } else {
+          setRedPosition(e.latlng);
+          setDestination(e.latlng.lat + "," + e.latlng.lng);
         }
-    })
+      } else {
+        setRedPosition(e.latlng);
+        setIsModalOpen(true);
+        setCanCreateMarker(false);
+      }
+    },
+  });
 
   if (creatingRoute) {
     if (greenPosition !== null && redPosition !== null) {
@@ -178,30 +181,55 @@ export default function MarkersManager({
   }
   return redPosition === null ? null : (
     <>
-      <Marker position={redPosition} icon={RedMarker}>
-        <Popup>
-          You are at {redPosition.lat.toFixed(4)}, {redPosition.lng.toFixed(4)}
-        </Popup>
-      </Marker>
+      {canCreateMarker && redPosition && (
+        <Marker position={redPosition} icon={RedMarker}>
+          <Popup>
+            You are at {redPosition.lat.toFixed(4)},{" "}
+            {redPosition.lng.toFixed(4)}
+          </Popup>
+        </Marker>
+      )}
 
       {/* Modal with btn to create POI */}
+      {isModalOpen && !isPOIModalOpen && (
+        <>
+          {/* add the marker */}
+          <Marker position={[poiLat, poiLon]} icon={RedMarker}>
+            <Popup>
+              You are at {redPosition.lat.toFixed(4)},{" "}
+              {redPosition.lng.toFixed(4)}
+            </Popup>
+          </Marker>
+          <CreatePOIModal
+            latitude={poiLat}
+            longitude={poiLon}
+            onClose={closeModal}
+            onCreatePOI={createPOI}
+            handleKeyDown={handleKeyDown}
+          />
+        </>
+      )}
 
-      <CreatePOIModal
-        latitude={poiLat}
-        longitude={poiLon}
-        onClose={closeModal}
-        onCreatePOI={createPOI}
-      />
-
-      {/* Modal to fill form to save POI */}
-
-      <SavePOIModal
+      {/* Modal to fill form to save POI - 2nd modal*/}
+      {isPOIModalOpen && (
+        <>
+          {/* add the marker */}
+          <Marker position={[poiLat, poiLon]} icon={RedMarker}>
+            <Popup>
+              You are at {redPosition.lat.toFixed(4)},{" "}
+              {redPosition.lng.toFixed(4)}
+            </Popup>
+          </Marker>
+          <SavePOIModal
         poiLat={poiLat}
         poiLon={poiLon}
         onClose={closePOIModal}
         onSavePOI={savePOI}
         handleKeyDown={handleKeyDown}
-        />
+      />
+        </>
+      )}
+      
     </>
   );
 }

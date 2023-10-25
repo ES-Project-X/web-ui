@@ -5,6 +5,7 @@ interface CreatePOIModalProps {
   longitude: number;
   onClose: () => void;
   onCreatePOI: () => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
 }
 
 const CreatePOIModal: React.FC<CreatePOIModalProps> = ({
@@ -12,6 +13,7 @@ const CreatePOIModal: React.FC<CreatePOIModalProps> = ({
   longitude,
   onClose,
   onCreatePOI,
+  handleKeyDown,
 }) => {
   return (
     <dialog id="my_modal_1" className="modal">
@@ -26,14 +28,16 @@ const CreatePOIModal: React.FC<CreatePOIModalProps> = ({
           Longitude: {longitude.toFixed(3)}
         </p>
         <div className="modal-action">
-          <button className="btn glass" onClick={onCreatePOI}>
-            Create POI
+          <button
+            className="btn glass"
+            onKeyDown={handleKeyDown}
+            onClick={onCreatePOI}
+          >
+            Save POI
           </button>
-          <form method="dialog">
-            <button className="btn" onClick={onClose}>
-              Close
-            </button>
-          </form>
+          <button className="btn" onClick={onClose} onKeyDown={handleKeyDown}>
+            Close
+          </button>
         </div>
       </div>
     </dialog>
