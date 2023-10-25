@@ -64,9 +64,9 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             .filter(type => type.selected)
             .map(type => type.value)
 
-        const url = new URL(URL_API + "poi");
-        (name.length > 0) && url.searchParams.append("name", name)
-        typesFetch.forEach(type => url.searchParams.append("type", type))
+        const url = new URL(URL_API + "pois");
+        (name.length > 0) && url.searchParams.append("name", name);
+        typesFetch.forEach(type => url.searchParams.append("type", type));
 
         fetch(url.toString())
             .then(response => response.json())
@@ -201,11 +201,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
-                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={!creatingRoute} />
-                {/*
-                    DISPLAY POIs
-                */}
-                <DisplayPOIs markers={basicPOIs}/>
+                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
+                <DisplayPOIs markers={basicPOIs} mapRef={mapRef} />
                 {basicPOIs.map(poi => {
                     return (
                         <Marker

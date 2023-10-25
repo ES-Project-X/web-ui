@@ -11,6 +11,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@changey/react-leaflet-markercluster": "^4.0.0-rc1",
     "axios": "^1.5.1",
     "bootstrap": "^5.3.2",
     "cors": "^2.8.5",
@@ -26,6 +27,7 @@
     "react-bootstrap-multiselect": "^2.4.1",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
+    "react-leaflet-markercluster": "^3.0.0-rc1",
     "swr": "^2.2.4"
   },
   "devDependencies": {
@@ -46,6 +48,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-leaflet-markercluster": "^3.0.3",
     "@types/selenium-webdriver": "^4.1.17",
     "@types/testing-library__react": "^10.2.0",
     "autoprefixer": "^10",
@@ -60,7 +63,7 @@
     "jest-sonar-reporter": "^2.0.0",
     "postcss": "^8",
     "react-test-renderer": "^18.2.0",
-    "selenium-webdriver": "^3.6.0",
+    "selenium-webdriver": "^4.14.0",
     "tailwindcss": "^3",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
