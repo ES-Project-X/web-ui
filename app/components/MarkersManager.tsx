@@ -237,14 +237,16 @@ export default function MarkersManager({
 
                 // Update the poiLat and poiLon using the callback function
                 setPoiLat((prevLat) => {
-                  console.log("Previous lat:", prevLat);
-                  console.log("New lat:", newPosition.lat);
+                  console.log("Previous lat:", prevLat.toFixed(3));
+                  console.log("New lat:", newPosition.lat.toFixed(3));
+                  setPoiLat(newPosition.lat);
                   return newPosition.lat;
                 });
 
                 setPoiLon((prevLon) => {
-                  console.log("Previous lon:", prevLon);
-                  console.log("New lon:", newPosition.lng);
+                  console.log("Previous lon:", prevLon.toFixed(3));
+                  console.log("New lon:", newPosition.lng.toFixed(3));
+                  setPoiLon(newPosition.lng);
                   return newPosition.lng;
                 });
                 setRedPosition(newPosition);

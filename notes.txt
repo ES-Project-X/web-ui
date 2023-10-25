@@ -1,16 +1,5 @@
--> ES-10; Start;
-	-> create menu;				        - CHECK
-
-	-> fix buttons to the right;		- 
-
-	-> Add stuff to menu;			    - CHECK;
-		> Origin and destino inputs;
-		> btn to calculate route;
-		> ?
-
-	-> Create POI btn;			        - 	
-		> Create a form inside the modal to actually create a POI;
-		> Send the validated POI back to the API;
-
+left todo:
+	-> Fix coords! One is checking the click and the dragend checks the marker coords!! (não bate 100% as vezes, which makes sense)
+	-> Make route markers draggable (and update their coords on dragend) 
 
 	-> FIX INPUT BOXES COLORS AND closing btns colors!!!
