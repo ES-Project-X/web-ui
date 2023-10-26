@@ -22,15 +22,13 @@ export default function FilterBoardComponent(
         ) => void
     }
 ) {
-    const FETCH_TIMEOUT = 1000; // ms before updating with new filters
 
     const [name, setName] = useState(initName)
     const [types, setTypes] = useState<FilterType[]>(initTypes);
 
     useEffect(() => {
-        const timeOutId = setTimeout(() => filterPOIs(name, types), FETCH_TIMEOUT);
-        return () => clearTimeout(timeOutId);
-    }, [name, types]);
+        filterPOIs(name, types)
+    }, [name, types])
 
     return (
         <>

@@ -1,7 +1,8 @@
 import { BasicPOI } from "../structs/poi";
 import L from "leaflet";
 import "leaflet.markercluster";
-import { useMapEvents, Marker, Popup } from "react-leaflet";
+import { useMapEvents } from "react-leaflet";
+import { useState } from "react";
 
 export default function DisplayPOIs({
     markers,
@@ -10,15 +11,15 @@ export default function DisplayPOIs({
 }: {
     markers: BasicPOI[]
     mapRef: React.MutableRefObject<L.Map | null>
-    fetchFunction: (clusters: number[]) => void
+    fetchFunction: (clusters: number[][]) => void
 }) {
 
     const clusterGroup = L.markerClusterGroup();
 
-    let max_lat: number | null = null;
-    let min_lat: number | null = null;
-    let max_lng: number | null = null;
-    let min_lng: number | null = null;
+    const [max_lat, setMaxLat] = useState<number | null>(null);
+    const [min_lat, setMinLat] = useState<number | null>(null);
+    const [max_lng, setMaxLng] = useState<number | null>(null);
+    const [min_lng, setMinLng] = useState<number | null>(null);
 
     useMapEvents({
         moveend: (e) => {
@@ -32,37 +33,39 @@ export default function DisplayPOIs({
             const sw = bounds.getSouthWest();
             let search_clusters: any[] = [];
 
-            if (max_lat === null || ne.lat > max_lat) {
-                search_clusters.push([ne.lat, max_lat, max_lng, min_lng]);
-                max_lat = ne.lat;
+            if (max_lat === null || min_lat === null || max_lng === null || min_lng === null) {
+                search_clusters.push([ne.lat, sw.lat, ne.lng, sw.lng]);
+                setMaxLat(ne.lat);
+                setMinLat(sw.lat);
+                setMaxLng(ne.lng);
+                setMinLng(sw.lng);
             }
-            if (min_lat === null || sw.lat < min_lat) {
-                search_clusters.push([min_lat, sw.lat, max_lng, min_lng]);
-                min_lat = sw.lat;
+            else {
+                if (ne.lat > max_lat) {
+                    search_clusters.push([ne.lat, max_lat, max_lng, min_lng]);
+                    setMaxLat(ne.lat);
+                }
+                if (sw.lat < min_lat) {
+                    search_clusters.push([min_lat, sw.lat, max_lng, min_lng]);
+                    setMinLat(sw.lat);
+                }
+                if (ne.lng > max_lng) {
+                    search_clusters.push([max_lat, min_lat, ne.lng, max_lng]);
+                    setMaxLng(ne.lng);
+                }
+                if (sw.lng < min_lng) {
+                    search_clusters.push([max_lat, min_lat, max_lng, sw.lng]);
+                    setMinLng(sw.lng);
+                }
             }
-            if (max_lng === null || ne.lng > max_lng) {
-                search_clusters.push([max_lat, min_lat, ne.lng, max_lng]);
-                max_lng = ne.lng;
-            }
-            if (min_lng === null || sw.lng < min_lng) {
-                search_clusters.push([max_lat, min_lat, max_lng, sw.lng]);
-                min_lng = sw.lng;
-            }
+            fetchFunction(search_clusters);
 
-            if (search_clusters.length > 0) {
-
-                fetchFunction(search_clusters);
-                console.log(markers);
-
-                markers.forEach((marker) => {
-                    clusterGroup.addLayer(L.marker([marker.latitude, marker.longitude], { icon: marker.icon }).bindPopup(marker.name));
-                });
-                mapRef.current.addLayer(clusterGroup);
-            }
+            markers.forEach((marker) => {
+                clusterGroup.addLayer(L.marker([marker.latitude, marker.longitude], { icon: marker.icon }).bindPopup(marker.name));
+            });
+            mapRef.current.addLayer(clusterGroup);
         }
     });
 
-    return (
-        null
-    )
+    return null;
 }

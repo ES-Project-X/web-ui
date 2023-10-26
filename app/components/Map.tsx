@@ -15,7 +15,6 @@ import DisplayPOIs from "./DisplayPOIs";
 
 import RedMarker from "./icons/RedMarker";
 import {BicycleParkingMarker, BicycleShopMarker, DrinkingWaterMarker, ToiletsMarker, BenchMarker} from "./icons/TypeMarkers";
-import { list } from "postcss";
 
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
@@ -72,17 +71,23 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
-    const fetchPOIs = (clusters: number[]) => {
+    const fetchPOIs = (clusters: number[][]) => {
 
         const url = new URL(URL_API + "pois");
-        clusters.forEach((cluster) => {
-            url.searchParams.append("cluster", cluster.toString());
-        })
+        clusters.forEach((cluster: number[]) => {
+            url.searchParams.append("max_lat", cluster[0].toString());
+            url.searchParams.append("min_lat", cluster[1].toString());
+            url.searchParams.append("max_lng", cluster[2].toString());
+            url.searchParams.append("min_lng", cluster[3].toString());
+        });
+        
 
         fetch(url.toString())
             .then(response => response.json())
             .then(data => updateMarkers(data))
             .catch(() => {})
+
+        setBasicPOIs(markers);
     }
 
     const updateMarkers = (data: any) => {
@@ -96,7 +101,11 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 icon: getIcon(poi.type)
             }
         })
-        setMarkers(pois);
+        let new_pois = markers;
+        pois.forEach((poi: BasicPOI) => {
+            new_pois.push(poi);
+        })
+        setMarkers(new_pois);
     }
 
     const filterPOIs = (name: string, types: FilterType[]) => {
