@@ -12,11 +12,11 @@ export default function FilterBoardComponent(
             {label: "Toilets", value: "toilets", selected: true},
             {label: "Bench", value: "bench", selected: true}
         ],
-        fetchPOIs
+        filterPOIs
     }: {
         initName?: string,
         initTypes?: FilterType[],
-        fetchPOIs: (
+        filterPOIs: (
             name: string,
             types: FilterType[]
         ) => void
@@ -28,7 +28,7 @@ export default function FilterBoardComponent(
     const [types, setTypes] = useState<FilterType[]>(initTypes);
 
     useEffect(() => {
-        const timeOutId = setTimeout(() => fetchPOIs(name, types), FETCH_TIMEOUT);
+        const timeOutId = setTimeout(() => filterPOIs(name, types), FETCH_TIMEOUT);
         return () => clearTimeout(timeOutId);
     }, [name, types]);
 

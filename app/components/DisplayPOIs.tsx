@@ -6,9 +6,11 @@ import { useMapEvents, Marker, Popup } from "react-leaflet";
 export default function DisplayPOIs({
     markers,
     mapRef,
+    fetchFunction,
 }: {
     markers: BasicPOI[]
     mapRef: React.MutableRefObject<L.Map | null>
+    fetchFunction: (clusters: number[]) => void
 }) {
 
     const clusterGroup = L.markerClusterGroup();
@@ -21,39 +23,44 @@ export default function DisplayPOIs({
     useMapEvents({
         moveend: (e) => {
 
+            if (mapRef.current === null) {
+                return (null);
+            }
+
             const bounds = e.target.getBounds();
             const ne = bounds.getNorthEast();
             const sw = bounds.getSouthWest();
-            let change = false;
+            let search_clusters: any[] = [];
 
             if (max_lat === null || ne.lat > max_lat) {
+                search_clusters.push([ne.lat, max_lat, max_lng, min_lng]);
                 max_lat = ne.lat;
-                change = true;
             }
             if (min_lat === null || sw.lat < min_lat) {
+                search_clusters.push([min_lat, sw.lat, max_lng, min_lng]);
                 min_lat = sw.lat;
-                change = true;
             }
             if (max_lng === null || ne.lng > max_lng) {
+                search_clusters.push([max_lat, min_lat, ne.lng, max_lng]);
                 max_lng = ne.lng;
-                change = true;
             }
             if (min_lng === null || sw.lng < min_lng) {
+                search_clusters.push([max_lat, min_lat, max_lng, sw.lng]);
                 min_lng = sw.lng;
-                change = true;
             }
 
-            if (change) {
-                if (mapRef.current) {
-                    markers.forEach((marker) => {
-                        clusterGroup.addLayer(L.marker([marker.latitude, marker.longitude], { icon: marker.icon }).bindPopup(marker.name));
-                    });
+            if (search_clusters.length > 0) {
 
-                    mapRef.current.addLayer(clusterGroup);
-                }
+                fetchFunction(search_clusters);
+                console.log(markers);
+
+                markers.forEach((marker) => {
+                    clusterGroup.addLayer(L.marker([marker.latitude, marker.longitude], { icon: marker.icon }).bindPopup(marker.name));
+                });
+                mapRef.current.addLayer(clusterGroup);
             }
         }
-    })
+    });
 
     return (
         null

@@ -1,7 +1,6 @@
 "use client"
 
-import "leaflet/dist/leaflet.css"
-
+import "leaflet/dist/leaflet.css";
 import {useEffect, useRef, useState} from "react";
 import {Button, ButtonGroup, Form, Card, Row, CloseButton, Container, Col} from "react-bootstrap";
 import {MapContainer, TileLayer} from "react-leaflet"
@@ -16,6 +15,7 @@ import DisplayPOIs from "./DisplayPOIs";
 
 import RedMarker from "./icons/RedMarker";
 import {BicycleParkingMarker, BicycleShopMarker, DrinkingWaterMarker, ToiletsMarker, BenchMarker} from "./icons/TypeMarkers";
+import { list } from "postcss";
 
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
@@ -32,6 +32,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
     const [odmap, setodmap] = useState(false);
 
     const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([]);
+    const [markers, setMarkers] = useState<BasicPOI[]>([]);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
@@ -71,7 +72,20 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
-    const updatePOIs = (data: any) => {
+    const fetchPOIs = (clusters: number[]) => {
+
+        const url = new URL(URL_API + "pois");
+        clusters.forEach((cluster) => {
+            url.searchParams.append("cluster", cluster.toString());
+        })
+
+        fetch(url.toString())
+            .then(response => response.json())
+            .then(data => updateMarkers(data))
+            .catch(() => {})
+    }
+
+    const updateMarkers = (data: any) => {
         const pois: BasicPOI[] = data.map((poi: any) => {
             return {
                 id: poi.id,
@@ -82,22 +96,19 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 icon: getIcon(poi.type)
             }
         })
-        setBasicPOIs(pois);
+        setMarkers(pois);
     }
 
-    const fetchPOIs = (name: string, types: FilterType[]) => {
-        const typesFetch = types
-            .filter(type => type.selected)
-            .map(type => type.value)
-
-        const url = new URL(URL_API + "pois");
-        (name.length > 0) && url.searchParams.append("name", name);
-        typesFetch.forEach(type => url.searchParams.append("type", type));
-
-        fetch(url.toString())
-            .then(response => response.json())
-            .then(data => updatePOIs(data))
-            .catch(() => {})
+    const filterPOIs = (name: string, types: FilterType[]) => {
+        const filteredMarkers = markers.filter((marker) => {
+            return types.some((type) => {
+                return type.selected && marker.type === type.value;
+            })
+        })
+        .filter((marker) => {
+            return marker.name.toLowerCase().includes(name.toLowerCase());
+        })
+        setBasicPOIs(filteredMarkers);
     }
 
     const getGeoLocation = (query: string) => {
@@ -211,7 +222,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
                 <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
-                <DisplayPOIs markers={basicPOIs} mapRef={mapRef} />
+                <DisplayPOIs markers={basicPOIs} mapRef={mapRef} fetchFunction={fetchPOIs}  />
             </MapContainer>
             <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{zIndex: 1, scale:"100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black"}}>Route</Button>
             <Card id={"card-ori-dest"} style={{zIndex: 1, top: "1%", left: "5%", width:"15%", position: "absolute", display: "none"}}>
@@ -273,7 +284,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                         <Card id={"filter-board"}>
                             <Card.Body>
                                 <FilterBoardComponent
-                                    fetchPOIs={fetchPOIs}/>
+                                    filterPOIs={filterPOIs}/>
                             </Card.Body>
                         </Card>
                     </Col>
