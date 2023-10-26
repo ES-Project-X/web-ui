@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css"
 
 import {useEffect, useRef, useState} from "react";
 import {Button, ButtonGroup, Form, Card, Row, CloseButton, Container, Col} from "react-bootstrap";
-import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet"
+import {MapContainer, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
 import "leaflet-rotate"
 
@@ -13,6 +13,9 @@ import MarkersManager from "./MarkersManager";
 import FilterBoardComponent from "./FilterBoard";
 import {BasicPOI, FilterType} from "../structs/poi";
 import DisplayPOIs from "./DisplayPOIs";
+
+import RedMarker from "./icons/RedMarker";
+import {BicycleParkingMarker, BicycleShopMarker, DrinkingWaterMarker, ToiletsMarker, BenchMarker} from "./icons/TypeMarkers";
 
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
@@ -51,6 +54,37 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
+    const getIcon = (poiType: string) => {
+        switch (poiType) {
+            case "bicycle-parking":
+                return BicycleParkingMarker;
+            case "bicycle-shop":
+                return BicycleShopMarker;
+            case "drinking-water":
+                return DrinkingWaterMarker;
+            case "toilets":
+                return ToiletsMarker;
+            case "bench":
+                return BenchMarker;
+            default:
+                return RedMarker;
+        }
+    }
+
+    const updatePOIs = (data: any) => {
+        const pois: BasicPOI[] = data.map((poi: any) => {
+            return {
+                id: poi.id,
+                name: poi.name,
+                type: poi.type,
+                latitude: poi.latitude,
+                longitude: poi.longitude,
+                icon: getIcon(poi.type)
+            }
+        })
+        setBasicPOIs(pois);
+    }
+
     const fetchPOIs = (name: string, types: FilterType[]) => {
         const typesFetch = types
             .filter(type => type.selected)
@@ -62,7 +96,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
 
         fetch(url.toString())
             .then(response => response.json())
-            .then(data => setBasicPOIs(data))
+            .then(data => updatePOIs(data))
             .catch(() => {})
     }
 
