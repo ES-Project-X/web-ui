@@ -36,8 +36,8 @@ export default function MarkersManager({
 
 
     if (creatingRoute) {
-        const redMarker = redPosition && <Marker position={redPosition} icon={RedMarker} interactive={true} eventHandlers={{ click: () => setRedPosition(null) }}></Marker>
-        const greenMarker = greenPosition && <Marker position={greenPosition} icon={GreenMarker} interactive={true} eventHandlers={{ click: () => setGreenPosition(null) }}></Marker>
+        const redMarker = redPosition && <Marker position={redPosition} icon={RedMarker} interactive={true} draggable={true} eventHandlers={{ click: () => setRedPosition(null) }}></Marker>
+        const greenMarker = greenPosition && <Marker position={greenPosition} icon={GreenMarker} interactive={true} draggable={true} eventHandlers={{ click: () => setGreenPosition(null) }}></Marker>
 
         return (
             <>
@@ -48,7 +48,7 @@ export default function MarkersManager({
     }
     else if (redPosition) {
         return (
-            <Marker position={redPosition} icon={RedMarker}>
+            <Marker position={redPosition} icon={RedMarker} draggable={true}>
                 <Popup>
                     You are at {redPosition.lat.toFixed(4)}, {redPosition.lng.toFixed(4)}
                 </Popup>

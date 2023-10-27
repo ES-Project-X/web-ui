@@ -1,23 +1,26 @@
 "use client"
 
 import "leaflet/dist/leaflet.css";
-import {useEffect, useRef, useState} from "react";
-import {Button, ButtonGroup, Form, Card, Row, CloseButton, Container, Col} from "react-bootstrap";
-import {MapContainer, TileLayer} from "react-leaflet"
-import {LatLng} from "leaflet";
+import { useEffect, useRef, useState } from "react";
+import { Button, ButtonGroup, Form, Card, Row, CloseButton, Container, Col } from "react-bootstrap";
+import { MapContainer, TileLayer } from "react-leaflet"
+import { LatLng } from "leaflet";
 import "leaflet-rotate"
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
 import LocateControl from "./LocateControl";
 import MarkersManager from "./MarkersManager";
 import FilterBoardComponent from "./FilterBoard";
-import {BasicPOI, FilterType} from "../structs/poi";
-import DisplayPOIs from "./DisplayPOIs";
+import { BasicPOI, FilterType } from "../structs/poi";
+import { updateClusterGroup } from "./DisplayPOIs";
 
 import RedMarker from "./icons/RedMarker";
-import {BicycleParkingMarker, BicycleShopMarker, DrinkingWaterMarker, ToiletsMarker, BenchMarker} from "./icons/TypeMarkers";
+import { BicycleParkingMarker, BicycleShopMarker, DrinkingWaterMarker, ToiletsMarker, BenchMarker } from "./icons/TypeMarkers";
+import FetchComponent from "./FetchComponent";
 
 
-export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
+export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
     const center = new LatLng(40.64427, -8.64554);
 
@@ -30,8 +33,16 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
     const [destination, setDestination] = useState<string>("");
     const [odmap, setodmap] = useState(false);
 
-    const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([]);
     const [markers, setMarkers] = useState<BasicPOI[]>([]);
+
+    const [filterName, setFilterName] = useState<string>("");
+    const [filterTypes, setFilterTypes] = useState<FilterType[]>([
+        { label: "Bicycle Parking", value: "bicycle-parking", selected: true },
+        { label: "Bicycle Shop", value: "bicycle-shop", selected: true },
+        { label: "Drinking Water", value: "drinking-water", selected: true },
+        { label: "Toilets", value: "toilets", selected: true },
+        { label: "Bench", value: "bench", selected: true }
+    ]);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
@@ -40,8 +51,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
 
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
-            const {latitude, longitude} = location.coords;
-            setUserPosition({latitude, longitude})
+            const { latitude, longitude } = location.coords;
+            setUserPosition({ latitude, longitude })
         });
     }, [])
 
@@ -80,14 +91,11 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             url.searchParams.append("max_lng", cluster[2].toString());
             url.searchParams.append("min_lng", cluster[3].toString());
         });
-        
 
         fetch(url.toString())
             .then(response => response.json())
             .then(data => updateMarkers(data))
-            .catch(() => {})
-
-        setBasicPOIs(markers);
+            .catch(() => { })
     }
 
     const updateMarkers = (data: any) => {
@@ -101,23 +109,28 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 icon: getIcon(poi.type)
             }
         })
-        let new_pois = markers;
-        pois.forEach((poi: BasicPOI) => {
-            new_pois.push(poi);
-        })
-        setMarkers(new_pois);
+        if (pois.length > 0) {
+            let new_pois = markers;
+            pois.forEach((poi: BasicPOI) => {
+                new_pois.push(poi);
+            })
+            setMarkers(new_pois);
+            filterPOIs();
+        }
     }
 
-    const filterPOIs = (name: string, types: FilterType[]) => {
+    const filterPOIs = () => {
         const filteredMarkers = markers.filter((marker) => {
-            return types.some((type) => {
+            return filterTypes.some((type) => {
                 return type.selected && marker.type === type.value;
             })
         })
-        .filter((marker) => {
-            return marker.name.toLowerCase().includes(name.toLowerCase());
-        })
-        setBasicPOIs(filteredMarkers);
+            .filter((marker) => {
+                return marker.name.toLowerCase().includes(filterName.toLowerCase());
+            });
+        if (mapRef.current) {
+            updateClusterGroup(filteredMarkers, mapRef);
+        }
     }
 
     const getGeoLocation = (query: string) => {
@@ -174,7 +187,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
     }
 
     const getFromMap = () => {
-        if(odmap) {
+        if (odmap) {
             console.log("odmap")
             setodmap(false)
             setCreatingRoute(false)
@@ -226,32 +239,32 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 center={center} zoom={13} scrollWheelZoom={true}
                 rotate={true} bearing={0}
                 // @ts-ignore
-                rotateControl={{closeOnZeroBearing: false}} touchRotate={true}
+                rotateControl={{ closeOnZeroBearing: false }} touchRotate={true}
             >
-                {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
-                <LocateControl/>
+                {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
+                <LocateControl />
                 <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
-                <DisplayPOIs markers={basicPOIs} mapRef={mapRef} fetchFunction={fetchPOIs}  />
+                <FetchComponent fetchFunction={fetchPOIs} />
             </MapContainer>
-            <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{zIndex: 1, scale:"100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black"}}>Route</Button>
-            <Card id={"card-ori-dest"} style={{zIndex: 1, top: "1%", left: "5%", width:"15%", position: "absolute", display: "none"}}>
+            <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{ zIndex: 1, scale: "100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black" }}>Route</Button>
+            <Card id={"card-ori-dest"} style={{ zIndex: 1, top: "1%", left: "5%", width: "15%", position: "absolute", display: "none" }}>
                 <Card.Body>
                     <Form>
                         <Form.Group>
                             <Form.Label>Origin</Form.Label>
-                            <Form.Control id={"origin-input"} type={"text"} placeholder={"Origin"} onChange={updateOrigin} value={origin} readOnly={false}/>
+                            <Form.Control id={"origin-input"} type={"text"} placeholder={"Origin"} onChange={updateOrigin} value={origin} readOnly={false} />
                         </Form.Group>
-                        <br/>
+                        <br />
                         <Form.Group>
                             <Form.Label>Destination</Form.Label>
-                            <Form.Control id={"destination-input"} type={"text"} placeholder={"Destination"} onChange={updateDestination} value={destination} readOnly={false}/>
+                            <Form.Control id={"destination-input"} type={"text"} placeholder={"Destination"} onChange={updateDestination} value={destination} readOnly={false} />
                         </Form.Group>
-                        <br/>
+                        <br />
                         <Form.Group className="mb-3" >
                             <Form.Check id="mapcbox" type="checkbox" onChange={getFromMap} label="Select in Map" />
                         </Form.Group>
                         <Form.Group>
-                            <Button id={"get-route-btn"} variant={"light"} style={{border: ".1em solid black"}}>Get Route</Button>
+                            <Button id={"get-route-btn"} variant={"light"} style={{ border: ".1em solid black" }}>Get Route</Button>
                         </Form.Group>
                     </Form>
                 </Card.Body>
@@ -260,9 +273,9 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 {/*
                     POPUP CARD
                 */}
-                <Card id={"card-info"} style={{position: "absolute", top: "10em", left: "50%", display: "none"}}>
+                <Card id={"card-info"} style={{ position: "absolute", top: "10em", left: "50%", display: "none" }}>
                     <Card.Header>
-                        <CloseButton id={"card-btn"} onClick={hidecard}/>
+                        <CloseButton id={"card-btn"} onClick={hidecard} />
                     </Card.Header>
                     <Card.Body>
                         <Row id={"location-text"}></Row>
@@ -277,7 +290,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                     <Col xs={"auto"} className={"mx-auto"}>
                         <Form>
                             <Form.Group controlId={"search-bar"}>
-                                <Form.Control type={"text"} placeholder={"Search"} onKeyDown={handleKeyDown}/>
+                                <Form.Control type={"text"} placeholder={"Search"} onKeyDown={handleKeyDown} />
                             </Form.Group>
                         </Form>
                     </Col>
@@ -293,7 +306,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                         <Card id={"filter-board"}>
                             <Card.Body>
                                 <FilterBoardComponent
-                                    filterPOIs={filterPOIs}/>
+                                    filterPOIs={filterPOIs} setFilterName={setFilterName} setFilterTypes={setFilterTypes} types={filterTypes} />
                             </Card.Body>
                         </Card>
                     </Col>
@@ -305,11 +318,11 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                     <Col xs={2} className={"d-flex align-items-end"}>
                         <ButtonGroup>
                             <Button id={"map-rotate-left-btn"} variant={"light"}
-                                    onClick={() => addToBearing(-10)}>
+                                onClick={() => addToBearing(-10)}>
                                 Rotate Left
                             </Button>
                             <Button id={"map-rotate-right-btn"} variant={"light"}
-                                    onClick={() => addToBearing(10)}>
+                                onClick={() => addToBearing(10)}>
                                 Rotate Right
                             </Button>
                         </ButtonGroup>
