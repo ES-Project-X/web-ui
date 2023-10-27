@@ -5,7 +5,6 @@ import { enableFetchMocks } from "jest-fetch-mock";
 import { MapContainer } from "react-leaflet";
 import CreatePOIModal from "../../app/components/CreatePOIModal";
 import SavePOIModal from "../../app/components/SavePOIModal";
-
 describe("MarkersManager", () => {
   enableFetchMocks();
 
@@ -278,23 +277,66 @@ describe("MarkersManager", () => {
     expect(savePOIModal).toBeDefined();
   });
 
-it ("test close modal function", () => {
+  it("should save POI and close modal when valid input is provided", () => {
+    const { container } = render(
+      <MapContainer>
+        <SavePOIModal
+          onClose={() => {}}
+          onSavePOI={() => {}}
+          handleKeyDown={() => {}}
+          poiLat={0}
+          poiLon={0} /* other props as needed */
+        />
+      </MapContainer>
+    );
 
-    // Arrange
-    const setOrigin = jest.fn();
-    const setDestination = jest.fn();
-    const setIsModalOpen = jest.fn();
-    const setCanCreateMarker = jest.fn();
+    const nameInput = container.querySelector("#name");
+    expect(nameInput).toBeDefined();
 
-    const closeModal = () => {
-        setIsModalOpen(false);
-        setCanCreateMarker(true);
-    }
+    const typeInput = container.querySelector("#type");
+    expect(typeInput).toBeDefined();
 
-    closeModal();
+    const savePOIBtn = container.querySelector(".glass");
+    expect(savePOIBtn).toBeDefined();
 
-    expect(setIsModalOpen).toHaveBeenCalledWith(false);
-    expect(setCanCreateMarker).toHaveBeenCalledWith(true);
+    fireEvent.change(nameInput!, { target: { value: "Test" } });
+    fireEvent.change(typeInput!, { target: { value: "Test" } });
+    fireEvent.click(savePOIBtn!);
 
-});
+    const savePOIModal = container.querySelector(".save-poi-modal");
+    expect(savePOIModal).toBeNull();
+  });
+
+  it("should not save POI and close modal when invalid input is provided", () => {
+    const { container } = render(
+      <MapContainer>
+        <SavePOIModal
+          onClose={() => {}}
+          onSavePOI={() => {}}
+          handleKeyDown={() => {}}
+          poiLat={0}
+          poiLon={0} /* other props as needed */
+        />
+      </MapContainer>
+    );
+
+    const nameInput = container.querySelector("#name");
+    expect(nameInput).toBeDefined();
+
+    const typeInput = container.querySelector("#type");
+    expect(typeInput).toBeDefined();
+
+    const savePOIBtn = container.querySelector(".glass");
+    expect(savePOIBtn).toBeDefined();
+
+    fireEvent.change(nameInput!, { target: { value: "" } });
+    fireEvent.change(typeInput!, { target: { value: "" } });
+    fireEvent.click(savePOIBtn!);
+
+    const savePOIModal = container.querySelector(".save-poi-modal");
+    expect(savePOIModal).toBeDefined();
+  });
+
+  // mock that redPosition is not null
+  
 });
