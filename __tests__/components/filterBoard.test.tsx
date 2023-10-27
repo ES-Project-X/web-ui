@@ -12,15 +12,23 @@ describe("FilterBoardComponent", () => {
     beforeEach(() => {
         component = render(
             <FilterBoardComponent
-                types={[
+                initName=""
+                initTypes={[
                     {label: "Bicycle Parking", value: "bicycle-parking", selected: true},
-                    {label: "Bicycle Shop", value: "bicycle-shop", selected: true},
-                    {label: "Drinking Water", value: "drinking-water", selected: true},
                     {label: "Toilets", value: "toilets", selected: true},
-                    {label: "Bench", value: "bench", selected: true}
                 ]}
-                updateTypes={() => {}}
+                fetchPOIs={() => {}}
             />).container
+    })
+
+    it("updates name", () => {
+        const name = findById("filter-name")
+        expect(name).toBeDefined()
+        expect(name).toHaveValue("")
+
+        fireEvent.change(name!, {target: {value: "test"}})
+
+        expect(name!).toHaveValue("test")
     })
 
     it("updates checkbox", () => {
@@ -30,6 +38,6 @@ describe("FilterBoardComponent", () => {
 
         fireEvent.click(checkbox!)
 
-        expect(checkbox).not.toBeChecked()
+        expect(checkbox!).not.toBeChecked()
     })
 })

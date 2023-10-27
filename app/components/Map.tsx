@@ -11,7 +11,7 @@ import "leaflet-rotate"
 import LocateControl from "./LocateControl";
 import MarkersManager from "./MarkersManager";
 import FilterBoardComponent from "./FilterBoard";
-import {BasicPOI} from "../structs/poi";
+import {BasicPOI, FilterType} from "../structs/poi";
 import RedMarker from "./icons/RedMarker";
 import {
     BicycleParkingMarker,
@@ -36,14 +36,6 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
     const [destination, setDestination] = useState<string>("");
     const [odmap, setodmap] = useState(false);
 
-    const [types, setTypes] = useState([
-        {label: "Bicycle Parking", value: "bicycle-parking", selected: true},
-        {label: "Bicycle Shop", value: "bicycle-shop", selected: true},
-        {label: "Drinking Water", value: "drinking-water", selected: true},
-        {label: "Toilets", value: "toilets", selected: true},
-        {label: "Bench", value: "bench", selected: true}
-    ]);
-
     const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([])
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
@@ -57,7 +49,6 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             const {latitude, longitude} = location.coords;
             setUserPosition({latitude, longitude})
         });
-        fetchPOIs()
     }, [])
 
     const addToBearing = (amount: number) => {
@@ -69,17 +60,13 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
-    const updateTypes = (types: { label: string, value: string, selected: boolean }[]) => {
-        setTypes(types)
-        fetchPOIs()
-    }
-
-    const fetchPOIs = () => {
+    const fetchPOIs = (name: string, types: FilterType[]) => {
         const typesFetch = types
             .filter(type => type.selected)
             .map(type => type.value)
 
         const url = new URL(URL_API + "poi");
+        (name.length > 0) && url.searchParams.append("name", name)
         typesFetch.forEach(type => url.searchParams.append("type", type))
 
         fetch(url.toString())
@@ -345,8 +332,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                         <Card id={"filter-board"}>
                             <Card.Body>
                                 <FilterBoardComponent
-                                    types={types}
-                                    updateTypes={updateTypes}/>
+                                    fetchPOIs={fetchPOIs}/>
                             </Card.Body>
                         </Card>
                     </Col>
