@@ -27,7 +27,7 @@ describe("CreatePOIModal", () => {
 
   it("triggers onCreatePOI when the 'Save POI' button is clicked", () => {
     renderCreatePOIModal();
-    const saveButton = screen.getByText("Save POI");
+    const saveButton = screen.getByText("Create POI");
     
     fireEvent.click(saveButton);
     
@@ -45,7 +45,7 @@ describe("CreatePOIModal", () => {
   
   it("handles onKeyDown event", () => {
     renderCreatePOIModal();
-    const saveButton = screen.getByText("Save POI");
+    const saveButton = screen.getByText("Create POI");
 
     fireEvent.keyDown(saveButton, { key: "Enter" });
     
