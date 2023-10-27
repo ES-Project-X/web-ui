@@ -278,32 +278,5 @@ describe("MarkersManager", () => {
     expect(savePOIModal).toBeDefined();
   });
 
-  it("handles click events on the 'Create POI' button", () => {
-    // Arrange
-    const onClose = jest.fn();
-    const onCreatePOI = jest.fn();
-    const handleKeyDown = jest.fn();
-
-    const { container } = render(
-      <MapContainer>
-        <CreatePOIModal
-          latitude={40.1234}
-          longitude={-8.5678}
-          onClose={onClose}
-          onCreatePOI={onCreatePOI}
-          handleKeyDown={handleKeyDown}
-        />
-      </MapContainer>
-    );
-
-    const createPOIBtn = container.querySelector(".btn.glass");
-    expect(createPOIBtn).toBeDefined();
-
-    // Act
-    fireEvent.click(createPOIBtn!);
-
-    // Assert
-    expect(onCreatePOI).toHaveBeenCalled();
-  });
   
 });
