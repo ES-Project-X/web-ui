@@ -368,20 +368,76 @@ describe("MarkersManager", () => {
     const modal = document.getElementById("my_modal_1");
     expect(modal).toBeDefined();
 
-    // it was called once so now we can restore the original function
-    document.getElementById = originalGetElementById;
-
     // check if the button to create a POI is defined
     const createPOIBtn = findByClass("glass");
     expect(createPOIBtn).toBeDefined();
 
     // before clicking, make sure the other modal is rendered
+    // before clicking, make sure the other modal is rendered
     const modal2 = document.getElementById("my_modal_2");
     expect(modal2).toBeDefined();
+    expect(modal2.showModal).toBeDefined(); // Check if showModal is defined for the second modal
+    expect(modal2.close).toBeDefined(); // Check if close is defined for the second modal
+
+    // click on the button to create a POI
+    fireEvent.click(createPOIBtn!);
+
 
     // it was called once so now we can restore the original function
     document.getElementById = originalGetElementById;
   });
 
+  /* it("with the 2nd modal open, we should be able to save the POI", () => {
+    const mapContainer = findById("map-container");
+    expect(mapContainer).toBeDefined();
 
+    // Mock document.getElementById to return valid modal elements
+    const originalGetElementById = document.getElementById;
+    document.getElementById = jest.fn((id) => {
+      if (id === "my_modal_1") {
+        return {
+          showModal: jest.fn(),
+          close: jest.fn(),
+          createPOI: jest.fn(),
+        };
+      } else if (id === "my_modal_2") {
+        return {
+          showModal: jest.fn(),
+          close: jest.fn(),
+          savePOI: jest.fn(),
+        };
+      } else {
+        // Return null for other elements
+        return null;
+      }
+    });
+
+    // now that the modal2 is open, we can check if it was called
+    const modal = document.getElementById("my_modal_2");
+    expect(modal).toBeDefined();
+
+    // it was called once so now we can restore the original function
+    document.getElementById = originalGetElementById;
+
+    // check if the button to save a POI is defined
+    const savePOIBtn = findByClass("glass");
+    expect(savePOIBtn).toBeDefined();
+
+    // click on the button to save a POI
+    fireEvent.click(savePOIBtn!);
+
+    // now that the modal is open, we can check if it was called
+    const modal4 = document.getElementById("my_modal_2");
+    expect(modal4).toBeDefined();
+
+    // it was called once so now we can restore the original function
+    document.getElementById = originalGetElementById;
+    
+  });
+  
+  it ("modal is not open, but we can drag the marker", () => {
+
+    
+
+  }); */
 });
