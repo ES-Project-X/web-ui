@@ -93,9 +93,11 @@ export default function MarkersManager({
   useEffect(() => {
     const modal = document.getElementById("my_modal_1") as HTMLDialogElement;
     if (modal === null) {
+      console.log("modal1 is null");
       return;
     }
     if (isModalOpen) {
+      console.log("modal is open");
       modal.showModal();
       // if the modal is open, it means i need to store the lat and lon of the POI
       // before clicking the button to create the POI!!!
@@ -110,6 +112,7 @@ export default function MarkersManager({
   useEffect(() => {
     const modal = document.getElementById("my_modal_2") as HTMLDialogElement;
     if (modal === null) {
+      console.log("modal2 is null");
       return;
     }
     if (isPOIModalOpen) {

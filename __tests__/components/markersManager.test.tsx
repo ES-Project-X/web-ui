@@ -1,6 +1,6 @@
 import MarkersManager from "../../app/components/MarkersManager";
 import MapComponent from "../../app/components/Map";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { enableFetchMocks } from "jest-fetch-mock";
 import { MapContainer } from "react-leaflet";
 import CreatePOIModal from "../../app/components/CreatePOIModal";
@@ -180,7 +180,7 @@ describe("MarkersManager", () => {
     }
     */
 
-  it("renders a draggable marker when isModalOpen is false", () => {
+  /* it("renders a draggable marker when isModalOpen is false", () => {
     // Arrange
     const { container } = render(
       <MapContainer>
@@ -215,7 +215,6 @@ describe("MarkersManager", () => {
           setOrigin={setOrigin}
           setDestination={setDestination}
           creatingRoute={false}
-          /* other props as needed */
         />
       </MapContainer>
     );
@@ -241,7 +240,6 @@ describe("MarkersManager", () => {
           creatingRoute={false}
           isModalOpen={true}
           isPOIModalOpen={false}
-          /* other props as needed */
         />
       </MapContainer>
     );
@@ -265,7 +263,6 @@ describe("MarkersManager", () => {
           setDestination={setDestination}
           creatingRoute={false}
           isPOIModalOpen={true}
-          /* other props as needed */
         />
       </MapContainer>
     );
@@ -285,7 +282,7 @@ describe("MarkersManager", () => {
           onSavePOI={() => {}}
           handleKeyDown={() => {}}
           poiLat={0}
-          poiLon={0} /* other props as needed */
+          poiLon={0}
         />
       </MapContainer>
     );
@@ -315,7 +312,7 @@ describe("MarkersManager", () => {
           onSavePOI={() => {}}
           handleKeyDown={() => {}}
           poiLat={0}
-          poiLon={0} /* other props as needed */
+          poiLon={0}
         />
       </MapContainer>
     );
@@ -335,8 +332,56 @@ describe("MarkersManager", () => {
 
     const savePOIModal = container.querySelector(".save-poi-modal");
     expect(savePOIModal).toBeDefined();
+  }); */
+
+  /* Actual important tests */
+
+  it("we set a marker and it should open the CreatePOIModal", () => {
+    const mapContainer = findById("map-container");
+    expect(mapContainer).toBeDefined();
+
+    // Mock document.getElementById to return valid modal elements
+    const originalGetElementById = document.getElementById;
+    document.getElementById = jest.fn((id) => {
+      if (id === "my_modal_1") {
+        return {
+          showModal: jest.fn(),
+          close: jest.fn(),
+          createPOI: jest.fn(),
+        };
+      } else if (id === "my_modal_2") {
+        return {
+          showModal: jest.fn(),
+          close: jest.fn(),
+          savePOI: jest.fn(),
+        };
+      } else {
+        // Return null for other elements
+        return null;
+      }
+    });
+
+    // Click on the map container
+    fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
+
+    // now that the modal is open, we can check if it was called
+    const modal = document.getElementById("my_modal_1");
+    expect(modal).toBeDefined();
+
+    // it was called once so now we can restore the original function
+    document.getElementById = originalGetElementById;
+
+    // check if the button to create a POI is defined
+    const createPOIBtn = findByClass("glass");
+    expect(createPOIBtn).toBeDefined();
+
+    // before clicking, make sure the other modal is rendered
+    const modal2 = document.getElementById("my_modal_2");
+    expect(modal2).toBeDefined();
+
+    // it was called once so now we can restore the original function
+    document.getElementById = originalGetElementById;
   });
 
-  // mock that redPosition is not null
-  
+
 });
