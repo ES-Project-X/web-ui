@@ -69,23 +69,24 @@ export default function MarkersManager({
 
     // validate name and type are not empty strings
     if (name === "" || type === "") {
-      alert("Name and type cannot be empty!");
       closePOIModal();
       return;
     }
 
     // validate that name and type are not too long
-    if (name.length > 20 || type.length > 20) {
-      alert("Name and type cannot be longer than 20 characters!");
+    else if (name.length > 20 || type.length > 20) {
       closePOIModal();
       return;
     }
-
-    console.log("name:", name);
+     
+    else {
+      console.log("name:", name);
     console.log("type:", type);
     console.log("lat:", poiLat.toFixed(3));
     console.log("lon:", poiLon.toFixed(3));
     closePOIModal();
+    }
+    
   };
 
   /* useEffect modal popup */
@@ -175,7 +176,7 @@ export default function MarkersManager({
                 setRedPosition(newPosition);
                 setDestination(newPosition.lat + "," + newPosition.lng);  
                 console.log("coords after:", redPosition);
-                
+
 
               },
             }}
