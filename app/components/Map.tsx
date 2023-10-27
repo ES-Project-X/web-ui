@@ -20,7 +20,6 @@ import {
     ToiletsMarker,
     BenchMarker
 } from "./icons/TypeMarkers";
-import {list} from "postcss";
 
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
@@ -191,7 +190,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
-    function geoCode(query: string): string {
+    const geoCode = async (query: string): Promise<string>  => {
         // @ts-ignore
         return fetch(query)
             .then(response => response.json())
@@ -246,8 +245,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 }
                 const points = data.paths[0].points.coordinates;
                 let points2 = [];
-                for (let i = 0; i < points.length; i++) {
-                    points2.push(new LatLng(points[i][1], points[i][0]));
+                for(let point of points) {
+                    points2.push(new LatLng(point[1], point[0]));
                 }
                 setPoints([points2]);
             })
