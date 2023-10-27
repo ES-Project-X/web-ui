@@ -141,7 +141,7 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                 return marker.name.toLowerCase().includes(filterName.toLowerCase());
             });
         if (mapRef.current) {
-            updateClusterGroup(filteredMarkers, mapRef);
+            updateClusterGroup(filteredMarkers, mapRef, fetchPOIDetails);
         }
     }
 
@@ -322,7 +322,7 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                         </Card>
                     </Col>
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
-                        <Card id={"poi-sidebar"}>
+                        <Card id={"poi-sidebar"} style={{ display:"none" }}>
                             <Card.Body>
                                 <POIsSidebar selectedPOI={selectedPOI} />
                             </Card.Body>

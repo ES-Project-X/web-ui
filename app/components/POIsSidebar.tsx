@@ -1,14 +1,21 @@
-import {AiFillDislike, AiFillLike} from "react-icons/ai";
+import {AiFillCloseCircle, AiFillDislike, AiFillLike} from "react-icons/ai";
 
+// @ts-ignore
 const POIsSidebar = ({selectedPOI}) => {
-    if (!selectedPOI) {
-        return <div>Select a POI</div>;
+    if (!selectedPOI) return ;
+
+    const hideCard = () => {
+        document.getElementById("poi-sidebar")?.style.setProperty("display", "none");
     }
+
     return (
         <div className="sidebar">
             <div className="sidebar-body">
                 <div className="sidebar-body-item">
-                    {/*<img className="w-fit rounded-xl" src={selectedPOI.picture_url} alt="poi_image"/>*/}
+                    <div className={"flex justify-end pb-2"}>
+                    <button><AiFillCloseCircle className="close-button" onClick={() => {hideCard()} } />
+                    </button></div>
+                    <img className="w-fit rounded-xl" src={"https://picsum.photos/200"} alt="poi_image"/>
                     <h2 className="mt-4">{selectedPOI.name}</h2>
                     <h5>{selectedPOI.type}</h5>
                     <p className="mt-8">{selectedPOI.description}</p>
