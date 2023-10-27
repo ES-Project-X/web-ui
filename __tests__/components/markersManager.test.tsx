@@ -293,7 +293,6 @@ describe("MarkersManager", () => {
           onCreatePOI={onCreatePOI}
           handleKeyDown={handleKeyDown}
         />
-        
       </MapContainer>
     );
 
@@ -306,4 +305,5 @@ describe("MarkersManager", () => {
     // Assert
     expect(onCreatePOI).toHaveBeenCalled();
   });
+  
 });
