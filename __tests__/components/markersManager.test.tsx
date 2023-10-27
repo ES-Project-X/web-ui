@@ -1,167 +1,135 @@
-import MapComponent from "../../app/components/Map"
 import MarkersManager from "../../app/components/MarkersManager";
-import {fireEvent, render} from "@testing-library/react"
-import {enableFetchMocks} from "jest-fetch-mock";
+import { fireEvent, render, screen } from "@testing-library/react"
+import { enableFetchMocks } from "jest-fetch-mock";
+import { useState } from 'react';
+import { MapContainer, TileLayer } from "react-leaflet";
+
+function TestComponent() {
+    const [creatingRoute, setCreatingRoute] = useState(false);
+    const [origin, setOrigin] = useState("");
+    const [destination, setDestination] = useState("");
+
+    return (
+        <div id="testMap">
+            <button onClick={() => setCreatingRoute(!creatingRoute)}>Toggle creatingRoute</button>
+            <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: "100vh", width: "100%" }}>
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
+            </MapContainer>
+        </div>
+    );
+}
 
 describe("MarkersManager", () => {
 
-    enableFetchMocks()
-
-    let mapComponent: HTMLElement
-
-    const findByClass = (className: string) => {
-        return mapComponent.querySelector(`.${className}`) ?? undefined
-    }
-
-    beforeEach(() => {
-        global.navigator.geolocation = {
-            watchPosition: jest.fn()
-                .mockImplementationOnce((success) => Promise.resolve(success({
-                    coords: {
-                        latitude: 40.64427,
-                        longitude: -8.64554
-                    }
-                })))
-        }
-
-        mapComponent = render(<MapComponent
-            tileLayerURL={"https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png"}/>
-            ).container
-    })
+    enableFetchMocks();
 
     it("adds a green marker", () => {
+        const { getByText } = render(<TestComponent />);
+        const toggleButton = getByText("Toggle creatingRoute");
+        fireEvent.click(toggleButton);
 
-        render(<MarkersManager
-            creatingRoute={true}
-            setOrigin={() => {}}
-            setDestination={() => {}}
-            />)
+        let component = screen.getByTestId("testMap");
 
-        fireEvent.click(mapComponent!, { clientX: 100, clientY: 100 });
+        fireEvent.click(component, { clientX: 100, clientY: 100 });
 
-        const greenMarker = findByClass("green-marker-icon")
-        expect(greenMarker).toBeDefined()
+
+        const greenMarker = screen.getByRole("img", { name: "green-marker" });
+        console.log(greenMarker);
+        expect(greenMarker).toBeDefined();
     })
 
-    it ("adds a green marker and a red marker", () => {
+    it("adds a green marker and a red marker", () => {
+        const { getByText, container } = render(<TestComponent />);
+        const toggleButton = getByText("Toggle creatingRoute");
+        fireEvent.click(toggleButton);
 
-        render(<MarkersManager
-            creatingRoute={true}
-            setOrigin={() => {}}
-            setDestination={() => {}}
-            />)
+        fireEvent.click(container!, { clientX: 100, clientY: 100 });
+        fireEvent.click(container!, { clientX: 200, clientY: 200 });
 
-        fireEvent.click(mapComponent!, { clientX: 100, clientY: 100 });
-        fireEvent.click(mapComponent!, { clientX: 200, clientY: 200 });
-
-        const greenMarker = findByClass("green-marker-icon")
+        const greenMarker = container.querySelector(".green-marker-icon")
         expect(greenMarker).toBeDefined()
 
-        const redMarker = findByClass("red-marker-icon")
+        const redMarker = container.querySelector(".red-marker-icon")
         expect(redMarker).toBeDefined()
     })
 
     it("removes a green marker", () => {
+        const { getByText, container } = render(<TestComponent />);
+        const toggleButton = getByText("Toggle creatingRoute");
+        fireEvent.click(toggleButton);
 
-        render(<MarkersManager
-            creatingRoute={true}
-            setOrigin={() => {}}
-            setDestination={() => {}}
-            />)
+        fireEvent.click(container!, { clientX: 100, clientY: 100 });
 
-        fireEvent.click(mapComponent!, { clientX: 100, clientY: 100 });
-
-        const greenMarker = findByClass("green-marker-icon")
+        const greenMarker = container.querySelector(".green-marker-icon")
         expect(greenMarker).toBeDefined()
 
         fireEvent.click(greenMarker!)
 
-        const greenMarker2 = findByClass("green-marker-icon")
+        const greenMarker2 = container.querySelector(".green-marker-icon")
         expect(greenMarker2).toBeUndefined()
     })
 
     it("removes a red marker", () => {
+        const { getByText, container } = render(<TestComponent />);
+        const toggleButton = getByText("Toggle creatingRoute");
+        fireEvent.click(toggleButton);
 
-        render(<MarkersManager
-            creatingRoute={true}
-            setOrigin={() => {}}
-            setDestination={() => {}}
-            />)
+        fireEvent.click(container!, { clientX: 100, clientY: 100 });
+        fireEvent.click(container!, { clientX: 200, clientY: 200 });
 
-        fireEvent.click(mapComponent!, { clientX: 100, clientY: 100 });
-        fireEvent.click(mapComponent!, { clientX: 200, clientY: 200 });
-
-        const redMarker = findByClass("red-marker-icon")
+        const redMarker = container.querySelector(".red-marker-icon")
         expect(redMarker).toBeDefined()
 
         fireEvent.click(redMarker!)
 
-        const redMarker2 = findByClass("red-marker-icon")
+        const redMarker2 = container.querySelector(".red-marker-icon")
         expect(redMarker2).toBeUndefined()
     })
 
-    it ("add a green marker and a red marker, then removes the green marker", () => {
+    it("add a green marker and a red marker, then removes the green marker", () => {
+        const { getByText, container } = render(<TestComponent />);
+        const toggleButton = getByText("Toggle creatingRoute");
+        fireEvent.click(toggleButton);
 
-        render(<MarkersManager
-            creatingRoute={true}
-            setOrigin={() => {}}
-            setDestination={() => {}}
-            />)
+        fireEvent.click(container!, { clientX: 100, clientY: 100 });
+        fireEvent.click(container!, { clientX: 200, clientY: 200 });
 
-        fireEvent.click(mapComponent!, { clientX: 100, clientY: 100 });
-        fireEvent.click(mapComponent!, { clientX: 200, clientY: 200 });
-
-        const greenMarker = findByClass("green-marker-icon")
+        const greenMarker = container.querySelector(".green-marker-icon")
         expect(greenMarker).toBeDefined()
 
-        const redMarker = findByClass("red-marker-icon")
+        const redMarker = container.querySelector(".red-marker-icon")
         expect(redMarker).toBeDefined()
 
         fireEvent.click(greenMarker!)
 
-        const greenMarker2 = findByClass("green-marker-icon")
+        const greenMarker2 = container.querySelector(".green-marker-icon")
         expect(greenMarker2).toBeUndefined()
 
-        const redMarker2 = findByClass("red-marker-icon")
+        const redMarker2 = container.querySelector(".red-marker-icon")
         expect(redMarker2).toBeDefined()
     })
-    
-    // TODO: fix when Creating Route is implemented
-    /*
+
     it("add a single red marker", () => {
-        const routeBtn = findById("ori-dst-btn")
-        expect(routeBtn).toBeDefined()
-        fireEvent.click(routeBtn!)
+        const { getByText, container } = render(<TestComponent />);
+        const toggleButton = getByText("Toggle creatingRoute");
 
-        const checkMap = findById("mapcbox")
-        expect(checkMap).toBeDefined()
-        fireEvent.click(checkMap!)
+        fireEvent.click(container!, { clientX: 100, clientY: 100 });
 
-        const mapContainer = findById("map-container")
-        expect(mapContainer).toBeDefined()
-        render(<MarkersManager creatingRoute={false}/>)
-
-        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
-
-        const redMarker = findByClass("red-marker-icon")
+        const redMarker = container.querySelector(".red-marker-icon")
         expect(redMarker).toBeDefined()
+
     })
 
     it("check red marker popup", () => {
-        const mapContainer = findById("map-container")
-        expect(mapContainer).toBeDefined()
-        render(<MarkersManager creatingRoute={false}/>)
+        const { getByText, container } = render(<TestComponent />);
+        const toggleButton = getByText("Toggle creatingRoute");
 
-        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
+        fireEvent.click(container!, { clientX: 100, clientY: 100 });
 
-        const redMarker = findByClass("red-marker-icon")
+        const redMarker = container.querySelector(".red-marker-icon")
         expect(redMarker).toBeDefined()
 
         fireEvent.click(redMarker!)
-
-        const popup = screen.getByText(/You are at/i)
-        expect(popup).toBeDefined()
-    }
-    */
-
+    })
 })

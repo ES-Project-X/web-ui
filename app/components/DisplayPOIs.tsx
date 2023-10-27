@@ -11,6 +11,7 @@ export function updateClusterGroup(toAddMarkers: BasicPOI[], mapRef: any) {
         addMarker.on("click", () => {
             alert(marker.id)
         })
+        
         clusterGroup.addLayer(addMarker);
     });
     mapRef.current.addLayer(clusterGroup);
