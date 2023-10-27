@@ -1,11 +1,8 @@
 import React from "react";
-import { slide as Menu } from "react-burger-menu"; /* maybe stack instead of slide */
-
+import { slide as Menu } from "react-burger-menu";
 import "../globals.css";
 
-export default () => {
-
-
+const Sidebar = () => {
   const searchRoute = () => {
     console.log("searching route from origin to destiny");
     console.log("org:", (document.getElementById("origin_input") as HTMLInputElement)?.value);
@@ -27,7 +24,7 @@ export default () => {
         />
       </a>
       <a className="menu-item">
-      <p className="text-2xl font-bold text-left">Destiny</p>
+        <p className="text-2xl font-bold text-left">Destiny</p>
         <input
           id="dest_input"
           type="text"
@@ -36,8 +33,12 @@ export default () => {
         />
       </a>
       <a className="menu-item">
-      <button className="btn btn-accent" onClick={searchRoute}>Search route</button>
+        <button className="btn btn-accent" onClick={searchRoute}>Search route</button>
       </a>
     </Menu>
   );
 };
+
+Sidebar.displayName = "Sidebar";
+
+export default Sidebar;
