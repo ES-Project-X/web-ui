@@ -1,4 +1,5 @@
 import MapComponent from "../../app/components/Map"
+import MarkersManager from "../../app/components/MarkersManager";
 import {fireEvent, render} from "@testing-library/react"
 import {enableFetchMocks} from "jest-fetch-mock";
 
@@ -6,14 +7,10 @@ describe("MarkersManager", () => {
 
     enableFetchMocks()
 
-    let component: HTMLElement
-
-    const findById = (id: string) => {
-        return component.querySelector(`#${id}`) ?? undefined
-    }
+    let mapComponent: HTMLElement
 
     const findByClass = (className: string) => {
-        return component.querySelector(`.${className}`) ?? undefined
+        return mapComponent.querySelector(`.${className}`) ?? undefined
     }
 
     beforeEach(() => {
@@ -26,40 +23,36 @@ describe("MarkersManager", () => {
                     }
                 })))
         }
-        component = render(<MapComponent/>).container
+
+        mapComponent = render(<MapComponent
+            tileLayerURL={"https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png"}/>
+            ).container
     })
 
     it("adds a green marker", () => {
-        const routeBtn = findById("ori-dst-btn")
-        expect(routeBtn).toBeDefined()
-        fireEvent.click(routeBtn!)
 
-        const checkMap = findById("mapcbox")
-        expect(checkMap).toBeDefined()
-        fireEvent.click(checkMap!)
+        render(<MarkersManager
+            creatingRoute={true}
+            setOrigin={() => {}}
+            setDestination={() => {}}
+            />)
 
-        const mapContainer = findById("map-container")
-        expect(mapContainer).toBeDefined()
-        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
+        fireEvent.click(mapComponent!, { clientX: 100, clientY: 100 });
 
         const greenMarker = findByClass("green-marker-icon")
         expect(greenMarker).toBeDefined()
     })
 
     it ("adds a green marker and a red marker", () => {
-        const routeBtn = findById("ori-dst-btn")
-        expect(routeBtn).toBeDefined()
-        fireEvent.click(routeBtn!)
 
-        const checkMap = findById("mapcbox")
-        expect(checkMap).toBeDefined()
-        fireEvent.click(checkMap!)
+        render(<MarkersManager
+            creatingRoute={true}
+            setOrigin={() => {}}
+            setDestination={() => {}}
+            />)
 
-        const mapContainer = findById("map-container")
-        expect(mapContainer).toBeDefined()
-
-        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
-        fireEvent.click(mapContainer!, { clientX: 200, clientY: 200 });
+        fireEvent.click(mapComponent!, { clientX: 100, clientY: 100 });
+        fireEvent.click(mapComponent!, { clientX: 200, clientY: 200 });
 
         const greenMarker = findByClass("green-marker-icon")
         expect(greenMarker).toBeDefined()
@@ -69,18 +62,14 @@ describe("MarkersManager", () => {
     })
 
     it("removes a green marker", () => {
-        const routeBtn = findById("ori-dst-btn")
-        expect(routeBtn).toBeDefined()
-        fireEvent.click(routeBtn!)
 
-        const checkMap = findById("mapcbox")
-        expect(checkMap).toBeDefined()
-        fireEvent.click(checkMap!)
+        render(<MarkersManager
+            creatingRoute={true}
+            setOrigin={() => {}}
+            setDestination={() => {}}
+            />)
 
-        const mapContainer = findById("map-container")
-        expect(mapContainer).toBeDefined()
-
-        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
+        fireEvent.click(mapComponent!, { clientX: 100, clientY: 100 });
 
         const greenMarker = findByClass("green-marker-icon")
         expect(greenMarker).toBeDefined()
@@ -92,19 +81,15 @@ describe("MarkersManager", () => {
     })
 
     it("removes a red marker", () => {
-        const routeBtn = findById("ori-dst-btn")
-        expect(routeBtn).toBeDefined()
-        fireEvent.click(routeBtn!)
 
-        const checkMap = findById("mapcbox")
-        expect(checkMap).toBeDefined()
-        fireEvent.click(checkMap!)
+        render(<MarkersManager
+            creatingRoute={true}
+            setOrigin={() => {}}
+            setDestination={() => {}}
+            />)
 
-        const mapContainer = findById("map-container")
-        expect(mapContainer).toBeDefined()
-
-        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
-        fireEvent.click(mapContainer!, { clientX: 200, clientY: 200 });
+        fireEvent.click(mapComponent!, { clientX: 100, clientY: 100 });
+        fireEvent.click(mapComponent!, { clientX: 200, clientY: 200 });
 
         const redMarker = findByClass("red-marker-icon")
         expect(redMarker).toBeDefined()
@@ -116,19 +101,15 @@ describe("MarkersManager", () => {
     })
 
     it ("add a green marker and a red marker, then removes the green marker", () => {
-        const routeBtn = findById("ori-dst-btn")
-        expect(routeBtn).toBeDefined()
-        fireEvent.click(routeBtn!)
 
-        const checkMap = findById("mapcbox")
-        expect(checkMap).toBeDefined()
-        fireEvent.click(checkMap!)
+        render(<MarkersManager
+            creatingRoute={true}
+            setOrigin={() => {}}
+            setDestination={() => {}}
+            />)
 
-        const mapContainer = findById("map-container")
-        expect(mapContainer).toBeDefined()
-
-        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
-        fireEvent.click(mapContainer!, { clientX: 200, clientY: 200 });
+        fireEvent.click(mapComponent!, { clientX: 100, clientY: 100 });
+        fireEvent.click(mapComponent!, { clientX: 200, clientY: 200 });
 
         const greenMarker = findByClass("green-marker-icon")
         expect(greenMarker).toBeDefined()
@@ -148,6 +129,14 @@ describe("MarkersManager", () => {
     // TODO: fix when Creating Route is implemented
     /*
     it("add a single red marker", () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+
         const mapContainer = findById("map-container")
         expect(mapContainer).toBeDefined()
         render(<MarkersManager creatingRoute={false}/>)
