@@ -3,6 +3,8 @@ import MapComponent from "../../app/components/Map";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { enableFetchMocks } from "jest-fetch-mock";
 import { MapContainer } from "react-leaflet";
+import CreatePOIModal from "../../app/components/CreatePOIModal";
+import SavePOIModal from "../../app/components/SavePOIModal";
 
 describe("MarkersManager", () => {
   enableFetchMocks();
@@ -179,86 +181,6 @@ describe("MarkersManager", () => {
     }
     */
 
-  it("renders a marker when redPosition is not null", () => {
-    const setOrigin = jest.fn();
-    const setDestination = jest.fn();
-    const setRedPosition = jest.fn();
-    // Arrange
-    const { container } = render(
-      <MapContainer>
-        <MarkersManager
-          setOrigin={setOrigin}
-          setDestination={setDestination}
-          creatingRoute={false}
-          /* other props as needed */
-        />
-      </MapContainer>
-    );
-    setRedPosition({ lat: 40.1234, lng: -8.5678 });
-
-    // Act
-
-    // Assert
-    const marker = container.querySelector(".red-marker-icon");
-    expect(marker).toBeDefined();
-
-    // You can further assert the contents of the marker's popup here if needed.
-  });
-
-  /* it("renders a draggable marker when isModalOpen is false", () => {
-    // Arrange
-    const setOrigin = jest.fn();
-    const setDestination = jest.fn();
-    const setIsModalOpen = jest.fn();
-
-    const { container } = render(
-      <MapContainer>
-        <MarkersManager
-          setOrigin={setOrigin}
-          setDestination={setDestination}
-          creatingRoute={false}
-        />
-      </MapContainer>
-    );
-    setIsModalOpen(false);
-  
-    // Act
-    const marker = container.querySelector(".red-marker-icon");
-    const draggableMarker = container.querySelector(".leaflet-marker-draggable");
-  
-    // Assert
-    expect(marker).toBeDefined();
-    expect(draggableMarker).toBeDefined();
-  
-    // Simulate dragging the marker and check for updates.
-    fireEvent.drag(draggableMarker); // Simulate the drag event
-  
-    // Optionally, check for updates after the drag event. For example, if redPosition should be updated, you can check it here.
-    // const updatedRedPosition = ... // Get the updated redPosition from your component
-    // expect(updatedRedPosition).toEqual(...); // Assert the updated value
-  
-    // You may need to adapt the above code to your specific implementation.
-  }); */
-
-  it("renders a marker when redPosition is not null", () => {
-    // Arrange
-    const { container } = render(
-      <MapContainer>
-        <MarkersManager
-          setOrigin={() => {}}
-          setDestination={() => {}}
-          creatingRoute={false}
-        />
-      </MapContainer>
-    );
-
-    // Act
-
-    // Assert
-    const marker = container.querySelector(".red-marker-icon");
-    expect(marker).toBeDefined();
-  });
-
   it("renders a draggable marker when isModalOpen is false", () => {
     // Arrange
     const { container } = render(
@@ -282,14 +204,45 @@ describe("MarkersManager", () => {
     expect(draggableMarker).toBeDefined();
   });
 
-  it("renders the 'Create POI' modal when isModalOpen is true and isPOIModalOpen is false", () => {
+  it("renders markers when redPosition is not null", () => {
     // Arrange
+    const setOrigin = jest.fn();
+    const setDestination = jest.fn();
+    const setRedPosition = jest.fn();
+
     const { container } = render(
       <MapContainer>
         <MarkersManager
-          setOrigin={() => {}}
-          setDestination={() => {}}
+          setOrigin={setOrigin}
+          setDestination={setDestination}
           creatingRoute={false}
+          /* other props as needed */
+        />
+      </MapContainer>
+    );
+    setRedPosition({ lat: 40.1234, lng: -8.5678 });
+
+    // Act
+
+    // Assert
+    const redMarker = container.querySelector(".red-marker-icon");
+    expect(redMarker).toBeDefined();
+  });
+
+  it("renders the 'Create POI' modal when isModalOpen is true and isPOIModalOpen is false", () => {
+    // Arrange
+    const setOrigin = jest.fn();
+    const setDestination = jest.fn();
+
+    const { container } = render(
+      <MapContainer>
+        <MarkersManager
+          setOrigin={setOrigin}
+          setDestination={setDestination}
+          creatingRoute={false}
+          isModalOpen={true}
+          isPOIModalOpen={false}
+          /* other props as needed */
         />
       </MapContainer>
     );
@@ -303,12 +256,17 @@ describe("MarkersManager", () => {
 
   it("renders the 'Save POI' modal when isPOIModalOpen is true", () => {
     // Arrange
+    const setOrigin = jest.fn();
+    const setDestination = jest.fn();
+
     const { container } = render(
       <MapContainer>
         <MarkersManager
-          setOrigin={() => {}}
-          setDestination={() => {}}
+          setOrigin={setOrigin}
+          setDestination={setDestination}
           creatingRoute={false}
+          isPOIModalOpen={true}
+          /* other props as needed */
         />
       </MapContainer>
     );
@@ -320,6 +278,32 @@ describe("MarkersManager", () => {
     expect(savePOIModal).toBeDefined();
   });
 
+  it("handles click events on the 'Create POI' button", () => {
+    // Arrange
+    const onClose = jest.fn();
+    const onCreatePOI = jest.fn();
+    const handleKeyDown = jest.fn();
 
+    const { container } = render(
+      <MapContainer>
+        <CreatePOIModal
+          latitude={40.1234}
+          longitude={-8.5678}
+          onClose={onClose}
+          onCreatePOI={onCreatePOI}
+          handleKeyDown={handleKeyDown}
+        />
+        
+      </MapContainer>
+    );
 
+    const createPOIBtn = container.querySelector(".btn.glass");
+    expect(createPOIBtn).toBeDefined();
+
+    // Act
+    fireEvent.click(createPOIBtn!);
+
+    // Assert
+    expect(onCreatePOI).toHaveBeenCalled();
+  });
 });

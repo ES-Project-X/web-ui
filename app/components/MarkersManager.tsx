@@ -133,6 +133,7 @@ export default function MarkersManager({
         }
       } else {
         setRedPosition(e.latlng);
+        console.log("inhere");
         setIsModalOpen(true);
         setCanCreateMarker(false);
       }

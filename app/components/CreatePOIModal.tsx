@@ -33,7 +33,7 @@ const CreatePOIModal: React.FC<CreatePOIModalProps> = ({
             onKeyDown={handleKeyDown}
             onClick={onCreatePOI}
           >
-            Save POI
+            <p>Create POI</p>
           </button>
           <button className="btn" onClick={onClose} onKeyDown={handleKeyDown}>
             Close
