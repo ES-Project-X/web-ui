@@ -1,7 +1,7 @@
 import { Marker, Popup, useMapEvents } from "react-leaflet";
 import RedMarker from "./icons/RedMarker";
 import GreenMarker from "./icons/GreenMarker";
-import { Draggable, LatLng } from "leaflet";
+import { LatLng } from "leaflet";
 import { useState, useEffect } from "react";
 import CreatePOIModal from "./CreatePOIModal";
 import SavePOIModal from "./SavePOIModal";
