@@ -151,7 +151,12 @@ export default function MarkersManager({
               click: () => setGreenPosition(null),
               dragend: (e) => {
                 console.log("hey!!!");
+                console.log("coords before:", greenPosition);
                 // just need to update the coordinates of the marker here
+                const newPosition = e.target.getLatLng();
+                setGreenPosition(newPosition);
+                setOrigin(newPosition.lat + "," + newPosition.lng);
+                console.log("coords after:", greenPosition);
               },
             }}
           ></Marker>
@@ -164,7 +169,14 @@ export default function MarkersManager({
               click: () => setRedPosition(null),
               dragend: (e) => {
                 console.log("hey!!!");
+                console.log("coords before:", redPosition);
                 // just need to update the coordinates of the marker here
+                const newPosition = e.target.getLatLng();
+                setRedPosition(newPosition);
+                setDestination(newPosition.lat + "," + newPosition.lng);  
+                console.log("coords after:", redPosition);
+                
+
               },
             }}
           ></Marker>
@@ -176,7 +188,13 @@ export default function MarkersManager({
           position={greenPosition}
           icon={GreenMarker}
           interactive={true}
-          eventHandlers={{ click: () => setGreenPosition(null) }}
+          eventHandlers={{
+            click: () => setGreenPosition(null),
+            dragend: (e) => {
+              console.log("hey!!!");
+              
+            },
+          }}
         ></Marker>
       );
     } else if (redPosition !== null) {
@@ -185,7 +203,13 @@ export default function MarkersManager({
           position={redPosition}
           icon={RedMarker}
           interactive={true}
-          eventHandlers={{ click: () => setGreenPosition(null) }}
+          eventHandlers={{
+            click: () => setRedPosition(null),
+            dragend: (e) => {
+              console.log("hey!!!");
+              // just need to update the coordinates of the marker here
+            },
+          }}
         ></Marker>
       );
     }
@@ -250,7 +274,6 @@ export default function MarkersManager({
                   return newPosition.lng;
                 });
                 setRedPosition(newPosition);
-                
               },
             }}
           >
