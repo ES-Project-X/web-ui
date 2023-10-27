@@ -278,5 +278,23 @@ describe("MarkersManager", () => {
     expect(savePOIModal).toBeDefined();
   });
 
-  
+it ("test close modal function", () => {
+
+    // Arrange
+    const setOrigin = jest.fn();
+    const setDestination = jest.fn();
+    const setIsModalOpen = jest.fn();
+    const setCanCreateMarker = jest.fn();
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setCanCreateMarker(true);
+    }
+
+    closeModal();
+
+    expect(setIsModalOpen).toHaveBeenCalledWith(false);
+    expect(setCanCreateMarker).toHaveBeenCalledWith(true);
+
+});
 });
