@@ -35,6 +35,7 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
     const [odmap, setodmap] = useState(false);
 
     const [markers, setMarkers] = useState<BasicPOI[]>([]);
+    const [selectedPOI, setSelectedPOI] = useState(null) 
 
     const [filterName, setFilterName] = useState<string>("");
     const [filterTypes, setFilterTypes] = useState<FilterType[]>([
@@ -98,6 +99,16 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             .then(data => updateMarkers(data))
             .catch(() => { })
     }
+
+    const fetchPOIDetails = (id:string) => {
+        const url = new URL(URL_API + "poi/" + id);
+        fetch(url.toString())
+            .then(response => response.json())
+            .then(data => setSelectedPOI(data))
+            .catch(() => { })
+    }
+
+
 
     const updateMarkers = (data: any) => {
         const pois: BasicPOI[] = data.map((poi: any) => {
@@ -301,20 +312,19 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                 */}
                 <Row className={"flex-grow-1"}>
                     <Col xs={"auto"} className={"flex-grow-1"}>
-
                     </Col>
-                    {/*<Col xs={"auto"} className={"d-flex align-items-center"}>*/}
-                    {/*    <Card id={"filter-board"}>*/}
-                    {/*        <Card.Body>*/}
-                    {/*            <FilterBoardComponent*/}
-                    {/*                filterPOIs={filterPOIs} setFilterName={setFilterName} setFilterTypes={setFilterTypes} types={filterTypes} />}
-                    {/*        </Card.Body>*/}
-                    {/*    </Card>*/}
-                    {/*</Col>*/}
+                    <Col xs={"auto"} className={"d-flex align-items-center"}>
+                        <Card id={"filter-board"}>
+                            <Card.Body>
+                                <FilterBoardComponent
+                                    filterPOIs={filterPOIs} setFilterName={setFilterName} setFilterTypes={setFilterTypes} types={filterTypes} />
+                            </Card.Body>
+                        </Card>
+                    </Col>
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
                         <Card id={"poi-sidebar"}>
                             <Card.Body>
-                                <POIsSidebar />
+                                <POIsSidebar selectedPOI={selectedPOI} />
                             </Card.Body>
                         </Card>
                     </Col>
