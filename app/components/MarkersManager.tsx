@@ -69,13 +69,11 @@ export default function MarkersManager({
 
     // validate name and type are not empty strings
     if (name === "" || type === "") {
-      closePOIModal();
       return;
     }
 
     // validate that name and type are not too long
     else if (name.length > 20 || type.length > 20) {
-      closePOIModal();
       return;
     }
      
