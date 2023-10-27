@@ -15,6 +15,7 @@ import DisplayPOIs from "./DisplayPOIs";
 
 import RedMarker from "./icons/RedMarker";
 import {BicycleParkingMarker, BicycleShopMarker, DrinkingWaterMarker, ToiletsMarker, BenchMarker} from "./icons/TypeMarkers";
+import POIsSidebar from "@/app/components/POIsSidebar";
 
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
@@ -289,11 +290,18 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                     <Col xs={"auto"} className={"flex-grow-1"}>
 
                     </Col>
+                    {/*<Col xs={"auto"} className={"d-flex align-items-center"}>*/}
+                    {/*    <Card id={"filter-board"}>*/}
+                    {/*        <Card.Body>*/}
+                    {/*            <FilterBoardComponent*/}
+                    {/*                filterPOIs={filterPOIs}/>*/}
+                    {/*        </Card.Body>*/}
+                    {/*    </Card>*/}
+                    {/*</Col>*/}
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
-                        <Card id={"filter-board"}>
+                        <Card id={"poi-sidebar"}>
                             <Card.Body>
-                                <FilterBoardComponent
-                                    filterPOIs={filterPOIs}/>
+                                <POIsSidebar />
                             </Card.Body>
                         </Card>
                     </Col>
