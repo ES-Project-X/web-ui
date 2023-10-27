@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css"
 
 import {useEffect, useRef, useState} from "react";
 import {Button, ButtonGroup, Form, Card, Row, CloseButton, Container, Col} from "react-bootstrap";
-import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet"
+import {MapContainer, Marker, Polyline, Popup, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
 import "leaflet-rotate"
 
@@ -38,6 +38,10 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
 
     const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([])
 
+    const [points, setPoints] = useState<LatLng[][]>([])
+
+    const [gettingRoute, setGettingRoute] = useState(false);
+
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
@@ -50,6 +54,12 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             setUserPosition({latitude, longitude})
         });
     }, [])
+
+    useEffect(() => {
+        if (gettingRoute) {
+            getRoute();
+        }
+    }, [origin, destination]);
 
     const addToBearing = (amount: number) => {
         if (mapRef.current) {
@@ -150,6 +160,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             console.log("odmap")
             setodmap(false)
             setCreatingRoute(false)
+            setGettingRoute(false)
+            setPoints([])
             setOrigin("")
             setDestination("")
             // @ts-ignore
@@ -164,6 +176,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             console.log("not odmap")
             setodmap(true)
             setCreatingRoute(true)
+            setGettingRoute(false)
+            setPoints([])
             setOrigin("")
             setDestination("")
             // @ts-ignore
@@ -201,6 +215,9 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             window.alert("Please fill in both fields");
             return;
         }
+        if (odmap) {
+            setGettingRoute(true);
+        }
         let url = "";
         if (origin.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/) && destination.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/)) {
             console.log("HERE1")
@@ -223,6 +240,16 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             .then(response => response.json())
             .then(data => {
                 console.log(data);
+                if (data.paths.length === 0) {
+                    window.alert("No results");
+                    return;
+                }
+                const points = data.paths[0].points.coordinates;
+                let points2 = [];
+                for (let i = 0; i < points.length; i++) {
+                    points2.push(new LatLng(points[i][1], points[i][0]));
+                }
+                setPoints([points2]);
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -241,6 +268,10 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
     const updateDestination = (event: React.ChangeEvent<HTMLInputElement>) => {
         setDestination(event.target.value);
     }
+    const cancelRoute = () => {
+        setPoints([]);
+        setGettingRoute(false);
+    }
 
     return (
         <>
@@ -255,6 +286,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL}/> : null}
                 <LocateControl/>
                 <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
+                {tileLayerURL !== undefined ? <Polyline positions={points}/> : null}
                 {/*
                     DISPLAY POIs
                 */}
@@ -289,9 +321,10 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                         <Form.Group className="mb-3" >
                             <Form.Check id="mapcbox" type="checkbox" onChange={getFromMap} label="Select in Map" />
                         </Form.Group>
-                        <Form.Group>
-                            <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{border: ".1em solid black"}}>Get Route</Button>
-                        </Form.Group>
+                        <Row>
+                            <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{border: ".1em solid black", width:"40%"}}>Get Route</Button>
+                            <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{border: ".1em solid black", width:"40%", marginLeft:"20%"}}>Cancel</Button>
+                        </Row>
                     </Form>
                 </Card.Body>
             </Card>
