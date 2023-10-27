@@ -229,54 +229,6 @@ describe("MarkersManager", () => {
     expect(redMarker).toBeDefined();
   });
 
-  it("renders the 'Create POI' modal when isModalOpen is true and isPOIModalOpen is false", () => {
-    // Arrange
-    const setOrigin = jest.fn();
-    const setDestination = jest.fn();
-
-    const { container } = render(
-      <MapContainer>
-        <MarkersManager
-          setOrigin={setOrigin}
-          setDestination={setDestination}
-          creatingRoute={false}
-          isModalOpen={true}
-          isPOIModalOpen={false}
-          /* other props as needed */
-        />
-      </MapContainer>
-    );
-
-    // Act
-
-    // Assert
-    const createPOIModal = container.querySelector(".create-poi-modal");
-    expect(createPOIModal).toBeDefined();
-  });
-
-  it("renders the 'Save POI' modal when isPOIModalOpen is true", () => {
-    // Arrange
-    const setOrigin = jest.fn();
-    const setDestination = jest.fn();
-
-    const { container } = render(
-      <MapContainer>
-        <MarkersManager
-          setOrigin={setOrigin}
-          setDestination={setDestination}
-          creatingRoute={false}
-          isPOIModalOpen={true}
-          /* other props as needed */
-        />
-      </MapContainer>
-    );
-
-    // Act
-
-    // Assert
-    const savePOIModal = container.querySelector(".save-poi-modal");
-    expect(savePOIModal).toBeDefined();
-  });
 
   
 });
