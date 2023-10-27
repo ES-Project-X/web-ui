@@ -218,14 +218,14 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             setGettingRoute(true);
         }
         let url = "";
-        if (origin.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/) && destination.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/)) {
+        if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
             console.log("HERE1")
             url = URL_ROUTING + "&point=" + origin + "&point=" + destination;
-        } else if (origin.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/) && !destination.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/)) {
+        } else if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && !destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
             console.log("HERE2")
             let dest = await geoCode(URL_GEO + "&q=" + destination);
             url = URL_ROUTING + "&point=" + origin + "&point=" + dest;
-        } else if (!origin.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/) && destination.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/)) {
+        } else if (!origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
             console.log("HERE3")
             let ori = await geoCode(URL_GEO + "&q=" + origin);
             url = URL_ROUTING + "&point=" + ori + "&point=" + destination;
