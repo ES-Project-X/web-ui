@@ -103,11 +103,6 @@ Note: Beware of modifying this element as it can break the animations - you shou
   padding: 0.8em;
 }
 
-/* Individual item */
-.bm-item {
-  display: inline-block;
-}
-
 /* Styling of overlay */
 .bm-overlay {
   background: rgba(0, 0, 0, 0.3);
@@ -116,7 +111,6 @@ Note: Beware of modifying this element as it can break the animations - you shou
 /* Individual item */
 .bm-item {
   display: inline-block;
-
   color: #d1d1d1;
   margin-bottom: 10px;
   text-align: center;
