@@ -13,7 +13,7 @@ const POIsSidebar = ({selectedPOI}) => {
             <div className="sidebar-body">
                 <div className="sidebar-body-item">
                     <div className={"flex justify-end pb-2"}>
-                    <button><AiFillCloseCircle className="close-button" onClick={() => {hideCard()} } />
+                    <button className="close-button" ><AiFillCloseCircle onClick={() => {hideCard()} } />
                     </button></div>
                     <img className="w-fit rounded-xl" src={"https://picsum.photos/200"} alt="poi_image"/>
                     <h2 className="mt-4">{selectedPOI.name}</h2>
