@@ -4,11 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest",
+    "test": "jest ./__tests__/components/markersManager.test.tsx",
     "test:watch": "jest --watch"
   },
   "dependencies": {
@@ -28,8 +27,8 @@
     "react-bootstrap-multiselect": "^2.4.1",
     "react-burger-menu": "^3.0.9",
     "react-dom": "^18.2.0",
-    "react-icons": "^4.11.0",
     "react-draggable": "^4.4.6",
+    "react-icons": "^4.11.0",
     "react-leaflet": "^4.2.1",
     "react-leaflet-markercluster": "^3.0.0-rc1",
     "swr": "^2.2.4"

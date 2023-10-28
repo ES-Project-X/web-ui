@@ -20,7 +20,7 @@ import RedMarker from "./icons/RedMarker";
 import { BicycleParkingMarker, BicycleShopMarker, DrinkingWaterMarker, ToiletsMarker, BenchMarker } from "./icons/TypeMarkers";
 import Sidebar from "./Sidebar";
 import FetchComponent from "./FetchComponent";
-import POIsSidebar from "@/app/components/POIsSidebar";
+import POIsSidebar from "./POIsSidebar";
 
 
 export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }) {
@@ -271,23 +271,23 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
         if (odmap) {
             setGettingRoute(true);
         }
-        let url = "";
+        let url = URL_ROUTING;
         if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
             console.log("HERE1")
-            url = URL_ROUTING + "&point=" + origin + "&point=" + destination;
+            url += "&point=" + origin + "&point=" + destination;
         } else if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && !destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
             console.log("HERE2")
             let dest = await geoCode(URL_GEO + "&q=" + destination);
-            url = URL_ROUTING + "&point=" + origin + "&point=" + dest;
+            url += "&point=" + origin + "&point=" + dest;
         } else if (!origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
             console.log("HERE3")
             let ori = await geoCode(URL_GEO + "&q=" + origin);
-            url = URL_ROUTING + "&point=" + ori + "&point=" + destination;
+            url += "&point=" + ori + "&point=" + destination;
         } else {
             console.log("HERE4")
             let ori = await geoCode(URL_GEO + "&q=" + origin);
             let dest = await geoCode(URL_GEO + "&q=" + destination);
-            url = URL_ROUTING + "&point=" + ori + "&point=" + dest;
+            url += "&point=" + ori + "&point=" + dest;
         }
         fetch(url)
             .then(response => response.json())
@@ -337,8 +337,7 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                 center={center} zoom={13} scrollWheelZoom={true}
                 rotate={true} bearing={0}
                 // @ts-ignore
-                rotateControl={{ closeOnZeroBearing: false }} touchRotate={true}
-            >
+                rotateControl={{ closeOnZeroBearing: false }} touchRotate={true}>
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
                 {tileLayerURL !== undefined ? <Polyline positions={points} /> : null}
 
@@ -367,7 +366,8 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                             <Form.Check id="mapcbox" type="checkbox" onChange={getFromMap} label="Select in Map" />
                         </Form.Group>
                         <Form.Group>
-                            <Button id={"get-route-btn"} variant={"light"} style={{ border: ".1em solid black" }}>Get Route</Button>
+                            <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%" }}>Get Route</Button>
+                            <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%", marginLeft: "20%" }}>Cancel</Button>
                         </Form.Group>
                     </Form>
                 </Card.Body>

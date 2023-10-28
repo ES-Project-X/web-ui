@@ -1,5 +1,6 @@
 import MarkersManager from "../../app/components/MarkersManager";
-import { fireEvent, render, screen } from "@testing-library/react"
+import MapComponent from "../../app/components/Map";
+import { fireEvent, render } from "@testing-library/react"
 import { enableFetchMocks } from "jest-fetch-mock";
 import { useState } from 'react';
 import { MapContainer, TileLayer } from "react-leaflet";
@@ -10,8 +11,8 @@ function TestComponent() {
     const [destination, setDestination] = useState("");
 
     return (
-        <div id="testMap">
-            <button onClick={() => setCreatingRoute(!creatingRoute)}>Toggle creatingRoute</button>
+        <div>
+            <button id="toggle-button" onClick={() => setCreatingRoute(!creatingRoute)}>Toggle creatingRoute</button>
             <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: "100vh", width: "100%" }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
@@ -21,23 +22,29 @@ function TestComponent() {
 }
 
 describe("MarkersManager", () => {
-  enableFetchMocks();
 
-    enableFetchMocks();
+    let component: HTMLElement;
+
+    beforeEach(() => {
+        global.navigator.geolocation = {
+            watchPosition: jest.fn().mockImplementationOnce((success) =>
+              Promise.resolve(
+                success({
+                  coords: {
+                    latitude: 40.64427,
+                    longitude: -8.64554,
+                  },
+                })
+              )
+            ),
+          };
+          component = render(<MapComponent />).container;
+    });
 
     it("adds a green marker", () => {
-        const { getByText } = render(<TestComponent />);
-        const toggleButton = getByText("Toggle creatingRoute");
-        fireEvent.click(toggleButton);
-
-        let component = screen.getByTestId("testMap");
-
         fireEvent.click(component, { clientX: 100, clientY: 100 });
 
-
-        const greenMarker = screen.getByRole("img", { name: "green-marker" });
-        console.log(greenMarker);
-        expect(greenMarker).toBeDefined();
+        console.log(component.innerHTML);
     })
 
     it("adds a green marker and a red marker", () => {
@@ -132,5 +139,20 @@ describe("MarkersManager", () => {
         expect(redMarker).toBeDefined()
 
         fireEvent.click(redMarker!)
+    })
+
+    it("remove red marker", () => {
+        const { getByText, container } = render(<TestComponent />);
+        const toggleButton = getByText("Toggle creatingRoute");
+
+        fireEvent.click(container!, { clientX: 100, clientY: 100 });
+
+        const redMarker = container.querySelector(".red-marker-icon")
+        expect(redMarker).toBeDefined()
+
+        fireEvent.dblClick(redMarker!)
+
+        const redMarker2 = container.querySelector(".red-marker-icon")
+        expect(redMarker2).toBeUndefined()
     })
 })

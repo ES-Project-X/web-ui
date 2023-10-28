@@ -100,6 +100,7 @@ describe("MapComponent", () => {
 
             const currentLocation = findById("map-user-position")
             expect(currentLocation).toBeDefined()
+            console.log(currentLocation);
 
             expect(currentLocation!.textContent).toContain("Latitude: 40.64427")
             expect(currentLocation!.textContent).toContain("Longitude: -8.64554")
