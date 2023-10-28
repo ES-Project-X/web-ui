@@ -19,7 +19,7 @@ import { updateClusterGroup } from "./DisplayPOIs";
 import RedMarker from "./icons/RedMarker";
 import { BicycleParkingMarker, BicycleShopMarker, DrinkingWaterMarker, ToiletsMarker, BenchMarker } from "./icons/TypeMarkers";
 import Sidebar from "./Sidebar";
-import FetchComponent from "./FetchComponent";
+import GetClusters from "./GetClusters";
 import POIsSidebar from "./POIsSidebar";
 
 
@@ -346,7 +346,7 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                     setOrigin={setOrigin}
                     setDestination={setDestination}
                     creatingRoute={creatingRoute} />
-                <FetchComponent fetchFunction={fetchPOIs} />
+                <GetClusters fetchFunction={fetchPOIs} />
             </MapContainer>
             <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{ zIndex: 1, scale: "100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black" }}>Route</Button>
             <Card id={"card-ori-dest"} style={{ zIndex: 1, top: "1%", left: "5%", width: "15%", position: "absolute", display: "none" }}>

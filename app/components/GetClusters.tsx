@@ -2,7 +2,7 @@
 import { useMapEvents } from "react-leaflet";
 import { useState } from "react";
 
-export default function FetchComponent({
+export default function GetClusters({
     fetchFunction,
 }: {
     fetchFunction: (clusters: number[][]) => void
