@@ -21,6 +21,7 @@ function TestComponent() {
 }
 
 describe("MarkersManager", () => {
+  enableFetchMocks();
 
     enableFetchMocks();
 

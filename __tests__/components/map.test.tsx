@@ -335,9 +335,211 @@ describe("MapComponent", () => {
         expect(destinationInput).toBeDefined()
         fireEvent.change(destinationInput!, {target: {value: "Porto"}})
 
+        fetchMock.mockResponseOnce(JSON.stringify({
+            items: [
+                {
+                    position: {
+                        lat: 40.64427,
+                        lng: -8.64554
+                    },
+                    address: {
+                        label: "Aveiro, Portugal"
+                    }
+                }
+            ]
+        }))
+
+        fetchMock.mockResponseOnce(JSON.stringify({
+            paths: [
+                {
+                    points: {
+                        coordinates: [
+                            [40.64427, -8.64554],
+                            [40.64427, -8.64554]
+                        ]
+                    }
+                }
+            ]
+        }))
+
         const getRouteBtn = findById("get-route-btn")
         expect(getRouteBtn).toBeDefined()
         fireEvent.click(getRouteBtn!)
+
+        const cancelRouteBtn = findById("cancel-route-btn")
+        expect(cancelRouteBtn).toBeDefined()
+        fireEvent.click(cancelRouteBtn!)
+    });
+
+    it('search for origin and destination no results geocoding', () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        fireEvent.click(routeBtn!)
+
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+        fireEvent.click(checkMap!)
+
+        const originInput = findById("origin-input")
+        expect(originInput).toBeDefined()
+        fireEvent.change(originInput!, {target: {value: "Aveiro"}})
+        const destinationInput = findById("destination-input")
+        expect(destinationInput).toBeDefined()
+        fireEvent.change(destinationInput!, {target: {value: "Porto"}})
+
+        fetchMock.mockResponseOnce(JSON.stringify({
+            items: []
+        }))
+
+        const getRouteBtn = findById("get-route-btn")
+        expect(getRouteBtn).toBeDefined()
+        fireEvent.click(getRouteBtn!)
+
+        const cancelRouteBtn = findById("cancel-route-btn")
+        expect(cancelRouteBtn).toBeDefined()
+        fireEvent.click(cancelRouteBtn!)
+    });
+
+    it('search for origin and destination dont pass arguments', () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        fireEvent.click(routeBtn!)
+
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+        fireEvent.click(checkMap!)
+
+        const getRouteBtn = findById("get-route-btn")
+        expect(getRouteBtn).toBeDefined()
+        fireEvent.click(getRouteBtn!)
+
+        const cancelRouteBtn = findById("cancel-route-btn")
+        expect(cancelRouteBtn).toBeDefined()
+        fireEvent.click(cancelRouteBtn!)
+    });
+
+    it('search for origin and destination, origin is coordinates', () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        fireEvent.click(routeBtn!)
+
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+        fireEvent.click(checkMap!)
+
+        const originInput = findById("origin-input")
+        expect(originInput).toBeDefined()
+        fireEvent.change(originInput!, {target: {value: "40.64427,-8.64554"}})
+        const destinationInput = findById("destination-input")
+        expect(destinationInput).toBeDefined()
+        fireEvent.change(destinationInput!, {target: {value: "Porto"}})
+
+        fetchMock.mockResponseOnce(JSON.stringify({
+            items: [
+                {
+                    position: {
+                        lat: 40.64427,
+                        lng: -8.64554
+                    },
+                    address: {
+                        label: "Aveiro, Portugal"
+                    }
+                }
+            ]
+        }))
+
+        fetchMock.mockResponseOnce(JSON.stringify({
+            paths: [
+                {
+                    points: {
+                        coordinates: [
+                            [40.64427, -8.64554],
+                            [40.64427, -8.64554]
+                        ]
+                    }
+                }
+            ]
+        }))
+
+        const getRouteBtn = findById("get-route-btn")
+        expect(getRouteBtn).toBeDefined()
+        fireEvent.click(getRouteBtn!)
+
+        const cancelRouteBtn = findById("cancel-route-btn")
+        expect(cancelRouteBtn).toBeDefined()
+        fireEvent.click(cancelRouteBtn!)
+    });
+
+    it('search for origin and destination, destination is coordinates', () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        fireEvent.click(routeBtn!)
+
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+        fireEvent.click(checkMap!)
+
+        const originInput = findById("origin-input")
+        expect(originInput).toBeDefined()
+        fireEvent.change(originInput!, {target: {value: "Aveiro"}})
+        const destinationInput = findById("destination-input")
+        expect(destinationInput).toBeDefined()
+        fireEvent.change(destinationInput!, {target: {value: "40.64427,-8.64554"}})
+
+        fetchMock.mockResponseOnce(JSON.stringify({
+            items: [
+                {
+                    position: {
+                        lat: 40.64427,
+                        lng: -8.64554
+                    },
+                    address: {
+                        label: "Aveiro, Portugal"
+                    }
+                }
+            ]
+        }))
+
+        fetchMock.mockResponseOnce(JSON.stringify({
+            paths: [
+                {
+                    points: {
+                        coordinates: [
+                            [40.64427, -8.64554],
+                            [40.64427, -8.64554]
+                        ]
+                    }
+                }
+            ]
+        }))
+
+        const getRouteBtn = findById("get-route-btn")
+        expect(getRouteBtn).toBeDefined()
+        fireEvent.click(getRouteBtn!)
+
+        const cancelRouteBtn = findById("cancel-route-btn")
+        expect(cancelRouteBtn).toBeDefined()
+        fireEvent.click(cancelRouteBtn!)
     });
 
     it('origin and destination in map', () => {
@@ -353,9 +555,48 @@ describe("MapComponent", () => {
         expect(mapContainer).toBeDefined()
 
         fireEvent.click(mapContainer!, {clientX: 100, clientY: 100});
+        fireEvent.click(mapContainer!, { clientX: 200, clientY: 200 });
+
+        fetchMock.mockResponseOnce(JSON.stringify({
+            paths: [
+                {
+                    points: {
+                        coordinates: [
+                            [40.64427, -8.64554],
+                            [40.64427, -8.64554]
+                        ]
+                    }
+                }
+            ]
+        }))
 
         const getRouteBtn = findById("get-route-btn")
         expect(getRouteBtn).toBeDefined()
         fireEvent.click(getRouteBtn!)
     });
+
+    it('origin and destination in map, no results', () => {
+        const routeBtn = findById("ori-dst-btn")
+        expect(routeBtn).toBeDefined()
+        fireEvent.click(routeBtn!)
+
+        const checkMap = findById("mapcbox")
+        expect(checkMap).toBeDefined()
+        fireEvent.click(checkMap!)
+
+        const mapContainer = findById("map-container")
+        expect(mapContainer).toBeDefined()
+
+        fireEvent.click(mapContainer!, {clientX: 100, clientY: 100});
+        fireEvent.click(mapContainer!, { clientX: 200, clientY: 200 });
+
+        fetchMock.mockResponseOnce(JSON.stringify({
+            paths: []
+        }))
+
+        const getRouteBtn = findById("get-route-btn")
+        expect(getRouteBtn).toBeDefined()
+        fireEvent.click(getRouteBtn!)
+    });
+
 })
