@@ -49,7 +49,6 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
     ]);
 
     const [points, setPoints] = useState<LatLng[][]>([])
-    const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([])
     const [gettingRoute, setGettingRoute] = useState(false);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
@@ -120,8 +119,6 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             .then(data => setSelectedPOI(data))
             .catch(() => { })
     }
-
-
 
     const updateMarkers = (data: any) => {
         const pois: BasicPOI[] = data.map((poi: any) => {
@@ -331,12 +328,9 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
 
     return (
         <>
-        {/* Sidebar */}
-
+            {/* Sidebar */}
             <Sidebar />
-
             {/* eventually change this to the main page, but for now fica aqui */}
-
             <MapContainer
                 id={"map-container"} ref={mapRef}
                 className={"map"}
@@ -346,29 +340,14 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                 rotateControl={{ closeOnZeroBearing: false }} touchRotate={true}
             >
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
-                {tileLayerURL !== undefined ? <Polyline positions={points}/> : null}
-        
+                {tileLayerURL !== undefined ? <Polyline positions={points} /> : null}
+
                 <LocateControl />
                 <MarkersManager
-                setOrigin={setOrigin}
-                setDestination={setDestination}
-                creatingRoute={creatingRoute} />
-                {/*
-                    DISPLAY POIs
-                */}
-                {basicPOIs.map(poi => {
-                    return (
-                        <Marker
-                            key={poi.id}
-                            icon={getIcon(poi.type)}
-                            position={new LatLng(poi.latitude, poi.longitude)}
-                        >
-                            <Popup>
-                                {poi.name} <br /> {poi.type}
-                            </Popup>
-                        </Marker>
-                    )
-                })}
+                    setOrigin={setOrigin}
+                    setDestination={setDestination}
+                    creatingRoute={creatingRoute} />
+                <FetchComponent fetchFunction={fetchPOIs} />
             </MapContainer>
             <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{ zIndex: 1, scale: "100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black" }}>Route</Button>
             <Card id={"card-ori-dest"} style={{ zIndex: 1, top: "1%", left: "5%", width: "15%", position: "absolute", display: "none" }}>
