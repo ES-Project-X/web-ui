@@ -31,9 +31,7 @@ export default function MarkersManager({
     const [greenPosition, setGreenPosition] = useState<LatLng | null>(null);
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isPOIModalOpen, setIsPOIModalOpen] = useState<boolean>(false);
-
-    let [poiLat, setPoiLat] = useState<number>(0);
-    let [poiLon, setPoiLon] = useState<number>(0);
+    const [visibleSingleMarker, setVisibleSingleMarker] = useState<boolean>(false);
 
     // close modal when btn is clicked
     const closeModal = () => {
@@ -43,10 +41,6 @@ export default function MarkersManager({
     const closePOIModal = () => {
         setIsPOIModalOpen(false);
         closeModal();
-    };
-    const storePos = (lat: number, lon: number) => {
-        setPoiLat(lat);
-        setPoiLon(lon);
     };
 
     const createPOI = () => {
@@ -68,9 +62,6 @@ export default function MarkersManager({
         }
         if (isModalOpen) {
             modal.showModal();
-            // if the modal is open, it means i need to store the lat and lon of the POI
-            // before clicking the button to create the POI!!!
-            storePos(redPosition!.lat, redPosition!.lng);
         } else {
             modal.close();
             setIsModalOpen(false);
@@ -103,6 +94,10 @@ export default function MarkersManager({
                     setDestination(e.latlng.lat + "," + e.latlng.lng);
                 }
             } else {
+                if (isModalOpen || isPOIModalOpen) {
+                    return;
+                }
+                setVisibleSingleMarker(true);
                 setRedPosition(e.latlng);
                 setIsModalOpen(true);
             }
@@ -146,27 +141,19 @@ export default function MarkersManager({
                 {redMarker}
             </>
         );
-    } else if (redPosition) {
+    } else if (visibleSingleMarker && redPosition) {
         return (
             <>
                 <Marker
-                    position={[poiLat, poiLon]}
+                    position={redPosition}
                     icon={RedMarker}
                     draggable={true}
                     eventHandlers={{
+                        dblclick: () => {
+                            setVisibleSingleMarker(false);
+                        },
                         dragend: (e) => {
-                            const marker = e.target;
-                            const newPosition = marker.getLatLng();
-                            setPoiLat(() => {
-                                setPoiLat(newPosition.lat);
-                                return newPosition.lat;
-                            });
-
-                            setPoiLon(() => {
-                                setPoiLon(newPosition.lng);
-                                return newPosition.lng;
-                            });
-                            setRedPosition(newPosition);
+                            setRedPosition(e.target.getLatLng());
                         },
                     }}
                 >
@@ -176,15 +163,15 @@ export default function MarkersManager({
                     </Popup>
                 </Marker>
                 <CreatePOIModal
-                    latitude={poiLat}
-                    longitude={poiLon}
+                    latitude={redPosition.lat}
+                    longitude={redPosition.lng}
                     onClose={closeModal}
                     onCreatePOI={createPOI}
                     handleKeyDown={handleKeyDown}
                 />
                 <SavePOIModal
-                    poiLat={poiLat}
-                    poiLon={poiLon}
+                    poiLat={redPosition.lat}
+                    poiLon={redPosition.lng}
                     onClose={closePOIModal}
                     onSavePOI={savePOI}
                     handleKeyDown={handleKeyDown}

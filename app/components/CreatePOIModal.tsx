@@ -23,9 +23,9 @@ const CreatePOIModal: React.FC<CreatePOIModalProps> = ({
           Here are the coordinates of the marker you clicked:
           <br />
           <br />
-          Latitude: {latitude.toFixed(3)}
+          Latitude: {latitude.toFixed(4)}
           <br />
-          Longitude: {longitude.toFixed(3)}
+          Longitude: {longitude.toFixed(4)}
         </p>
         <div className="modal-action">
           <button
