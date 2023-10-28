@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "jest.config.js"
-  ],
+, "app/components/POIsSidebar"  ],
   "exclude": [
     "node_modules"
   ]
