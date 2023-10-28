@@ -67,24 +67,11 @@ export default function MarkersManager({
     const name = (document.getElementById("name") as HTMLInputElement).value;
     const type = (document.getElementById("type") as HTMLInputElement).value;
 
-    // validate name and type are not empty strings
-    if (name === "" || type === "") {
-      return;
-    }
-
-    // validate that name and type are not too long
-    else if (name.length > 20 || type.length > 20) {
-      return;
-    }
-     
-    else {
-      console.log("name:", name);
+    console.log("name:", name);
     console.log("type:", type);
     console.log("lat:", poiLat.toFixed(3));
     console.log("lon:", poiLon.toFixed(3));
     closePOIModal();
-    }
-    
   };
 
   /* useEffect modal popup */
@@ -176,10 +163,8 @@ export default function MarkersManager({
                 // just need to update the coordinates of the marker here
                 const newPosition = e.target.getLatLng();
                 setRedPosition(newPosition);
-                setDestination(newPosition.lat + "," + newPosition.lng);  
+                setDestination(newPosition.lat + "," + newPosition.lng);
                 console.log("coords after:", redPosition);
-
-
               },
             }}
           ></Marker>
@@ -195,7 +180,6 @@ export default function MarkersManager({
             click: () => setGreenPosition(null),
             dragend: (e) => {
               console.log("hey!!!");
-              
             },
           }}
         ></Marker>

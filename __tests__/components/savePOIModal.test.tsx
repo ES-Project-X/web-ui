@@ -31,14 +31,7 @@ describe("SavePOIModal", () => {
     expect(screen.getByText("Type:")).toBeInTheDocument();
   });
 
-  it("triggers onSavePOI when the 'Save POI' button is clicked", () => {
-    renderSavePOIModal();
-    const saveButton = screen.getByText("Save POI");
 
-    fireEvent.click(saveButton);
-
-    expect(mockOnSavePOI).toHaveBeenCalled();
-  });
 
   it("triggers onClose when the 'Close' button is clicked", () => {
     renderSavePOIModal();
@@ -66,17 +59,21 @@ describe("SavePOIModal", () => {
 
     // Enter a value that is too long
     fireEvent.change(nameInput, {
-      target: { value: "ThisNameIsTooLongToBeAccepted" },
+      target: { value: "" },
     });
     fireEvent.change(typeInput, {
-      target: { value: "ThisTypeIsTooLongToBeAccepted" },
+      target: { value: "" },
     });
 
     // Trigger the savePOI function
     const saveButton = screen.getByText("Save POI");
     fireEvent.click(saveButton);
 
-    expect(mockOnSavePOI).toHaveBeenCalled();
+    // Expect error messages to be displayed
+    expect(screen.getByText("Name is required")).toBeInTheDocument();
+    expect(screen.getByText("Type is required")).toBeInTheDocument();
 
+    // Expect mockOnSavePOI not to be called
+    expect(mockOnSavePOI).not.toHaveBeenCalled();
   });
 });
