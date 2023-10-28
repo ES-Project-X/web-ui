@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css"
 
 import {useEffect, useRef, useState} from "react";
 import {Button, ButtonGroup, Form, Card, Row, CloseButton, Container, Col} from "react-bootstrap";
-import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet"
+import {MapContainer, Marker, Polyline, Popup, TileLayer} from "react-leaflet"
 import {LatLng} from "leaflet";
 import "leaflet-rotate"
 
@@ -37,10 +37,15 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
 
     const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([])
 
+    const [points, setPoints] = useState<LatLng[][]>([])
+
+    const [gettingRoute, setGettingRoute] = useState(false);
+
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
     const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
+    const URL_ROUTING = "http://localhost:8989/route?points_encoded=false&profile=bike";
 
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
@@ -48,6 +53,12 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             setUserPosition({latitude, longitude})
         });
     }, [])
+
+    useEffect(() => {
+        if (gettingRoute) {
+            getRoute();
+        }
+    }, [origin, destination]);
 
     const addToBearing = (amount: number) => {
         if (mapRef.current) {
@@ -148,6 +159,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             console.log("odmap")
             setodmap(false)
             setCreatingRoute(false)
+            setGettingRoute(false)
+            setPoints([])
             setOrigin("")
             setDestination("")
             // @ts-ignore
@@ -162,6 +175,8 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
             console.log("not odmap")
             setodmap(true)
             setCreatingRoute(true)
+            setGettingRoute(false)
+            setPoints([])
             setOrigin("")
             setDestination("")
             // @ts-ignore
@@ -175,6 +190,71 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         }
     }
 
+    const geoCode = async (query: string): Promise<string>  => {
+        // @ts-ignore
+        return fetch(query)
+            .then(response => response.json())
+            .then(data => {
+                if (data.items.length === 0) {
+                    window.alert("No results");
+                    return "";
+                }
+                const lat = data.items[0].position.lat;
+                const lng = data.items[0].position.lng;
+                return lat + "," + lng;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                return "";
+            });
+    }
+
+    const getRoute = async () => {
+        if (origin === "" || destination === "") {
+            window.alert("Please fill in both fields");
+            return;
+        }
+        if (odmap) {
+            setGettingRoute(true);
+        }
+        let url = "";
+        if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            console.log("HERE1")
+            url = URL_ROUTING + "&point=" + origin + "&point=" + destination;
+        } else if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && !destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            console.log("HERE2")
+            let dest = await geoCode(URL_GEO + "&q=" + destination);
+            url = URL_ROUTING + "&point=" + origin + "&point=" + dest;
+        } else if (!origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            console.log("HERE3")
+            let ori = await geoCode(URL_GEO + "&q=" + origin);
+            url = URL_ROUTING + "&point=" + ori + "&point=" + destination;
+        } else {
+            console.log("HERE4")
+            let ori = await geoCode(URL_GEO + "&q=" + origin);
+            let dest = await geoCode(URL_GEO + "&q=" + destination);
+            url = URL_ROUTING + "&point=" + ori + "&point=" + dest;
+        }
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.paths.length === 0) {
+                    window.alert("No results");
+                    return;
+                }
+                const points = data.paths[0].points.coordinates;
+                let points2 = [];
+                for(let point of points) {
+                    points2.push(new LatLng(point[1], point[0]));
+                }
+                setPoints([points2]);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
     const hidecard = () => {
         // @ts-ignore
         document.getElementById("card-info").style.display = "none";
@@ -186,6 +266,10 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
 
     const updateDestination = (event: React.ChangeEvent<HTMLInputElement>) => {
         setDestination(event.target.value);
+    }
+    const cancelRoute = () => {
+        setPoints([]);
+        setGettingRoute(false);
     }
 
   return (
@@ -210,6 +294,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
         touchRotate={true}
       >
         {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
+          {tileLayerURL !== undefined ? <Polyline positions={points}/> : null}
         <LocateControl />
         <MarkersManager
           setOrigin={setOrigin}
@@ -293,20 +378,55 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 label="Select in Map"
               />
             </Form.Group>
-            <Form.Group>
-              <Button
-                id={"get-route-btn"}
-                variant={"light"}
-                style={{ border: ".1em solid black" }}
-              >
-                Get Route
-              </Button>
-            </Form.Group>
+              <Row>
+                  <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{border: ".1em solid black", width:"40%"}}>Get Route</Button>
+                  <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{border: ".1em solid black", width:"40%", marginLeft:"20%"}}>Cancel</Button>
+              </Row>
           </Form>
         </Card.Body>
       </Card>
       <Container className={"map-ui d-flex flex-column h-100"} fluid>
         {/*
+                {basicPOIs.map(poi => {
+                    return (
+                        <Marker
+                            key={poi.id}
+                            icon={getIcon(poi.type)}
+                            position={new LatLng(poi.latitude, poi.longitude)}
+                        >
+                            <Popup>
+                                {poi.name} <br/> {poi.type}
+                            </Popup>
+                        </Marker>
+                    )
+                })}
+            </MapContainer>
+            <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{zIndex: 1, scale:"100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black"}}>Route</Button>
+            <Card id={"card-ori-dest"} style={{zIndex: 1, top: "1%", left: "5%", width:"15%", position: "absolute", display: "none"}}>
+                <Card.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Origin</Form.Label>
+                            <Form.Control id={"origin-input"} type={"text"} placeholder={"Origin"} onChange={updateOrigin} value={origin} readOnly={false}/>
+                        </Form.Group>
+                        <br/>
+                        <Form.Group>
+                            <Form.Label>Destination</Form.Label>
+                            <Form.Control id={"destination-input"} type={"text"} placeholder={"Destination"} onChange={updateDestination} value={destination} readOnly={false}/>
+                        </Form.Group>
+                        <br/>
+                        <Form.Group className="mb-3" >
+                            <Form.Check id="mapcbox" type="checkbox" onChange={getFromMap} label="Select in Map" />
+                        </Form.Group>
+                        <Row>
+                            <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{border: ".1em solid black", width:"40%"}}>Get Route</Button>
+                            <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{border: ".1em solid black", width:"40%", marginLeft:"20%"}}>Cancel</Button>
+                        </Row>
+                    </Form>
+                </Card.Body>
+            </Card>
+            <Container className={"map-ui d-flex flex-column h-100"} fluid>
+                {/*
                     POPUP CARD
                 */}
         <Card
