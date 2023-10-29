@@ -336,6 +336,7 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                 className={"map"}
                 center={center} zoom={13} scrollWheelZoom={true}
                 rotate={true} bearing={0}
+                maxZoom={16}
                 // @ts-ignore
                 rotateControl={{ closeOnZeroBearing: false }} touchRotate={true}>
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}

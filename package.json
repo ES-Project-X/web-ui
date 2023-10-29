@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest ./__tests__/components/map.test.tsx",
+    "test": "jest",
     "test:watch": "jest --watch"
   },
   "dependencies": {
