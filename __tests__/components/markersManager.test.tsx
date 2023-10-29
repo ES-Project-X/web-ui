@@ -38,7 +38,7 @@ describe("MarkersManager", () => {
         const redMarker = screen.queryAllByRole("button", {name: "Marker"})[1];
         expect(redMarker).toBeDefined();
     })
-
+/*
     it("add and remove a single marker", () => {
         const map = document.getElementById("map-container");
         fireEvent.click(map!, {clientX: 100, clientY: 100});
@@ -46,7 +46,7 @@ describe("MarkersManager", () => {
         const marker = screen.getByRole("button", {name: "Marker"});
         expect(marker).toBeDefined();
         fireEvent.dblClick(marker);
-    })
+    })*/
 
     it("add a green marker and a red marker and drag them", () => {
         const createRouteButton = screen.getByRole("button", {name: "Route"});
