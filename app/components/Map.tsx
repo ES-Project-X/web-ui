@@ -1,9 +1,10 @@
 "use client"
 
-import "leaflet/dist/leaflet.css";
+import "leaflet/dist/leaflet.css"
+
 import { useEffect, useRef, useState } from "react";
 import { Button, ButtonGroup, Form, Card, Row, CloseButton, Container, Col } from "react-bootstrap";
-import { MapContainer, TileLayer } from "react-leaflet"
+import { MapContainer, Marker, Polyline, Popup, TileLayer } from "react-leaflet"
 import { LatLng } from "leaflet";
 import "leaflet-rotate"
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -17,8 +18,9 @@ import { updateClusterGroup } from "./DisplayPOIs";
 
 import RedMarker from "./icons/RedMarker";
 import { BicycleParkingMarker, BicycleShopMarker, DrinkingWaterMarker, ToiletsMarker, BenchMarker } from "./icons/TypeMarkers";
-import FetchComponent from "./FetchComponent";
-import POIsSidebar from "@/app/components/POIsSidebar";
+import Sidebar from "./Sidebar";
+import GetClusters from "./GetClusters";
+import POIsSidebar from "./POIsSidebar";
 
 
 export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }) {
@@ -35,7 +37,7 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
     const [odmap, setodmap] = useState(false);
 
     const [markers, setMarkers] = useState<BasicPOI[]>([]);
-    const [selectedPOI, setSelectedPOI] = useState(null) 
+    const [selectedPOI, setSelectedPOI] = useState(null)
 
     const [filterName, setFilterName] = useState<string>("");
     const [filterTypes, setFilterTypes] = useState<FilterType[]>([
@@ -46,12 +48,14 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
         { label: "Bench", value: "bench", selected: true }
     ]);
 
-    const [cardIsVisible, setCardIsVisible] = useState(false);
+    const [points, setPoints] = useState<LatLng[][]>([])
+    const [gettingRoute, setGettingRoute] = useState(false);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
     const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
+    const URL_ROUTING = "http://localhost:8989/route?points_encoded=false&profile=bike";
 
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
@@ -59,6 +63,12 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             setUserPosition({ latitude, longitude })
         });
     }, [])
+
+    useEffect(() => {
+        if (gettingRoute) {
+            getRoute();
+        }
+    }, [origin, destination]);
 
     const addToBearing = (amount: number) => {
         if (mapRef.current) {
@@ -102,15 +112,13 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             .catch(() => { })
     }
 
-    const fetchPOIDetails = (id:string) => {
+    const fetchPOIDetails = (id: string) => {
         const url = new URL(URL_API + "poi/" + id);
         fetch(url.toString())
             .then(response => response.json())
             .then(data => setSelectedPOI(data))
             .catch(() => { })
     }
-
-
 
     const updateMarkers = (data: any) => {
         const pois: BasicPOI[] = data.map((poi: any) => {
@@ -205,6 +213,8 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             console.log("odmap")
             setodmap(false)
             setCreatingRoute(false)
+            setGettingRoute(false)
+            setPoints([])
             setOrigin("")
             setDestination("")
             // @ts-ignore
@@ -219,6 +229,8 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             console.log("not odmap")
             setodmap(true)
             setCreatingRoute(true)
+            setGettingRoute(false)
+            setPoints([])
             setOrigin("")
             setDestination("")
             // @ts-ignore
@@ -230,6 +242,71 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             // @ts-ignore
             document.getElementById("destination-input").style.readonly = true;
         }
+    }
+
+    const geoCode = async (query: string): Promise<string> => {
+        // @ts-ignore
+        return fetch(query)
+            .then(response => response.json())
+            .then(data => {
+                if (data.items.length === 0) {
+                    window.alert("No results");
+                    return "";
+                }
+                const lat = data.items[0].position.lat;
+                const lng = data.items[0].position.lng;
+                return lat + "," + lng;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                return "";
+            });
+    }
+
+    const getRoute = async () => {
+        if (origin === "" || destination === "") {
+            window.alert("Please fill in both fields");
+            return;
+        }
+        if (odmap) {
+            setGettingRoute(true);
+        }
+        let url = URL_ROUTING;
+        if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            console.log("HERE1")
+            url += "&point=" + origin + "&point=" + destination;
+        } else if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && !destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            console.log("HERE2")
+            let dest = await geoCode(URL_GEO + "&q=" + destination);
+            url += "&point=" + origin + "&point=" + dest;
+        } else if (!origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) && destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            console.log("HERE3")
+            let ori = await geoCode(URL_GEO + "&q=" + origin);
+            url += "&point=" + ori + "&point=" + destination;
+        } else {
+            console.log("HERE4")
+            let ori = await geoCode(URL_GEO + "&q=" + origin);
+            let dest = await geoCode(URL_GEO + "&q=" + destination);
+            url += "&point=" + ori + "&point=" + dest;
+        }
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.paths.length === 0) {
+                    window.alert("No results");
+                    return;
+                }
+                const points = data.paths[0].points.coordinates;
+                let points2 = [];
+                for (let point of points) {
+                    points2.push(new LatLng(point[1], point[0]));
+                }
+                setPoints([points2]);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     }
 
     const hidecard = () => {
@@ -244,21 +321,35 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
     const updateDestination = (event: React.ChangeEvent<HTMLInputElement>) => {
         setDestination(event.target.value);
     }
+    const cancelRoute = () => {
+        setPoints([]);
+        setGettingRoute(false);
+    }
 
     return (
         <>
+            {/* Sidebar */}
+            <Sidebar />
+            {/* eventually change this to the main page, but for now fica aqui */}
             <MapContainer
                 id={"map-container"} ref={mapRef}
                 className={"map"}
                 center={center} zoom={13} scrollWheelZoom={true}
                 rotate={true} bearing={0}
+                maxZoom={18}
+                minZoom={2}
+                maxBounds={[[-90, -180], [90, 180]]}
                 // @ts-ignore
-                rotateControl={{ closeOnZeroBearing: false }} touchRotate={true}
-            >
+                rotateControl={{ closeOnZeroBearing: false }} touchRotate={true}>
                 {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
+                {tileLayerURL !== undefined ? <Polyline positions={points} /> : null}
+
                 <LocateControl />
-                <MarkersManager setOrigin={setOrigin} setDestination={setDestination} creatingRoute={creatingRoute} />
-                <FetchComponent fetchFunction={fetchPOIs} />
+                <MarkersManager
+                    setOrigin={setOrigin}
+                    setDestination={setDestination}
+                    creatingRoute={creatingRoute} />
+                <GetClusters fetchFunction={fetchPOIs} />
             </MapContainer>
             <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{ zIndex: 1, scale: "100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black" }}>Route</Button>
             <Card id={"card-ori-dest"} style={{ zIndex: 1, top: "1%", left: "5%", width: "15%", position: "absolute", display: "none" }}>
@@ -278,7 +369,8 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                             <Form.Check id="mapcbox" type="checkbox" onChange={getFromMap} label="Select in Map" />
                         </Form.Group>
                         <Form.Group>
-                            <Button id={"get-route-btn"} variant={"light"} style={{ border: ".1em solid black" }}>Get Route</Button>
+                            <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%" }}>Get Route</Button>
+                            <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%", marginLeft: "20%" }}>Cancel</Button>
                         </Form.Group>
                     </Form>
                 </Card.Body>
@@ -287,7 +379,15 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                 {/*
                     POPUP CARD
                 */}
-                <Card id={"card-info"} style={{ position: "absolute", top: "10em", left: "50%", display: "none" }}>
+                <Card
+                    id={"card-info"}
+                    style={{
+                        position: "absolute",
+                        top: "10em",
+                        left: "50%",
+                        display: "none",
+                    }}
+                >
                     <Card.Header>
                         <CloseButton id={"card-btn"} onClick={hidecard} />
                     </Card.Header>
@@ -304,7 +404,11 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                     <Col xs={"auto"} className={"mx-auto"}>
                         <Form>
                             <Form.Group controlId={"search-bar"}>
-                                <Form.Control type={"text"} placeholder={"Search"} onKeyDown={handleKeyDown} />
+                                <Form.Control
+                                    type={"text"}
+                                    placeholder={"Search"}
+                                    onKeyDown={handleKeyDown}
+                                />
                             </Form.Group>
                         </Form>
                     </Col>
@@ -324,7 +428,7 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                         </Card>
                     </Col>
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
-                        <Card id={"poi-sidebar"} style={{ display:"none" }}>
+                        <Card id={"poi-sidebar"} style={{ display: "none" }}>
                             <Card.Body>
                                 <POIsSidebar selectedPOI={selectedPOI} />
                             </Card.Body>
@@ -335,36 +439,41 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                     LOWER PART OF THE UI
                 */}
                 <Row className={"pb-2"}>
-                    <Col xs={2} className={"d-flex align-items-end"}>
-                        <ButtonGroup>
-                            <Button id={"map-rotate-left-btn"} variant={"light"}
-                                onClick={() => addToBearing(-10)}>
-                                Rotate Left
-                            </Button>
-                            <Button id={"map-rotate-right-btn"} variant={"light"}
-                                onClick={() => addToBearing(10)}>
-                                Rotate Right
-                            </Button>
-                        </ButtonGroup>
-                    </Col>
+                    <Col xs={2}></Col>
                     <Col xs={"auto"} className={"mx-auto"}>
                         <Card className={"text-center"}>
                             <Card.Body>
                                 <Card.Title>User Position</Card.Title>
                                 <Card.Text id={"map-user-position"}>
-                                    {userPosition.latitude !== undefined && userPosition.longitude !== undefined
+                                    {userPosition.latitude !== undefined &&
+                                        userPosition.longitude !== undefined
                                         ? `Latitude: ${userPosition.latitude} | Longitude: ${userPosition.longitude}`
-                                        : "Please enable location to see your current location"
-                                    }
+                                        : "Please enable location to see your current location"}
                                 </Card.Text>
                             </Card.Body>
                         </Card>
                     </Col>
-                    <Col xs={2}>
 
+                    <Col xs={2} className={"d-flex align-items-end"}>
+                        <ButtonGroup>
+                            <Button
+                                id={"map-rotate-left-btn"}
+                                variant={"light"}
+                                onClick={() => addToBearing(-10)}
+                            >
+                                Rotate Left
+                            </Button>
+                            <Button
+                                id={"map-rotate-right-btn"}
+                                variant={"light"}
+                                onClick={() => addToBearing(10)}
+                            >
+                                Rotate Right
+                            </Button>
+                        </ButtonGroup>
                     </Col>
                 </Row>
             </Container>
         </>
-    )
+    );
 }
