@@ -46,6 +46,8 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
         { label: "Bench", value: "bench", selected: true }
     ]);
 
+    const [cardIsVisible, setCardIsVisible] = useState(false);
+
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
