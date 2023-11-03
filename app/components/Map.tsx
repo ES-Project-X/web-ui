@@ -23,7 +23,7 @@ import {
 import Sidebar from "./Sidebar";
 import {Hash} from "crypto";
 import {list} from "postcss";
-import {Direction} from "@/app/structs/direction";
+import {Direction} from "../structs/direction";
 
 export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
@@ -267,7 +267,7 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                 for(let instruction of data.paths[0].instructions) {
                     directions.push(new Direction(instruction.text, instruction.distance.toFixed(2), instruction.time.toFixed(2) ));
                 }
-                setCurrentIndex(0)
+                setCurrentIndex(0);
                 setDirections(directions);
                 // @ts-ignore
                 document.getElementById("ins-card").style.display = "block";
@@ -449,10 +449,10 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
                     Distance: {directions[currentIndex].distance} meters <br />
                     Time: { convertMsToTime(directions[currentIndex].duration) }
                 </Card.Text>
-                <Button variant="primary" onClick={handleNext} disabled={currentIndex >= directions.length - 1} style={{border: ".1em solid black", width:"40%"}}>
+                <Button id={"next-ins-btn"} variant="primary" onClick={handleNext} disabled={currentIndex >= directions.length - 1} style={{border: ".1em solid black", width:"40%"}}>
                     Next
                 </Button>
-                <Button variant="primary" onClick={handleBefore} disabled={currentIndex == 0} style={{border: ".1em solid black", width:"40%", marginLeft:"20%"}}>
+                <Button id={"before-ins-btn"} variant="primary" onClick={handleBefore} disabled={currentIndex == 0} style={{border: ".1em solid black", width:"40%", marginLeft:"20%"}}>
                     Before
                 </Button>
             </Card.Body>
