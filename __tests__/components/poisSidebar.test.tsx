@@ -30,7 +30,7 @@ describe('POIsSidebar', () => {
     expect(screen.getAllByText('5')).toHaveLength(1);
   });
 
-  // TEST IS NOT WORKING
+ 
   test('hides the card when close button is clicked', () => {
     const selectedPOI = {
       name: 'Test POI',

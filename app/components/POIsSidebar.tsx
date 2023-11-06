@@ -1,5 +1,5 @@
 import {AiFillCloseCircle, AiFillDislike, AiFillLike} from "react-icons/ai";
-import React, { useState } from 'react';
+
 
 // @ts-ignore
 const POIsSidebar = ({selectedPOI}) => {
