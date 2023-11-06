@@ -39,6 +39,8 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
     const [destination, setDestination] = useState<string>("");
     const [odmap, setodmap] = useState(false);
 
+    const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([])
+
     const [markers, setMarkers] = useState<BasicPOI[]>([]);
     const [selectedPOI, setSelectedPOI] = useState(null)
 
@@ -104,49 +106,12 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
         }
     }
 
-    const fetchPOIs = (clusters: number[][]) => {
-
-        const url = new URL(URL_API + "pois");
-        clusters.forEach((cluster: number[]) => {
-            url.searchParams.append("max_lat", cluster[0].toString());
-            url.searchParams.append("min_lat", cluster[1].toString());
-            url.searchParams.append("max_lng", cluster[2].toString());
-            url.searchParams.append("min_lng", cluster[3].toString());
-        });
-
-        fetch(url.toString())
-            .then(response => response.json())
-            .then(data => updateMarkers(data))
-            .catch(() => { })
-    }
-
     const fetchPOIDetails = (id: string) => {
         const url = new URL(URL_API + "poi/" + id);
         fetch(url.toString())
             .then(response => response.json())
             .then(data => setSelectedPOI(data))
             .catch(() => { })
-    }
-
-    const updateMarkers = (data: any) => {
-        const pois: BasicPOI[] = data.map((poi: any) => {
-            return {
-                id: poi.id,
-                name: poi.name,
-                type: poi.type,
-                latitude: poi.latitude,
-                longitude: poi.longitude,
-                icon: getIcon(poi.type)
-            }
-        })
-        if (pois.length > 0) {
-            let new_pois = markers;
-            pois.forEach((poi: BasicPOI) => {
-                new_pois.push(poi);
-            })
-            setMarkers(new_pois);
-            filterPOIs();
-        }
     }
 
     const filterPOIs = () => {
