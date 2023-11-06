@@ -22,6 +22,9 @@ import Sidebar from "./Sidebar";
 import GetClusters from "./GetClusters";
 import POIsSidebar from "./POIsSidebar";
 
+import {Hash} from "crypto";
+import {list} from "postcss";
+import {Direction} from "../structs/direction";
 
 export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }) {
     const mapRef = useRef(null);
@@ -50,6 +53,11 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
 
     const [points, setPoints] = useState<LatLng[][]>([])
     const [gettingRoute, setGettingRoute] = useState(false);
+
+    const d = [new Direction("test", 10, 10)];
+
+    const [directions, setDirections] = useState<Direction[]>(d);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
     const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
@@ -217,6 +225,7 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             setPoints([])
             setOrigin("")
             setDestination("")
+            setCurrentIndex(0)
             // @ts-ignore
             document.getElementById("origin-input").value = "";
             // @ts-ignore
@@ -225,6 +234,8 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             document.getElementById("destination-input").value = "";
             // @ts-ignore
             document.getElementById("destination-input").style.readonly = false;
+            // @ts-ignore
+            document.getElementById("ins-card").style.display = "none";
         } else {
             console.log("not odmap")
             setodmap(true)
@@ -233,6 +244,7 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             setPoints([])
             setOrigin("")
             setDestination("")
+            setCurrentIndex(0)
             // @ts-ignore
             document.getElementById("origin-input").value = "";
             // @ts-ignore
@@ -241,6 +253,8 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             document.getElementById("destination-input").value = "";
             // @ts-ignore
             document.getElementById("destination-input").style.readonly = true;
+            // @ts-ignore
+            document.getElementById("ins-card").style.display = "none";
         }
     }
 
@@ -303,6 +317,14 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
                     points2.push(new LatLng(point[1], point[0]));
                 }
                 setPoints([points2]);
+                let directions = [];
+                for(let instruction of data.paths[0].instructions) {
+                    directions.push(new Direction(instruction.text, instruction.distance.toFixed(2), instruction.time.toFixed(2) ));
+                }
+                setCurrentIndex(0);
+                setDirections(directions);
+                // @ts-ignore
+                document.getElementById("ins-card").style.display = "block";
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -324,32 +346,190 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
     const cancelRoute = () => {
         setPoints([]);
         setGettingRoute(false);
+        setCurrentIndex(0);
+        // @ts-ignore
+        document.getElementById("ins-card").style.display = "none";
     }
 
-    return (
-        <>
-            {/* Sidebar */}
-            <Sidebar />
-            {/* eventually change this to the main page, but for now fica aqui */}
-            <MapContainer
-                id={"map-container"} ref={mapRef}
-                className={"map"}
-                center={center} zoom={13} scrollWheelZoom={true}
-                rotate={true} bearing={0}
-                maxZoom={18}
-                minZoom={2}
-                maxBounds={[[-90, -180], [90, 180]]}
-                // @ts-ignore
-                rotateControl={{ closeOnZeroBearing: false }} touchRotate={true}>
-                {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
-                {tileLayerURL !== undefined ? <Polyline positions={points} /> : null}
+    const handleNext = () => {
+        setCurrentIndex(currentIndex + 1);
+    }
 
-                <LocateControl />
-                <MarkersManager
-                    setOrigin={setOrigin}
-                    setDestination={setDestination}
-                    creatingRoute={creatingRoute} />
-                <GetClusters fetchFunction={fetchPOIs} />
+    const handleBefore = () => {
+        setCurrentIndex(currentIndex - 1);
+    }
+
+    function padTo2Digits(num: number) {
+        return num.toString().padStart(2, '0');
+    }
+
+    function convertMsToTime(milliseconds: number) {
+        let seconds = Math.floor(milliseconds / 1000);
+        let minutes = Math.floor(seconds / 60);
+        let hours = Math.floor(minutes / 60);
+
+        seconds = seconds % 60;
+        minutes = minutes % 60;
+
+        // 👇️ If you don't want to roll hours over, e.g. 24 to 00
+        // 👇️ comment (or remove) the line below
+        // commenting next line gets you `24:00:00` instead of `00:00:00`
+        // or `36:15:31` instead of `12:15:31`, etc.
+        hours = hours % 24;
+
+        return `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(
+            seconds,
+        )}`;
+    }
+
+  return (
+    <>
+      {/* Sidebar */}
+
+      <Sidebar />
+
+      {/* eventually change this to the main page, but for now fica aqui */}
+
+      <MapContainer
+        id={"map-container"}
+        ref={mapRef}
+        className={"map"}
+        center={center}
+        zoom={13}
+        scrollWheelZoom={true}
+        rotate={true}
+        bearing={0}
+        maxZoom={18}
+        minZoom={2}
+        maxBounds={[[-90, -180], [90, 180]]}
+        // @ts-ignore
+        rotateControl={{ closeOnZeroBearing: false }}
+        touchRotate={true}
+      >
+        {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
+          {tileLayerURL !== undefined ? <Polyline positions={points}/> : null}
+        <LocateControl />
+        <MarkersManager
+          setOrigin={setOrigin}
+          setDestination={setDestination}
+          creatingRoute={creatingRoute}
+        />
+        {/*
+                    DISPLAY POIs
+                */}
+        {basicPOIs.map((poi) => {
+          return (
+            <Marker
+              key={poi.id}
+              icon={getIcon(poi.type)}
+              position={new LatLng(poi.latitude, poi.longitude)}
+            >
+              <Popup>
+                {poi.name} <br /> {poi.type}
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+      <Button
+        id={"ori-dst-btn"}
+        onClick={createRoute}
+        variant={"light"}
+        style={{
+          zIndex: 1,
+          scale: "100%",
+          bottom: "1%",
+          left: "0.5em",
+          position: "absolute",
+          border: ".1em solid black",
+        }}
+      >
+        Route
+      </Button>
+      <Card
+        id={"card-ori-dest"}
+        style={{
+          zIndex: 1,
+          top: "1%",
+          left: "5%",
+          width: "15%",
+          position: "absolute",
+          display: "none",
+        }}
+      >
+        <Card.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Origin</Form.Label>
+              <Form.Control
+                id={"origin-input"}
+                type={"text"}
+                placeholder={"Origin"}
+                onChange={updateOrigin}
+                value={origin}
+                readOnly={false}
+              />
+            </Form.Group>
+            <br />
+            <Form.Group>
+              <Form.Label>Destination</Form.Label>
+              <Form.Control
+                id={"destination-input"}
+                type={"text"}
+                placeholder={"Destination"}
+                onChange={updateDestination}
+                value={destination}
+                readOnly={false}
+              />
+            </Form.Group>
+            <br />
+            <Form.Group className="mb-3">
+              <Form.Check
+                id="mapcbox"
+                type="checkbox"
+                onChange={getFromMap}
+                label="Select in Map"
+              />
+            </Form.Group>
+              <Row>
+                  <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{border: ".1em solid black", width:"40%"}}>Get Route</Button>
+                  <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{border: ".1em solid black", width:"40%", marginLeft:"20%"}}>Cancel</Button>
+              </Row>
+          </Form>
+        </Card.Body>
+      </Card>
+        if (directions[currentIndex] !== undefined) {
+        <Card id={"ins-card"} style={{ zIndex: 1, bottom: "10%",  left: "0.5em", position: "absolute", display: "none"}}>
+            <Card.Body>
+                <Card.Title>{directions[currentIndex].direction}</Card.Title>
+                <Card.Text>
+                    Distance: {directions[currentIndex].distance} meters <br />
+                    Time: { convertMsToTime(directions[currentIndex].duration) }
+                </Card.Text>
+                <Button id={"next-ins-btn"} variant="primary" onClick={handleNext} disabled={currentIndex >= directions.length - 1} style={{border: ".1em solid black", width:"40%"}}>
+                    Next
+                </Button>
+                <Button id={"before-ins-btn"} variant="primary" onClick={handleBefore} disabled={currentIndex == 0} style={{border: ".1em solid black", width:"40%", marginLeft:"20%"}}>
+                    Before
+                </Button>
+            </Card.Body>
+        </Card>
+    }
+      <Container className={"map-ui d-flex flex-column h-100"} fluid>
+        {/*
+                {basicPOIs.map(poi => {
+                    return (
+                        <Marker
+                            key={poi.id}
+                            icon={getIcon(poi.type)}
+                            position={new LatLng(poi.latitude, poi.longitude)}
+                        >
+                            <Popup>
+                                {poi.name} <br/> {poi.type}
+                            </Popup>
+                        </Marker>
+                    )
+                })}
             </MapContainer>
             <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{ zIndex: 1, scale: "100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black" }}>Route</Button>
             <Card id={"card-ori-dest"} style={{ zIndex: 1, top: "1%", left: "5%", width: "15%", position: "absolute", display: "none" }}>
