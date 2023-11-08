@@ -1,192 +1,221 @@
-"use client"
+"use client";
 
-import "leaflet/dist/leaflet.css"
+import "leaflet/dist/leaflet.css";
 
-import {useEffect, useRef, useState} from "react";
-import {Button, ButtonGroup, Form, Card, Row, CloseButton, Container, Col} from "react-bootstrap";
-import {MapContainer, Marker, Popup, TileLayer} from "react-leaflet"
-import {LatLng} from "leaflet";
-import "leaflet-rotate"
+import { useEffect, useRef, useState } from "react";
+import {
+  Button,
+  ButtonGroup,
+  Form,
+  Card,
+  Row,
+  CloseButton,
+  Container,
+  Col,
+} from "react-bootstrap";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+import { LatLng } from "leaflet";
+import "leaflet-rotate";
 
 import LocateControl from "./LocateControl";
 import MarkersManager from "./MarkersManager";
 import FilterBoardComponent from "./FilterBoard";
-import {BasicPOI, FilterType} from "../structs/poi";
+import { BasicPOI, FilterType } from "../structs/poi";
 import RedMarker from "./icons/RedMarker";
 import {
-    BicycleParkingMarker,
-    BicycleShopMarker,
-    DrinkingWaterMarker,
-    ToiletsMarker,
-    BenchMarker
+  BicycleParkingMarker,
+  BicycleShopMarker,
+  DrinkingWaterMarker,
+  ToiletsMarker,
+  BenchMarker,
 } from "./icons/TypeMarkers";
 import Sidebar from "./Sidebar";
+import { Link } from "react-router-dom";
 
-export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) {
-    const mapRef = useRef(null);
-    const center = new LatLng(40.64427, -8.64554);
+export default function MapComponent({
+  tileLayerURL,
+}: {
+  tileLayerURL?: string;
+}) {
+  const mapRef = useRef(null);
+  const center = new LatLng(40.64427, -8.64554);
 
-    const [userPosition, setUserPosition] = useState<{ [key: string]: undefined | number }>({
-        latitude: undefined,
-        longitude: undefined
+  const [userPosition, setUserPosition] = useState<{
+    [key: string]: undefined | number;
+  }>({
+    latitude: undefined,
+    longitude: undefined,
+  });
+  const [creatingRoute, setCreatingRoute] = useState(false);
+  const [origin, setOrigin] = useState<string>("");
+  const [destination, setDestination] = useState<string>("");
+  const [odmap, setodmap] = useState(false);
+
+  const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([]);
+
+  const API_KEY = process.env.PUBLIC_KEY_HERE;
+  const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
+  const URL_GEO =
+    "https://geocode.search.hereapi.com/v1/geocode?apiKey=" +
+    API_KEY +
+    "&in=countryCode:PRT";
+  const URL_REV =
+    "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
+
+  useEffect(() => {
+    navigator.geolocation.watchPosition((location) => {
+      const { latitude, longitude } = location.coords;
+      setUserPosition({ latitude, longitude });
     });
-    const [creatingRoute, setCreatingRoute] = useState(false);
-    const [origin, setOrigin] = useState<string>("");
-    const [destination, setDestination] = useState<string>("");
-    const [odmap, setodmap] = useState(false);
+  }, []);
 
-    const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([])
+  const addToBearing = (amount: number) => {
+    if (mapRef.current) {
+      // @ts-ignore
+      const nextBearing = mapRef.current.getBearing() + (amount % 360);
+      // @ts-ignore
+      mapRef.current.setBearing(nextBearing);
+    }
+  };
 
-    const API_KEY = process.env.PUBLIC_KEY_HERE;
-    const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
-    const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
-    const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
+  const fetchPOIs = (name: string, types: FilterType[]) => {
+    const typesFetch = types
+      .filter((type) => type.selected)
+      .map((type) => type.value);
 
-    useEffect(() => {
-        navigator.geolocation.watchPosition((location) => {
-            const {latitude, longitude} = location.coords;
-            setUserPosition({latitude, longitude})
-        });
-    }, [])
+    const url = new URL(URL_API + "poi");
+    name.length > 0 && url.searchParams.append("name", name);
+    typesFetch.forEach((type) => url.searchParams.append("type", type));
 
-    const addToBearing = (amount: number) => {
-        if (mapRef.current) {
-            // @ts-ignore
-            const nextBearing = mapRef.current.getBearing() + amount % 360;
-            // @ts-ignore
-            mapRef.current.setBearing(nextBearing);
+    fetch(url.toString())
+      .then((response) => response.json())
+      .then((data) => setBasicPOIs(data))
+      .catch(() => {});
+  };
+
+  const getIcon = (poiType: string) => {
+    switch (poiType) {
+      case "bicycle-parking":
+        return BicycleParkingMarker;
+      case "bicycle-shop":
+        return BicycleShopMarker;
+      case "drinking-water":
+        return DrinkingWaterMarker;
+      case "toilets":
+        return ToiletsMarker;
+      case "bench":
+        return BenchMarker;
+      default:
+        return RedMarker;
+    }
+  };
+
+  const getGeoLocation = (query: string) => {
+    fetch(query)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if (data.items.length === 0) {
+          window.alert("No results");
+          return;
         }
-    }
-
-    const fetchPOIs = (name: string, types: FilterType[]) => {
-        const typesFetch = types
-            .filter(type => type.selected)
-            .map(type => type.value)
-
-        const url = new URL(URL_API + "poi");
-        (name.length > 0) && url.searchParams.append("name", name)
-        typesFetch.forEach(type => url.searchParams.append("type", type))
-
-        fetch(url.toString())
-            .then(response => response.json())
-            .then(data => setBasicPOIs(data))
-            .catch(() => {})
-    }
-
-    const getIcon = (poiType: string) => {
-        switch (poiType) {
-            case "bicycle-parking":
-                return BicycleParkingMarker;
-            case "bicycle-shop":
-                return BicycleShopMarker;
-            case "drinking-water":
-                return DrinkingWaterMarker;
-            case "toilets":
-                return ToiletsMarker;
-            case "bench":
-                return BenchMarker;
-            default:
-                return RedMarker;
-        }
-    }
-
-    const getGeoLocation = (query: string) => {
-        fetch(query)
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                if (data.items.length === 0) {
-                    window.alert("No results");
-                    return;
-                }
-                const lat = data.items[0].position.lat;
-                // @ts-ignore
-                document.getElementById("lat-text").innerHTML = "Latitude: " + lat;
-                const lng = data.items[0].position.lng;
-                // @ts-ignore
-                document.getElementById("lng-txt").innerHTML = "Longitude: " + lng;
-                const address = data.items[0].address.label;
-                // @ts-ignore
-                document.getElementById("location-text").innerHTML = address;
-                // @ts-ignore
-                document.getElementById("card-info").style.display = "block";
-                // @ts-ignore
-                mapRef.current.flyTo(new LatLng(lat, lng), 15);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-    }
-
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            const query = (event.target as HTMLInputElement).value;
-            if (query.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/)) {
-                getGeoLocation(URL_REV + "&at=" + query);
-            } else {
-                getGeoLocation(URL_GEO + "&q=" + query);
-            }
-        }
-    }
-
-    const createRoute = () => {
-        var card = document.getElementById("card-ori-dest")
+        const lat = data.items[0].position.lat;
         // @ts-ignore
-        if (card.style.display === "none") {
-            // @ts-ignore
-            card.style.display = "block";
-        }
-        else {
-            // @ts-ignore
-            card.style.display = "none";
-        }
-    }
-
-    const getFromMap = () => {
-        if(odmap) {
-            console.log("odmap")
-            setodmap(false)
-            setCreatingRoute(false)
-            setOrigin("")
-            setDestination("")
-            // @ts-ignore
-            document.getElementById("origin-input").value = "";
-            // @ts-ignore
-            document.getElementById("origin-input").style.readonly = false;
-            // @ts-ignore
-            document.getElementById("destination-input").value = "";
-            // @ts-ignore
-            document.getElementById("destination-input").style.readonly = false;
-        } else {
-            console.log("not odmap")
-            setodmap(true)
-            setCreatingRoute(true)
-            setOrigin("")
-            setDestination("")
-            // @ts-ignore
-            document.getElementById("origin-input").value = "";
-            // @ts-ignore
-            document.getElementById("origin-input").style.readonly = true;
-            // @ts-ignore
-            document.getElementById("destination-input").value = "";
-            // @ts-ignore
-            document.getElementById("destination-input").style.readonly = true;
-        }
-    }
-
-    const hidecard = () => {
+        document.getElementById("lat-text").innerHTML = "Latitude: " + lat;
+        const lng = data.items[0].position.lng;
         // @ts-ignore
-        document.getElementById("card-info").style.display = "none";
-    }
+        document.getElementById("lng-txt").innerHTML = "Longitude: " + lng;
+        const address = data.items[0].address.label;
+        // @ts-ignore
+        document.getElementById("location-text").innerHTML = address;
+        // @ts-ignore
+        document.getElementById("card-info").style.display = "block";
+        // @ts-ignore
+        mapRef.current.flyTo(new LatLng(lat, lng), 15);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
 
-    const updateOrigin = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setOrigin(event.target.value);
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const query = (event.target as HTMLInputElement).value;
+      if (query.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/)) {
+        getGeoLocation(URL_REV + "&at=" + query);
+      } else {
+        getGeoLocation(URL_GEO + "&q=" + query);
+      }
     }
+  };
 
-    const updateDestination = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setDestination(event.target.value);
+  const createRoute = () => {
+    var card = document.getElementById("card-ori-dest");
+    // @ts-ignore
+    if (card.style.display === "none") {
+      // @ts-ignore
+      card.style.display = "block";
+    } else {
+      // @ts-ignore
+      card.style.display = "none";
     }
+  };
+
+  const getFromMap = () => {
+    if (odmap) {
+      console.log("odmap");
+      setodmap(false);
+      setCreatingRoute(false);
+      setOrigin("");
+      setDestination("");
+      // @ts-ignore
+      document.getElementById("origin-input").value = "";
+      // @ts-ignore
+      document.getElementById("origin-input").style.readonly = false;
+      // @ts-ignore
+      document.getElementById("destination-input").value = "";
+      // @ts-ignore
+      document.getElementById("destination-input").style.readonly = false;
+    } else {
+      console.log("not odmap");
+      setodmap(true);
+      setCreatingRoute(true);
+      setOrigin("");
+      setDestination("");
+      // @ts-ignore
+      document.getElementById("origin-input").value = "";
+      // @ts-ignore
+      document.getElementById("origin-input").style.readonly = true;
+      // @ts-ignore
+      document.getElementById("destination-input").value = "";
+      // @ts-ignore
+      document.getElementById("destination-input").style.readonly = true;
+    }
+  };
+
+  const hidecard = () => {
+    // @ts-ignore
+    document.getElementById("card-info").style.display = "none";
+  };
+
+  const updateOrigin = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setOrigin(event.target.value);
+  };
+
+  const updateDestination = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDestination(event.target.value);
+  };
+
+  // FETCHE THE USER HERE AND STORE IT TO PASS IT TO THE PROFILE PAGE
+  /* GUI */
+  const user = {
+    name: "John Doe",
+    email: "johndoe@example.com",
+    username: "johndoe",
+    profilePictureUrl:
+      "https://i.pinimg.com/originals/85/59/09/855909df65727e5c7ba5e11a8c45849a.png",
+  };
 
   return (
     <>
@@ -342,24 +371,41 @@ export default function MapComponent({tileLayerURL}: { tileLayerURL?: string }) 
               </Form.Group>
             </Form>
           </Col>
+          <Col xs="auto" className="d-flex align-items-center">
+            <ButtonGroup>
+              <a href={`/profile/${user.username}`} className="btn-circle-link">
+                <Button
+                  style={{
+                    backgroundColor: "transparent",
+                    border: "none",
+                    padding: "0",
+                  }}
+                  className="btn-circle"
+                >
+                  <img
+                    src={user.profilePictureUrl}
+                    alt={`${user.name}'s profile`}
+                    className="rounded-circle" // Use Bootstrap's rounded-circle class for circular images
+                  />
+                </Button>
+              </a>
+            </ButtonGroup>
+          </Col>
         </Row>
         {/*
                     MIDDLE PART OF THE UI
                 */}
-                <Row className={"flex-grow-1"}>
-                    <Col xs={"auto"} className={"flex-grow-1"}>
-
-                    </Col>
-                    <Col xs={"auto"} className={"d-flex align-items-center"}>
-                        <Card id={"filter-board"}>
-                            <Card.Body>
-                                <FilterBoardComponent
-                                    fetchPOIs={fetchPOIs}/>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
-                {/*
+        <Row className={"flex-grow-1"}>
+          <Col xs={"auto"} className={"flex-grow-1"}></Col>
+          <Col xs={"auto"} className={"d-flex align-items-center"}>
+            <Card id={"filter-board"}>
+              <Card.Body>
+                <FilterBoardComponent fetchPOIs={fetchPOIs} />
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        {/*
                     LOWER PART OF THE UI
                 */}
         <Row className={"pb-2"}>
