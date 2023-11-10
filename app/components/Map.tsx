@@ -209,46 +209,83 @@ export default function MapComponent({
 
   // FETCHE THE USER HERE AND STORE IT TO PASS IT TO THE PROFILE PAGE
   /* GUI */
-  const user = {
-    name: "John Doe",
+  const userMock = {
+    name: "John Doexxx",
     email: "johndoe@example.com",
     username: "johndoe",
     profilePictureUrl:
-      "https://i.pinimg.com/originals/85/59/09/855909df65727e5c7ba5e11a8c45849a.png",
+      "https://i.imgur.com/8Km9tLL.png",
   };
 
+  const TOKEN =
+    "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiNTBkZTM4YzUtZTJmZi00YjQ0LWFmMDQtYzhjYjk5OTg1NjcxIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk2MTM0NzEsImV4cCI6MTY5OTYxNzA3MSwiaWF0IjoxNjk5NjEzNDcxLCJqdGkiOiIxNmVkZjY3OC00MWU5LTQyZjYtOGQ0Yi02ZWJjOTUxOTMwMjQiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.HWfnJIbgtu8PyMc4pok6f0XY_nXUG9M0RX7tws6lZXvjRK7QbX7tzcnmDxs9pSVHOTD0T-j7y4cOmYe8apVrrc3Xd9pzggdzRdHw9Vgh7aFwNi41JQm9DyGGO4Eml8YRJfKKhv0F4LI16PK_Q_LdoIJMGYYVuhp7pjJ88VUGDW1cDD_8XwKG83RmniSFiqIdJN1U66jAKusZ0vha07QvegxTnfP5jXv6MWsRXiYg_qWG9nKGj2gS5s5kNHAYvjICYXm3vi6lq02ELUQQ_4g5ab7hWNBoFLn794qYvpy2fqRBM9aoUNdN4e8kGnICUKGLKH2IBp4KGCx5OjDm0YIefQ";
+  /* Fetch the user details by username */
+  // const res = await fetch(`.../${params.user}`)
+  // const data: user = await res.json()
+  const URL_USER = process.env.API_URL;
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const headers = { Authorization: `Bearer ${TOKEN}` };
+    const url = new URL("http://127.0.0.1:8000/user");
+
+    const fetchUser = async () => {
+      console.log("fetching user");
+      console.log("URL_USER:", URL_USER);
+      console.log("TOKEN:", TOKEN);
+      try {
+        await fetch(url.toString(), { headers })
+          .then((res) => res.json())
+          .then((data) => {
+            setUser(data);
+            console.log(data);
+            localStorage.setItem("user", JSON.stringify(data));
+          });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  /* flex tape */
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <>
-      {/* Sidebar */}
+    console.log("user HEY:", user),
+    (
+      <>
+        {/* Sidebar */}
 
-      <Sidebar />
+        <Sidebar />
 
-      {/* eventually change this to the main page, but for now fica aqui */}
+        {/* eventually change this to the main page, but for now fica aqui */}
 
-      <MapContainer
-        id={"map-container"}
-        ref={mapRef}
-        className={"map"}
-        center={center}
-        zoom={13}
-        scrollWheelZoom={true}
-        rotate={true}
-        bearing={0}
-        // @ts-ignore
-        rotateControl={{ closeOnZeroBearing: false }}
-        touchRotate={true}
-      >
-        {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
-        <LocateControl />
-        <MarkersManager
-          setOrigin={setOrigin}
-          setDestination={setDestination}
-          creatingRoute={creatingRoute}
-        />
-        {/*
+        <MapContainer
+          id={"map-container"}
+          ref={mapRef}
+          className={"map"}
+          center={center}
+          zoom={13}
+          scrollWheelZoom={true}
+          rotate={true}
+          bearing={0}
+          // @ts-ignore
+          rotateControl={{ closeOnZeroBearing: false }}
+          touchRotate={true}
+        >
+          {tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
+          <LocateControl />
+          <MarkersManager
+            setOrigin={setOrigin}
+            setDestination={setDestination}
+            creatingRoute={creatingRoute}
+          />
+          {/*
                     DISPLAY POIs
                 */}
-        {basicPOIs.map((poi) => {
+          {/*  {basicPOIs.map((poi) => {
           return (
             <Marker
               key={poi.id}
@@ -260,190 +297,202 @@ export default function MapComponent({
               </Popup>
             </Marker>
           );
-        })}
-      </MapContainer>
-      <Button
-        id={"ori-dst-btn"}
-        onClick={createRoute}
-        variant={"light"}
-        style={{
-          zIndex: 1,
-          scale: "100%",
-          bottom: "6%",
-          left: "0.5em",
-          position: "absolute",
-          border: ".1em solid black",
-        }}
-      >
-        Route
-      </Button>
-      <Card
-        id={"card-ori-dest"}
-        style={{
-          zIndex: 1,
-          top: "1%",
-          left: "5%",
-          width: "15%",
-          position: "absolute",
-          display: "none",
-        }}
-      >
-        <Card.Body>
-          <Form>
-            <Form.Group>
-              <Form.Label>Origin</Form.Label>
-              <Form.Control
-                id={"origin-input"}
-                type={"text"}
-                placeholder={"Origin"}
-                onChange={updateOrigin}
-                value={origin}
-                readOnly={false}
-              />
-            </Form.Group>
-            <br />
-            <Form.Group>
-              <Form.Label>Destination</Form.Label>
-              <Form.Control
-                id={"destination-input"}
-                type={"text"}
-                placeholder={"Destination"}
-                onChange={updateDestination}
-                value={destination}
-                readOnly={false}
-              />
-            </Form.Group>
-            <br />
-            <Form.Group className="mb-3">
-              <Form.Check
-                id="mapcbox"
-                type="checkbox"
-                onChange={getFromMap}
-                label="Select in Map"
-              />
-            </Form.Group>
-            <Form.Group>
-              <Button
-                id={"get-route-btn"}
-                variant={"light"}
-                style={{ border: ".1em solid black" }}
-              >
-                Get Route
-              </Button>
-            </Form.Group>
-          </Form>
-        </Card.Body>
-      </Card>
-      <Container className={"map-ui d-flex flex-column h-100"} fluid>
-        {/*
-                    POPUP CARD
-                */}
-        <Card
-          id={"card-info"}
+        })} */}
+        </MapContainer>
+        <Button
+          id={"ori-dst-btn"}
+          onClick={createRoute}
+          variant={"light"}
           style={{
+            zIndex: 1,
+            scale: "100%",
+            bottom: "6%",
+            left: "0.5em",
             position: "absolute",
-            top: "10em",
-            left: "50%",
+            border: ".1em solid black",
+          }}
+        >
+          Route
+        </Button>
+        <Card
+          id={"card-ori-dest"}
+          style={{
+            zIndex: 1,
+            top: "1%",
+            left: "5%",
+            width: "15%",
+            position: "absolute",
             display: "none",
           }}
         >
-          <Card.Header>
-            <CloseButton id={"card-btn"} onClick={hidecard} />
-          </Card.Header>
           <Card.Body>
-            <Row id={"location-text"}></Row>
-            <Row id={"lat-text"}></Row>
-            <Row id={"lng-txt"}></Row>
-          </Card.Body>
-        </Card>
-        {/*
-                    UPPER PART OF THE UI
-                */}
-        <Row className={"pt-2"}>
-          <Col xs={"auto"} className={"mx-auto"}>
             <Form>
-              <Form.Group controlId={"search-bar"}>
+              <Form.Group>
+                <Form.Label>Origin</Form.Label>
                 <Form.Control
+                  id={"origin-input"}
                   type={"text"}
-                  placeholder={"Search"}
-                  onKeyDown={handleKeyDown}
+                  placeholder={"Origin"}
+                  onChange={updateOrigin}
+                  value={origin}
+                  readOnly={false}
                 />
               </Form.Group>
-            </Form>
-          </Col>
-          <Col xs="auto" className="d-flex align-items-center">
-            <ButtonGroup>
-              <a href={`/profile/${user.username}`} className="btn-circle-link">
+              <br />
+              <Form.Group>
+                <Form.Label>Destination</Form.Label>
+                <Form.Control
+                  id={"destination-input"}
+                  type={"text"}
+                  placeholder={"Destination"}
+                  onChange={updateDestination}
+                  value={destination}
+                  readOnly={false}
+                />
+              </Form.Group>
+              <br />
+              <Form.Group className="mb-3">
+                <Form.Check
+                  id="mapcbox"
+                  type="checkbox"
+                  onChange={getFromMap}
+                  label="Select in Map"
+                />
+              </Form.Group>
+              <Form.Group>
                 <Button
-                  style={{
-                    backgroundColor: "transparent",
-                    border: "none",
-                    padding: "0",
-                  }}
-                  className="btn-circle"
+                  id={"get-route-btn"}
+                  variant={"light"}
+                  style={{ border: ".1em solid black" }}
                 >
-                  <img
-                    src={user.profilePictureUrl}
-                    alt={`${user.name}'s profile`}
-                    className="rounded-circle" // Use Bootstrap's rounded-circle class for circular images
-                  />
+                  Get Route
                 </Button>
-              </a>
-            </ButtonGroup>
-          </Col>
-        </Row>
-        {/*
+              </Form.Group>
+            </Form>
+          </Card.Body>
+        </Card>
+        <Container className={"map-ui d-flex flex-column h-100"} fluid>
+          {/*
+                    POPUP CARD
+                */}
+          <Card
+            id={"card-info"}
+            style={{
+              position: "absolute",
+              top: "10em",
+              left: "50%",
+              display: "none",
+            }}
+          >
+            <Card.Header>
+              <CloseButton id={"card-btn"} onClick={hidecard} />
+            </Card.Header>
+            <Card.Body>
+              <Row id={"location-text"}></Row>
+              <Row id={"lat-text"}></Row>
+              <Row id={"lng-txt"}></Row>
+            </Card.Body>
+          </Card>
+          {/*
+                    UPPER PART OF THE UI
+                */}
+          <Row className={"pt-2"}>
+            <Col xs={"auto"} className={"mx-auto"}>
+              <Form>
+                <Form.Group controlId={"search-bar"}>
+                  <Form.Control
+                    type={"text"}
+                    placeholder={"Search"}
+                    onKeyDown={handleKeyDown}
+                  />
+                </Form.Group>
+              </Form>
+            </Col>
+            <Col xs="auto" className="d-flex align-items-center">
+              <ButtonGroup>
+                <a
+                  href={`/profile/${user.username}`}
+                  className="btn-circle-link"
+                >
+                  <Button
+                    style={{
+                      backgroundColor: "transparent",
+                      border: "none",
+                      padding: "0",
+                    }}
+                    className="btn-circle"
+                  >
+                    {user.image_url === "" ? (
+                      <img
+                        src={userMock.profilePictureUrl}
+                        alt={`${user.first_name}'s profile`}
+                        className="rounded-circle"
+                      />
+                    ) : (
+                      <img
+                        src={user.image_url}
+                        alt={`${user.first_name}'s profile`}
+                        className="rounded-circle"
+                      />
+                    )}
+                  </Button>
+                </a>
+              </ButtonGroup>
+            </Col>
+          </Row>
+          {/*
                     MIDDLE PART OF THE UI
                 */}
-        <Row className={"flex-grow-1"}>
-          <Col xs={"auto"} className={"flex-grow-1"}></Col>
-          <Col xs={"auto"} className={"d-flex align-items-center"}>
-            <Card id={"filter-board"}>
-              <Card.Body>
-                <FilterBoardComponent fetchPOIs={fetchPOIs} />
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-        {/*
+          <Row className={"flex-grow-1"}>
+            <Col xs={"auto"} className={"flex-grow-1"}></Col>
+            <Col xs={"auto"} className={"d-flex align-items-center"}>
+              <Card id={"filter-board"}>
+                <Card.Body>
+                  <FilterBoardComponent fetchPOIs={fetchPOIs} />
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+          {/*
                     LOWER PART OF THE UI
                 */}
-        <Row className={"pb-2"}>
-          <Col xs={2}></Col>
-          <Col xs={"auto"} className={"mx-auto"}>
-            <Card className={"text-center"}>
-              <Card.Body>
-                <Card.Title>User Position</Card.Title>
-                <Card.Text id={"map-user-position"}>
-                  {userPosition.latitude !== undefined &&
-                  userPosition.longitude !== undefined
-                    ? `Latitude: ${userPosition.latitude} | Longitude: ${userPosition.longitude}`
-                    : "Please enable location to see your current location"}
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
+          <Row className={"pb-2"}>
+            <Col xs={2}></Col>
+            <Col xs={"auto"} className={"mx-auto"}>
+              <Card className={"text-center"}>
+                <Card.Body>
+                  <Card.Title>User Position</Card.Title>
+                  <Card.Text id={"map-user-position"}>
+                    {userPosition.latitude !== undefined &&
+                    userPosition.longitude !== undefined
+                      ? `Latitude: ${userPosition.latitude} | Longitude: ${userPosition.longitude}`
+                      : "Please enable location to see your current location"}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
 
-          <Col xs={2} className={"d-flex align-items-end"}>
-            <ButtonGroup>
-              <Button
-                id={"map-rotate-left-btn"}
-                variant={"light"}
-                onClick={() => addToBearing(-10)}
-              >
-                Rotate Left
-              </Button>
-              <Button
-                id={"map-rotate-right-btn"}
-                variant={"light"}
-                onClick={() => addToBearing(10)}
-              >
-                Rotate Right
-              </Button>
-            </ButtonGroup>
-          </Col>
-        </Row>
-      </Container>
-    </>
+            <Col xs={2} className={"d-flex align-items-end"}>
+              <ButtonGroup>
+                <Button
+                  id={"map-rotate-left-btn"}
+                  variant={"light"}
+                  onClick={() => addToBearing(-10)}
+                >
+                  Rotate Left
+                </Button>
+                <Button
+                  id={"map-rotate-right-btn"}
+                  variant={"light"}
+                  onClick={() => addToBearing(10)}
+                >
+                  Rotate Right
+                </Button>
+              </ButtonGroup>
+            </Col>
+          </Row>
+        </Container>
+      </>
+    )
   );
 }

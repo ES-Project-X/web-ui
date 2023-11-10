@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserProps } from "../structs/user";
 import { Form, FloatingLabel } from "react-bootstrap";
 import { Button } from "react-bootstrap";
@@ -27,8 +27,11 @@ const UserProfile = ({ user }: { user: UserProps }) => {
   };
 
   const [isEditing, setIsEditing] = useState(false);
-  const [username, setUsername] = useState(user.username);
-  const [email, setEmail] = useState(user.email);
+  const [username, setUsername] = useState("");
+  const [fname, setFname] = useState("");
+  const [lname, setLname] = useState("");
+  const [email, setEmail] = useState("");
+  const [avatar, setAvatar] = useState("");
 
   const updateProfile = () => {
     console.log("update profile");
@@ -38,8 +41,22 @@ const UserProfile = ({ user }: { user: UserProps }) => {
 
     // here u need to update the user profile in the DB
     /* @Gonçalo */
-  }
-  
+  };
+
+  useEffect(() => {
+    // get the user from local storage
+    const userLS = JSON.parse(localStorage.getItem("user") || "{}");
+    console.log("userLS:", userLS);
+
+    if (!userLS.avatar) {
+      userLS.image_url = "https://i.imgur.com/8Km9tLL.png";
+    }
+    setAvatar(userLS.image_url);
+    setFname(userLS.first_name);
+    setLname(userLS.last_name);
+    setUsername(userLS.username);
+    setEmail(userLS.email);
+  }, [user]);
 
   return (
     <div
@@ -61,10 +78,17 @@ const UserProfile = ({ user }: { user: UserProps }) => {
           position: "absolute",
         }}
       >
+        <Button
+          variant="success"
+          className="mt-3"
+          onClick={() => (window.location.href = "/map")}
+        >
+          Go back to Map
+        </Button>
         <div style={avatarContainerStyle}>
           <img
-            src={user.avatar}
-            alt={`${user.fname} ${user.lname}'s avatar`}
+            src={avatar}
+            alt={`${fname} ${lname}'s avatar`}
             style={avatarStyle}
           />
         </div>
@@ -79,7 +103,7 @@ const UserProfile = ({ user }: { user: UserProps }) => {
         )}
         <div style={userDetailStyle}>
           <h1 style={nameStyle} className="mb-3">
-            {user.fname} {user.lname}
+            {fname} {lname}
           </h1>
           <div className="mb-3">
             <FloatingLabel controlId="floatingInput1" label="Username">
@@ -105,11 +129,7 @@ const UserProfile = ({ user }: { user: UserProps }) => {
           </div>
         </div>
         {isEditing && (
-          <Button
-            variant="primary"
-            className="mt-3"
-            onClick={updateProfile}
-          >
+          <Button variant="primary" className="mt-3" onClick={updateProfile}>
             Save Profile
           </Button>
         )}
