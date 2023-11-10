@@ -2,7 +2,6 @@ FROM node:18-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -39,8 +38,12 @@ ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
-# Add authbind to allow non-root user to bind to port 80
-RUN apk add --no-cache authbind && touch /etc/authbind/byport/80 && chmod 500 /etc/authbind/byport/80
+# Create a script to allow non-root user to bind to port 80
+COPY authbind.sh /usr/local/bin/authbind
+RUN chmod +x /usr/local/bin/authbind && \
+    touch /etc/authbind/byport/80 && \
+    chmod 500 /etc/authbind/byport/80
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
@@ -63,5 +66,5 @@ ENV PORT 80
 # set hostname to localhost
 ENV HOSTNAME "0.0.0.0"
 
-# Use authbind to run the server on port 80
-CMD ["authbind", "--deep", "node", "server.js"]
+# Use authbind-like script to run the server on port 80
+CMD ["authbind", "node", "server.js"]
