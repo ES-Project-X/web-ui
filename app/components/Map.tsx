@@ -401,6 +401,9 @@ export default function MapComponent({
       } catch (error) {
         console.log("error guy:", error);
         console.log(error);
+        setUsername("a"); // JUST TO MAKE SURE IT GETS TO PROFILE PAGE - MUST FIX
+        setAvatar("");
+        setFname("");
       }
     };
     fetchUser();
