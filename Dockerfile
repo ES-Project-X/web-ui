@@ -68,4 +68,4 @@ ENV PORT 80
 ENV HOSTNAME "0.0.0.0"
 
 # Use authbind-like script to run the server on port 80
-CMD ["authbind", "node", "server.js"]
+CMD ["authbind", "--deep", "node", "server.js"]
