@@ -41,6 +41,7 @@ ENV NODE_ENV production
 # Create a script to allow non-root user to bind to port 80
 COPY authbind.sh /usr/local/bin/authbind
 RUN chmod +x /usr/local/bin/authbind && \
+    mkdir -p /etc/authbind/byport && \
     touch /etc/authbind/byport/80 && \
     chmod 500 /etc/authbind/byport/80
 
