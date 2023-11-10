@@ -62,4 +62,4 @@ ENV PORT 80
 # set hostname to localhost
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "server.js", "--host", "0.0.0.0", "--port", "80"]
+CMD ["sudo", "node", "server.js", "--host", "0.0.0.0", "--port", "80"]
