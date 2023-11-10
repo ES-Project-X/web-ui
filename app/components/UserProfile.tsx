@@ -47,52 +47,24 @@ const UserProfile = ({ user }: { user: UserProps }) => {
     const userLS = JSON.parse(localStorage.getItem("user") || "{}");
     console.log("userLS:", userLS);
 
-    if (!userLS.avatar) {
-      userLS.image_url = "https://i.imgur.com/8Km9tLL.png";
-    }
-    setAvatar(userLS.image_url);
+    if (userLS) {
+      if (userLS.image_url === "") {
+        setAvatar("https://i.imgur.com/8Km9tLL.png");
+      } else {
+        setAvatar(userLS.image_url);
+      }
     setFname(userLS.first_name);
     setLname(userLS.last_name);
     setUsername(userLS.username);
     setEmail(userLS.email);
+    } else {
+      setAvatar(user.avatar);
+      setFname(user.fname);
+      setLname(user.lname);
+      setUsername(user.username);
+      setEmail(user.email);
+    }
   }, [user]);
-
-  if (username === "") {
-    return (
-      <div
-        className="container"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            top: "50%",
-            position: "absolute",
-          }}
-        >
-          {" "}
-  <h1 style={{ color:"white"}}>Sorry Not logged in</h1>
-          <Button
-            variant="success"
-            className="mt-3"
-            onClick={() =>
-              (window.location.href = "/map")
-            } /*  CHANGE HERE TO LOGIN IDK???? */
-          >
-            Login
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div

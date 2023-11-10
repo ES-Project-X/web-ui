@@ -9,7 +9,6 @@ export default async function Page({
 }: {
   params: { user: UserProps };
 }) {
-  console.log("params:", params);
   const data: UserProps = {
     id: 1,
     username: "",
