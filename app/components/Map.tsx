@@ -369,7 +369,7 @@ export default function MapComponent({
   }
 
   const TOKEN =
-    "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiMDg3YTVjM2UtNWI0MC00N2M2LWFmZmUtYjg1OTk1ZTBlYjFlIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk2MjIzMDYsImV4cCI6MTY5OTYyNTkwNiwiaWF0IjoxNjk5NjIyMzA2LCJqdGkiOiI0OWQ5OWU2ZC1lMGYzLTQ4ZmItOGU2Ny00NGY1ZmFiNzc0MGUiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.vddusokriIAZsB3cBptofWmju3U4yQD-mG7qNA6tcMPiLZv1LcUUjv4SYLKNywSooI6mK3Q8waZ2w9JQFvsToHu2zDvKtqj2zYgCNkoA6Od2toVDAHdxcL-C984IIxShr2K1Dr5BdknmbOd5VlVWx-gwOoNImBN6gf078ejgg_Ku4Kan3KNS-36NFduNPW_yMd6u0SQP-S0lQQKTdqd5OxRKSOfJH9w1pAfvw2uVvo4JD11SS-nZVrJbXzYV2HyW2ziJcyet8pCLc7uNtmVTmEaFYaiJGXPCNVIOUw0SV8lMh9mMMLQZZMXm8omxeSiXara-TMrCZU7_QMaubUrOVw";
+    "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiZjNjMTVkYmEtMzZhNS00NDNmLTkzZGQtOTNkYjA2OGZkMWExIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk2Mjg1MDcsImV4cCI6MTY5OTYzMjEwNywiaWF0IjoxNjk5NjI4NTA3LCJqdGkiOiJkOGY5ZTgzZS1mNjUyLTRhNjUtYjZhMC02ZmQyM2JlNGUwZWUiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.cWW4Fb4gXuaPvOL-ZWeEvZ-TKsx5OO1x-6HrzLgGdCz5w0loAYIps9rR-lmetacdmm2oW1WNV8JkDjr6P8AUGhd-FsnIpscddsFTeH2vudZ1RGNc-hZA5OLZ0fwerIvnRTafAI0TXlgzhnHhRLizTs3vLU_ar_mMCmIK3WE2zq1K4C3qOR2cF8BdBByazv9h044Z2zSNkMWK7f6nrp_0AZCNo7wRes--Lx1NktUBTL-hrK43GhQnkAouCppXmYNPIniRcp-iO8yuBJvCz3D43c4eMgxFBdhLAlON6ZRX8Ju-AH4_bk51x4fedwHE6YjJcAa1Ax-CkBKmP4owVU65Zg";
   /* Fetch the user details by username */
   // const res = await fetch(`.../${params.user}`)
   // const data: user = await res.json()
@@ -655,8 +655,14 @@ export default function MapComponent({
             </Form>
           </Col>
           <Col xs="auto" className="d-flex align-items-center">
+            <a href={`/login`} className="btn-circle-link me-3">
+              <button className="btn">Login</button>
+            </a>
+            <a href={`/login`} className="btn-circle-link me-3">
+              <button className="btn">Register</button>
+            </a>
             <ButtonGroup>
-              <a href={`/profile/${username}`} className="btn-circle-link">
+              <a href={`/profile/${username}`} className="btn-circle-link me-3">
                 <Button
                   style={{
                     backgroundColor: "transparent",
@@ -668,7 +674,7 @@ export default function MapComponent({
                   {avatar === "" ? (
                     <img
                       src="https://i.imgur.com/8Km9tLL.png"
-                      alt={'Default pfp'}
+                      alt={"Default pfp"}
                       className="rounded-circle"
                     />
                   ) : (
