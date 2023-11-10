@@ -329,50 +329,6 @@ export default function MapComponent({
   const updateDestination = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDestination(event.target.value);
   };
-
-  // FETCHE THE USER HERE AND STORE IT TO PASS IT TO THE PROFILE PAGE
-  /* GUI */
-  const userMock = {
-    name: "John Doe",
-    email: "johndoe@example.com",
-    username: "johndoe3",
-    profilePictureUrl: "https://i.imgur.com/8Km9tLL.png",
-  };
-
-  /* TODO: MUST FIX */
-  const TOKEN = "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiNWMzZmRhZDQtOTllYy00NTkxLWJlOTEtMmM1NmMxZmM2MGYyIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk2MTc1OTYsImV4cCI6MTY5OTYyMTE5NiwiaWF0IjoxNjk5NjE3NTk2LCJqdGkiOiI2ODZkODhkOS1lMjE5LTQ2NWMtYWViNy1mYjBjM2FjMmU2MDMiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.TowQ9G1OjzFYpBdbESJdubJWyv-SQBilWSlTszAz7OkG9L-yhoeNHY2V6IIbOUn4rOErFv9LvSb92Owl5E-LFrJ5Z3GVBEN2QPi0lruebte3zFJZCn2UNgPkw2uSHvA5xQMXtxMXvD_QguRTp-DwtMHwd2i_VQ5Znqr16D_N8H462KCRwGV1kjYAEjr6oOq7OdyefO20W9HqUvcCchcp6gbbKGn0VSI-Khxy4VA3noSSotHs8J0JMrh5kTSvAUIbbd7gk83RCUG9a2ec1uY83RCWvRU7x5XBfRLzJgMuZBOOqWj1BJi5X3d7iCKBJ3_XvC-wmoC2B3bx2HvlrhLLeA";
-  /* Fetch the user details by username */
-  // const res = await fetch(`.../${params.user}`)
-  // const data: user = await res.json()
-  const URL_USER = process.env.API_URL;
-  const [user, setUser] = useState(null);
-  useEffect(() => {
-    const headers = { Authorization: `Bearer ${TOKEN}` };
-    const url = new URL("http://127.0.0.1:8000/user");
-
-    const fetchUser = async () => {
-      console.log("fetching user");
-      console.log("URL_USER:", URL_USER);
-      console.log("TOKEN:", TOKEN);
-      try {
-        await fetch(url.toString(), { headers })
-          .then((res) => res.json())
-          .then((data) => {
-            setUser(data);
-            //console.log(data);
-            localStorage.setItem("user", JSON.stringify(data));
-          });
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  /* flex tape */
-  if (!user) {
-    return <div>Loading...</div>;
-  }
   const cancelRoute = () => {
     setPoints([]);
     setGettingRoute(false);
@@ -412,8 +368,45 @@ export default function MapComponent({
     )}`;
   }
 
+  const TOKEN =
+    "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiMDg3YTVjM2UtNWI0MC00N2M2LWFmZmUtYjg1OTk1ZTBlYjFlIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk2MjIzMDYsImV4cCI6MTY5OTYyNTkwNiwiaWF0IjoxNjk5NjIyMzA2LCJqdGkiOiI0OWQ5OWU2ZC1lMGYzLTQ4ZmItOGU2Ny00NGY1ZmFiNzc0MGUiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.vddusokriIAZsB3cBptofWmju3U4yQD-mG7qNA6tcMPiLZv1LcUUjv4SYLKNywSooI6mK3Q8waZ2w9JQFvsToHu2zDvKtqj2zYgCNkoA6Od2toVDAHdxcL-C984IIxShr2K1Dr5BdknmbOd5VlVWx-gwOoNImBN6gf078ejgg_Ku4Kan3KNS-36NFduNPW_yMd6u0SQP-S0lQQKTdqd5OxRKSOfJH9w1pAfvw2uVvo4JD11SS-nZVrJbXzYV2HyW2ziJcyet8pCLc7uNtmVTmEaFYaiJGXPCNVIOUw0SV8lMh9mMMLQZZMXm8omxeSiXara-TMrCZU7_QMaubUrOVw";
+  /* Fetch the user details by username */
+  // const res = await fetch(`.../${params.user}`)
+  // const data: user = await res.json()
+  // const URL_USER = process.env.API_URL;
+  const [user, setUser] = useState(null);
+  const [username, setUsername] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [fname, setFname] = useState("");
+
+  useEffect(() => {
+    const headers = { Authorization: `Bearer ${TOKEN}` };
+    const url = new URL("http://127.0.0.1:8000/user");
+
+    const fetchUser = async () => {
+      // console.log("fetching user");
+      // console.log("URL_USER:", URL_USER);
+      // console.log("TOKEN:", TOKEN);
+      try {
+        await fetch(url.toString(), { headers })
+          .then((res) => res.json())
+          .then((data) => {
+            setUser(data);
+            //console.log(data);
+            localStorage.setItem("user", JSON.stringify(data));
+            setUsername(data.username);
+            setAvatar(data.image_url);
+            setFname(data.first_name);
+          });
+      } catch (error) {
+        console.log("error guy:", error);
+        console.log(error);
+      }
+    };
+    fetchUser();
+  }, []);
+
   return (
-    //console.log("user HEY:", user),
     <>
       {/* Sidebar */}
       <Sidebar />
@@ -442,7 +435,7 @@ export default function MapComponent({
         {/*
                     DISPLAY POIs
                 */}
-        {/*  {basicPOIs.map((poi) => {
+        {/* {basicPOIs.map((poi) => {
           return (
             <Marker
               key={poi.id}
@@ -663,7 +656,7 @@ export default function MapComponent({
           </Col>
           <Col xs="auto" className="d-flex align-items-center">
             <ButtonGroup>
-              <a href={`/profile/${user.username}`} className="btn-circle-link">
+              <a href={`/profile/${username}`} className="btn-circle-link">
                 <Button
                   style={{
                     backgroundColor: "transparent",
@@ -672,16 +665,16 @@ export default function MapComponent({
                   }}
                   className="btn-circle"
                 >
-                  {user.image_url === "" ? (
+                  {avatar === "" ? (
                     <img
-                      src={userMock.profilePictureUrl}
-                      alt={`${user.first_name}'s profile`}
+                      src="https://i.imgur.com/8Km9tLL.png"
+                      alt={'Default pfp'}
                       className="rounded-circle"
                     />
                   ) : (
                     <img
-                      src={user.image_url}
-                      alt={`${user.first_name}'s profile`}
+                      src={avatar}
+                      alt={`${fname}'s profile`}
                       className="rounded-circle"
                     />
                   )}
