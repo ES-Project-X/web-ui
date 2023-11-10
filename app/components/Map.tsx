@@ -655,12 +655,19 @@ export default function MapComponent({
             </Form>
           </Col>
           <Col xs="auto" className="d-flex align-items-center">
-            <a href={`/login`} className="btn-circle-link me-3">
+            <a
+              href={`https://es-project-x.auth.eu-west-1.amazoncognito.com/login?response_type=token&client_id=5g4bsfslqa95u4pd2posbn0rnu&redirect_uri=https://google.com`}
+              className="btn-circle-link me-3"
+            >
               <button className="btn">Login</button>
             </a>
-            <a href={`/login`} className="btn-circle-link me-3">
+            <a
+              href={`https://es-project-x.auth.eu-west-1.amazoncognito.com/signup?response_type=token&client_id=5g4bsfslqa95u4pd2posbn0rnu&redirect_uri=https://google.com`}
+              className="btn-circle-link me-3"
+            >
               <button className="btn">Register</button>
             </a>
+
             <ButtonGroup>
               <a href={`/profile/${username}`} className="btn-circle-link me-3">
                 <Button
