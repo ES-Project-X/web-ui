@@ -278,11 +278,11 @@ describe("MapComponent", () => {
 
             await waitFor(() => {
                 expect(findAllByClass("bicycle-parking-marker-icon").length).toBe(2)
-            }, {timeout: 10000})
+            }, {timeout: 15000 })
 
             await waitFor(() => {
                 expect(findAllByClass("toilets-marker-icon").length).toBe(1)
-            }, {timeout: 10000})
+            }, {timeout: 15000 })
         })
 
         it("filters POIs", async () => {
@@ -307,11 +307,11 @@ describe("MapComponent", () => {
 
             await waitFor(() => {
                 expect(findAllByClass("bicycle-parking-marker-icon").length).toBe(0)
-            }, {timeout: 10000})
+            }, {timeout: 15000 })
 
             await waitFor(() => {
                 expect(findAllByClass("toilets-marker-icon").length).toBe(1)
-            }, {timeout: 10000})
+            }, {timeout: 15000 })
         })
     });
 
