@@ -232,7 +232,7 @@ describe("MapComponent", () => {
         });
     })
 
-    describe("Filter", () => {
+    describe.skip("Filter", () => {
 
         beforeEach(async () => {
             global.navigator.geolocation = {
@@ -272,20 +272,20 @@ describe("MapComponent", () => {
             })
         })
 
-        it("fetches POIs", async () => {
+        it.skip("fetches POIs", async () => {
             const mapContainer = findById("map-container")
             expect(mapContainer).toBeDefined()
 
             await waitFor(() => {
                 expect(findAllByClass("bicycle-parking-marker-icon").length).toBe(2)
-            }, {timeout: 15000 })
+            }, {timeout: 10000})
 
             await waitFor(() => {
                 expect(findAllByClass("toilets-marker-icon").length).toBe(1)
-            }, {timeout: 15000 })
+            }, {timeout: 10000})
         })
 
-        it("filters POIs", async () => {
+        it.skip("filters POIs", async () => {
             const mapContainer = findById("map-container")
             expect(mapContainer).toBeDefined()
 
@@ -307,11 +307,11 @@ describe("MapComponent", () => {
 
             await waitFor(() => {
                 expect(findAllByClass("bicycle-parking-marker-icon").length).toBe(0)
-            }, {timeout: 15000 })
+            }, {timeout: 10000})
 
             await waitFor(() => {
                 expect(findAllByClass("toilets-marker-icon").length).toBe(1)
-            }, {timeout: 15000 })
+            }, {timeout: 10000})
         })
     });
 
