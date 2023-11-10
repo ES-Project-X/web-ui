@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import { UserProps } from "../structs/user";
 import { Form, FloatingLabel } from "react-bootstrap";
@@ -44,6 +42,7 @@ const UserProfile = ({ user }: { user: UserProps }) => {
   };
 
   useEffect(() => {
+    console.log("user:", user);
     // get the user from local storage
     const userLS = JSON.parse(localStorage.getItem("user") || "{}");
     console.log("userLS:", userLS);
@@ -57,6 +56,43 @@ const UserProfile = ({ user }: { user: UserProps }) => {
     setUsername(userLS.username);
     setEmail(userLS.email);
   }, [user]);
+
+  if (username === "") {
+    return (
+      <div
+        className="container"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            top: "50%",
+            position: "absolute",
+          }}
+        >
+          {" "}
+  <h1 style={{ color:"white"}}>Sorry Not logged in</h1>
+          <Button
+            variant="success"
+            className="mt-3"
+            onClick={() =>
+              (window.location.href = "/map")
+            } /*  CHANGE HERE TO LOGIN IDK???? */
+          >
+            Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

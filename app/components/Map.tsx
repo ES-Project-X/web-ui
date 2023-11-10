@@ -210,9 +210,9 @@ export default function MapComponent({
   // FETCHE THE USER HERE AND STORE IT TO PASS IT TO THE PROFILE PAGE
   /* GUI */
   const userMock = {
-    name: "John Doexxx",
+    name: "John Doe",
     email: "johndoe@example.com",
-    username: "johndoe",
+    username: "johndoe3",
     profilePictureUrl:
       "https://i.imgur.com/8Km9tLL.png",
   };
@@ -229,15 +229,15 @@ export default function MapComponent({
     const url = new URL("http://127.0.0.1:8000/user");
 
     const fetchUser = async () => {
-      console.log("fetching user");
-      console.log("URL_USER:", URL_USER);
-      console.log("TOKEN:", TOKEN);
+      //console.log("fetching user");
+      //console.log("URL_USER:", URL_USER);
+      //console.log("TOKEN:", TOKEN);
       try {
         await fetch(url.toString(), { headers })
           .then((res) => res.json())
           .then((data) => {
             setUser(data);
-            console.log(data);
+            //console.log(data);
             localStorage.setItem("user", JSON.stringify(data));
           });
       } catch (error) {
@@ -253,7 +253,7 @@ export default function MapComponent({
   }
 
   return (
-    console.log("user HEY:", user),
+    //console.log("user HEY:", user),
     (
       <>
         {/* Sidebar */}
