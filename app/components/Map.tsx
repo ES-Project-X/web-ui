@@ -40,6 +40,8 @@ import {
 import Sidebar from "./Sidebar";
 import GetClusters from "./GetClusters";
 import POIsSidebar from "./POIsSidebar";
+import {Hash} from "crypto";
+import {list} from "postcss";
 import { Direction } from "../structs/direction";
 
 const API_KEY = process.env.PUBLIC_KEY_HERE;
@@ -472,7 +474,6 @@ export default function MapComponent({
 
             <MapContainer
                 id={"map-container"}
-                ref={mapRef}
                 className={"map"}
                 center={center}
                 zoom={13}
@@ -502,7 +503,7 @@ export default function MapComponent({
                 style={{
                     zIndex: 1,
                     scale: "100%",
-                    bottom: "6%",
+                    bottom: "1%",
                     left: "0.5em",
                     position: "absolute",
                     border: ".1em solid black",
