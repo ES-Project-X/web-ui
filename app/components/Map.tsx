@@ -52,10 +52,10 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
     const [gettingRoute, setGettingRoute] = useState(false);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
-    const URL_API = "http://127.0.0.1:8000/"; // TODO: put in .env
+    const URL_API = process.env.DATABASE_API;
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
     const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
-    const URL_ROUTING = "http://localhost:8989/route?points_encoded=false&profile=bike";
+    const URL_ROUTING = process.env.URL_ROUTING;
 
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
@@ -289,24 +289,27 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
             let dest = await geoCode(URL_GEO + "&q=" + destination);
             url += "&point=" + ori + "&point=" + dest;
         }
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                if (data.paths.length === 0) {
-                    window.alert("No results");
-                    return;
-                }
-                const points = data.paths[0].points.coordinates;
-                let points2 = [];
-                for (let point of points) {
-                    points2.push(new LatLng(point[1], point[0]));
-                }
-                setPoints([points2]);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+        if (url) {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.paths.length === 0) {
+                        window.alert("No results");
+                        return;
+                    }
+                    const points = data.paths[0].points.coordinates;
+                    let points2 = [];
+                    for (let point of points) {
+                        points2.push(new LatLng(point[1], point[0]));
+                    }
+                    setPoints([points2]);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+                
+            }
     }
 
     const hidecard = () => {
