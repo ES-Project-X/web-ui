@@ -432,6 +432,7 @@ export default function MapComponent({
 
     useEffect(() => {
         const headers = { Authorization: `Bearer ${TOKEN}` };
+        console.log(URL_API + "user")
         const url = new URL(URL_API + "user");
 
         const fetchUser = async () => {
@@ -473,10 +474,13 @@ export default function MapComponent({
                 ref={mapRef}
                 className={"map"}
                 center={center}
-                zoom={13}
+                zoom={13} 
                 scrollWheelZoom={true}
                 rotate={true}
                 bearing={0}
+                maxZoom={18}
+                minZoom={2}
+                maxBounds={[[-90, -180], [90, 180]]}
                 // @ts-ignore
                 rotateControl={{ closeOnZeroBearing: false }}
                 touchRotate={true}
