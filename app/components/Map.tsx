@@ -474,7 +474,7 @@ export default function MapComponent({
                 ref={mapRef}
                 className={"map"}
                 center={center}
-                zoom={13} 
+                zoom={13}
                 scrollWheelZoom={true}
                 rotate={true}
                 bearing={0}
@@ -561,6 +561,49 @@ export default function MapComponent({
                     </Form>
                 </Card.Body>
             </Card>
+            if (directions[currentIndex] !== undefined){" "}
+            {
+                <Card
+                    id={"ins-card"}
+                    style={{
+                        zIndex: 1,
+                        bottom: "10%",
+                        left: "0.5em",
+                        position: "absolute",
+                        display: "none",
+                    }}
+                >
+                    <Card.Body>
+                        <Card.Title>{directions[currentIndex].direction}</Card.Title>
+                        <Card.Text>
+                            Distance: {directions[currentIndex].distance} meters <br />
+                            Time: {convertMsToTime(directions[currentIndex].duration)}
+                        </Card.Text>
+                        <Button
+                            id={"next-ins-btn"}
+                            variant="primary"
+                            onClick={handleNext}
+                            disabled={currentIndex >= directions.length - 1}
+                            style={{ border: ".1em solid black", width: "40%" }}
+                        >
+                            Next
+                        </Button>
+                        <Button
+                            id={"before-ins-btn"}
+                            variant="primary"
+                            onClick={handleBefore}
+                            disabled={currentIndex == 0}
+                            style={{
+                                border: ".1em solid black",
+                                width: "40%",
+                                marginLeft: "20%",
+                            }}
+                        >
+                            Before
+                        </Button>
+                    </Card.Body>
+                </Card>
+            }
             <Container className={"map-ui d-flex flex-column h-100"} fluid>
                 {/*
                 {basicPOIs.map(poi => {

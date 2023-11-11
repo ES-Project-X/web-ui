@@ -1,11 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import MapComponent from "../../app/components/Map";
 import { enableFetchMocks } from "jest-fetch-mock";
-import { map } from "leaflet";
-import exp from "constants";
 
 describe("MarkersManager", () => {
-
     enableFetchMocks();
 
     beforeEach(() => {
