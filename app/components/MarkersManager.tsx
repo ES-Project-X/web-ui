@@ -61,9 +61,9 @@ export default function MarkersManager({
             return;
         }
         if (isModalOpen) {
-            modal.showModal();
+            modal.open = true;
         } else {
-            modal.close();
+            modal.open = false;
             setIsModalOpen(false);
         }
     }, [isModalOpen]);
@@ -75,10 +75,10 @@ export default function MarkersManager({
             return;
         }
         if (isPOIModalOpen) {
-            modal.showModal();
+            modal.open = true;
             closeModal();
         } else {
-            modal.close();
+            modal.open = false;
             setIsPOIModalOpen(false);
         }
     }, [isPOIModalOpen]);
