@@ -48,10 +48,6 @@ const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KE
 const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
 const URL_ROUTING = process.env.URL_ROUTING;
 
-import {Hash} from "crypto";
-import {list} from "postcss";
-import {Direction} from "../structs/direction";
-
 export default function MapComponent({
     tileLayerURL,
 }: {
@@ -130,6 +126,27 @@ export default function MapComponent({
                 return BenchMarker;
             default:
                 return RedMarker;
+        }
+    }
+
+    const updateMarkers = (data: any) => {
+        const pois: BasicPOI[] = data.map((poi: any) => {
+            return {
+                id: poi.id,
+                name: poi.name,
+                type: poi.type,
+                latitude: poi.latitude,
+                longitude: poi.longitude,
+                icon: getIcon(poi.type)
+            }
+        })
+        if (pois.length > 0) {
+            let new_pois = markers;
+            pois.forEach((poi: BasicPOI) => {
+                new_pois.push(poi);
+            })
+            setMarkers(new_pois);
+            filterPOIs();
         }
     }
 
