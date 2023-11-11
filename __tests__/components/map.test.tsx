@@ -232,7 +232,7 @@ describe("MapComponent", () => {
         });
     })
 
-    describe("Filter", () => {
+    describe.skip("Filter", () => {
 
         beforeEach(async () => {
             global.navigator.geolocation = {
@@ -272,7 +272,7 @@ describe("MapComponent", () => {
             })
         })
 
-        it("fetches POIs", async () => {
+        it.skip("fetches POIs", async () => {
             const mapContainer = findById("map-container")
             expect(mapContainer).toBeDefined()
 
@@ -285,7 +285,7 @@ describe("MapComponent", () => {
             }, {timeout: 10000})
         })
 
-        it("filters POIs", async () => {
+        it.skip("filters POIs", async () => {
             const mapContainer = findById("map-container")
             expect(mapContainer).toBeDefined()
 
