@@ -52,7 +52,9 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
     const [gettingRoute, setGettingRoute] = useState(false);
 
     const API_KEY = process.env.PUBLIC_KEY_HERE;
-    const URL_API = process.env.DATABASE_API;
+    console.log(API_KEY);
+    const URL_API = process.env.DATABASE_API_URL;
+    console.log(URL_API);
     const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
     const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
     const URL_ROUTING = process.env.URL_ROUTING;
@@ -97,7 +99,6 @@ export default function MapComponent({ tileLayerURL }: { tileLayerURL?: string }
     }
 
     const fetchPOIs = (clusters: number[][]) => {
-
         const url = new URL(URL_API + "pois");
         clusters.forEach((cluster: number[]) => {
             url.searchParams.append("max_lat", cluster[0].toString());
