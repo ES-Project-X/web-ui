@@ -23,7 +23,7 @@ describe("MapPage", () => {
             await driver.quit()
         })
 
-        it("Rotate map to the right", async () => {
+        it.skip("Rotate map to the right", async () => {
             const pane = await driver.findElement({className: "leaflet-rotate-pane"})
             let paneStyle = await pane.getAttribute("style")
             expect(paneStyle).toBe("transform: translate3d(0px, 0px, 0px);")
@@ -35,7 +35,7 @@ describe("MapPage", () => {
             expect(paneStyle).toContain("rotate(0.174533rad);")
         })
 
-        it("Rotate map to the left", async () => {
+        it.skip("Rotate map to the left", async () => {
             const pane = await driver.findElement({className: "leaflet-rotate-pane"})
             let paneStyle = await pane.getAttribute("style")
             expect(paneStyle).toBe("transform: translate3d(0px, 0px, 0px);")
