@@ -2,7 +2,6 @@ import {enableFetchMocks} from 'jest-fetch-mock'
 import MapComponent from "../../app/components/Map"
 import {fireEvent, render, waitFor} from "@testing-library/react"
 import {act} from "react-dom/test-utils";
-import {delay} from "msw";
 
 describe("MapComponent", () => {
 

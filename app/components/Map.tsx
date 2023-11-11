@@ -15,9 +15,7 @@ import {
 } from "react-bootstrap";
 import {
     MapContainer,
-    Marker,
     Polyline,
-    Popup,
     TileLayer,
 } from "react-leaflet";
 import { LatLng } from "leaflet";
@@ -42,8 +40,6 @@ import {
 import Sidebar from "./Sidebar";
 import GetClusters from "./GetClusters";
 import POIsSidebar from "./POIsSidebar";
-import { Hash } from "crypto";
-import { list } from "postcss";
 import { Direction } from "../structs/direction";
 
 const API_KEY = process.env.PUBLIC_KEY_HERE;
@@ -436,7 +432,7 @@ export default function MapComponent({
 
     useEffect(() => {
         const headers = { Authorization: `Bearer ${TOKEN}` };
-        const url = new URL("http://127.0.0.1:8000/user");
+        const url = new URL(URL_API + "user");
 
         const fetchUser = async () => {
             // console.log("fetching user");
@@ -491,24 +487,8 @@ export default function MapComponent({
                 <MarkersManager
                     setOrigin={setOrigin}
                     setDestination={setDestination}
-                    creatingRoute={creatingRoute}
-                />
-                {/*
-                    DISPLAY POIs
-                */}
-                {basicPOIs.map((poi) => {
-                    return (
-                        <Marker
-                            key={poi.id}
-                            icon={getIcon(poi.type)}
-                            position={new LatLng(poi.latitude, poi.longitude)}
-                        >
-                            <Popup>
-                                {poi.name} <br /> {poi.type}
-                            </Popup>
-                        </Marker>
-                    );
-                })}
+                    creatingRoute={creatingRoute} />
+                <GetClusters fetchFunction={fetchPOIs} />
             </MapContainer>
             <Button
                 id={"ori-dst-btn"}
@@ -660,13 +640,19 @@ export default function MapComponent({
                 */}
                 <Row className={"flex-grow-1"}>
                     <Col xs={"auto"} className={"flex-grow-1"}>
-
                     </Col>
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
                         <Card id={"filter-board"}>
                             <Card.Body>
                                 <FilterBoardComponent
-                                    fetchPOIs={fetchPOIs} />
+                                    filterPOIs={filterPOIs} setFilterName={setFilterName} setFilterTypes={setFilterTypes} types={filterTypes} />
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    <Col xs={"auto"} className={"d-flex align-items-center"}>
+                        <Card id={"poi-sidebar"} style={{ display: "none" }}>
+                            <Card.Body>
+                                <POIsSidebar selectedPOI={selectedPOI} />
                             </Card.Body>
                         </Card>
                     </Col>
