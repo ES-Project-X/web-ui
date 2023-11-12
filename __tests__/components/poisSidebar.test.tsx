@@ -214,4 +214,8 @@ describe('POIsSidebar', () => {
         expect(mockSetRatingPositive).toHaveBeenCalled();
     });
 
+    it('fetchPOIDetails', async () => {
+
+    });
+
 });
