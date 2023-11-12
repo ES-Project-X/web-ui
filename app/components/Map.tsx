@@ -88,6 +88,9 @@ export default function MapComponent({
     const [directions, setDirections] = useState<Direction[]>(d);
     const [currentIndex, setCurrentIndex] = useState(0);
 
+    const [ratingPositive, setRatingPositive] = useState(0)
+    const [ratingNegative, setRatingNegative] = useState(0)
+
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
             const { latitude, longitude } = location.coords;
@@ -163,12 +166,21 @@ export default function MapComponent({
             .catch(() => { })
     }
 
-    const fetchPOIDetails = (id: string) => {
+    function fetchPOIDetails(id: string) {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`
+        };
         const url = new URL(URL_API + "poi/" + id);
-        fetch(url.toString())
+        fetch(url.toString(), { headers })
             .then(response => response.json())
-            .then(data => setSelectedPOI(data))
+            .then(data => {
+                setSelectedPOI(data);
+                setRatingPositive(data.rating_positive);
+                setRatingNegative(data.rating_negative);
+            })
             .catch(() => { })
+        return;
     }
 
     const filterPOIs = () => {
@@ -419,8 +431,10 @@ export default function MapComponent({
     }
 
     function rateExistenceFunction(id: string, existence: boolean) {
-        const headers = { "Content-Type": "application/json",
-        Authorization: `Bearer ${TOKEN}` };
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`
+        };
         const url = new URL(URL_API + "poi/exists");
         let body = {
             id: id,
@@ -433,10 +447,18 @@ export default function MapComponent({
         })
             .then(response => response.json())
             .then(data => {
-                if (data.status === "OK") {
+                if (data.time === 0) {
                     return true;
                 }
                 else {
+                    // covert seconds in 00h00m00s
+                    let seconds = data.time;
+                    let minutes = Math.floor(seconds / 60);
+                    let hours = Math.floor(minutes / 60);
+                    seconds = seconds % 60;
+                    minutes = minutes % 60;
+                    let time = `${padTo2Digits(hours)}h${padTo2Digits(minutes)}m${padTo2Digits(seconds)}s`;
+                    window.alert("You have already rated this POI, please wait " + time + " to rate again");
                     return false;
                 }
             })
@@ -446,7 +468,7 @@ export default function MapComponent({
     }
 
     const TOKEN =
-        "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiZmZjYTEzYi05NDFmLTQwZTMtYmE2MC0yOWY2MjBiMTcyNjYiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6Im9wZW5pZCBlbWFpbCIsImF1dGhfdGltZSI6MTY5OTc1OTc4NywiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LXdlc3QtMS5hbWF6b25hd3MuY29tXC9ldS13ZXN0LTFfZHpnWUw4ZlBYIiwiZXhwIjoxNjk5NzYzMzg3LCJpYXQiOjE2OTk3NTk3ODcsInZlcnNpb24iOjIsImp0aSI6IjdlMDM3YjQzLTA2NzYtNDAzOS1iZTgxLTQwZTBmZjU2MTAxNiIsImNsaWVudF9pZCI6IjVnNGJzZnNscWE5NXU0cGQycG9zYm4wcm51IiwidXNlcm5hbWUiOiJiZmZjYTEzYi05NDFmLTQwZTMtYmE2MC0yOWY2MjBiMTcyNjYifQ.Vu-WnMTMb0ZB9r5KWj1_FbIuJTDOA2SlKRnvzxZbk5R_ikaOvvlhtHCbern2e2unhRsLQ1POkqR3lIAa4h27BMugpNeacH-PxJdfcxzFIF1yyycWMH5c0abnMEZJKJoXrt9d9WULEc1DDbMYWTOrkv_GWfo1aEvPQYgPL5k9pq7Zsj3UQBlU5-DvCRznNDZ4RJY3zarpPDTu5i1h40zCXc6S3X1QH3v8wJNz9QQldfsy-4iFTT6l8JIUnl46RSOr5dSgd-ql3li46tCFlDQ5kesLAdOdxxCXxbokezLUYdtMlHAPLqJTJyxiIS-RsfSyt3joFpSkUFcIFpMyd4XrNg";
+        "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiZmZjYTEzYi05NDFmLTQwZTMtYmE2MC0yOWY2MjBiMTcyNjYiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6Im9wZW5pZCBlbWFpbCIsImF1dGhfdGltZSI6MTY5OTc5NDAxNiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LXdlc3QtMS5hbWF6b25hd3MuY29tXC9ldS13ZXN0LTFfZHpnWUw4ZlBYIiwiZXhwIjoxNjk5Nzk3NjE2LCJpYXQiOjE2OTk3OTQwMTcsInZlcnNpb24iOjIsImp0aSI6IjNiNmFiYWIzLTZiZjMtNDMzZC1iN2YzLWVhZjVlMjg0NmVlNyIsImNsaWVudF9pZCI6IjVnNGJzZnNscWE5NXU0cGQycG9zYm4wcm51IiwidXNlcm5hbWUiOiJiZmZjYTEzYi05NDFmLTQwZTMtYmE2MC0yOWY2MjBiMTcyNjYifQ.pQOMvBHtT8aFqZpRi7O85_mHrero0kE8I7LMQmtFLSiFk58b5GAEZUkENQStCl761uDzSNG3xu7cx1-PwK5QktsChr_Vjdywx6FxB4Qqd1I8ly1lOTlDUJo7yQumzmy02CblI9YoMKRk0_cNKFQjK9BeDd88SH4ZYD1MIBhWD7zGHdyK2gi6ZjehK3SAbQ3CPSf2-oPvtocNNYbLoXsbGeY5lHgLVqV9OZH6s9KhmS4vIZ8jEl6hzk4d8q_7dP38HPLiHJTeAGJH0bsmfMDhfBtxdNcidNHJTep1jO6U_Cssc75CVXETFk3VCc354bhabwIq6xxcNvk0-903CeWiMA";
     /* Fetch the user details by username */
     // const res = await fetch(`.../${params.user}`)
     // const data: user = await res.json()
@@ -711,7 +733,7 @@ export default function MapComponent({
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
                         <Card id={"poi-sidebar"} style={{ display: "none" }}>
                             <Card.Body>
-                                <POIsSidebar selectedPOI={selectedPOI} rateExistenceFunction={rateExistenceFunction} />
+                                <POIsSidebar selectedPOI={selectedPOI} rateExistenceFunction={rateExistenceFunction} ratingPositive={ratingPositive} setRatingPositive={setRatingPositive} ratingNegative={ratingNegative} setRatingNegative={setRatingNegative} />
                             </Card.Body>
                         </Card>
                     </Col>

@@ -10,7 +10,7 @@ export function updateClusterGroup(toAddMarkers: BasicPOI[], mapRef: any, fetchP
     toAddMarkers.forEach((marker) => {
         const addMarker = L.marker([marker.latitude, marker.longitude], { icon: marker.icon })
         addMarker.on("click", () => {
-            fetchPOIDetails(marker.id);
+            var res = fetchPOIDetails(marker.id);
             document.getElementById("poi-sidebar")?.style.setProperty("display", "block");
         });
         clusterGroup.addLayer(addMarker);

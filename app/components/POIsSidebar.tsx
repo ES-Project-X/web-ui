@@ -1,26 +1,30 @@
 import { AiFillCloseCircle, AiFillDislike, AiFillLike } from "react-icons/ai";
-import { useState } from "react";
 
 // @ts-ignore
-export default function POIsSidebar({
+const POIsSidebar = ({
     selectedPOI,
-    rateExistenceFunction
+    rateExistenceFunction,
+    ratingPositive,
+    setRatingPositive,
+    ratingNegative,
+    setRatingNegative
 }: {
     selectedPOI: any,
     rateExistenceFunction: Function
-}) {
+    ratingPositive: number,
+    setRatingPositive: Function,
+    ratingNegative: number,
+    setRatingNegative: Function
+}) => {
 
     if (!selectedPOI) return;
-
-    const [ratingPositive, setRatingPositive] = useState(selectedPOI.rating_positive);
-    const [ratingNegative, setRatingNegative] = useState(selectedPOI.rating_negative);
 
     const hideCard = () => {
         document.getElementById("poi-sidebar")?.style.setProperty("display", "none");
     }
 
-    function handleClick(rate: boolean) {
-        if (selectedPOI.rate === undefined) {
+    async function handleClick(rate: boolean) {
+        if (selectedPOI.rate === null) {
             rateExistenceFunction(selectedPOI.id, rate);
             if (rate) {
                 setRatingPositive(ratingPositive + 1);
@@ -28,17 +32,23 @@ export default function POIsSidebar({
             else {
                 setRatingNegative(ratingNegative + 1);
             }
+            selectedPOI.rate = rate;
         }
         else {
-            if (rate !== selectedPOI.rate && rateExistenceFunction(selectedPOI.id, rate)) {
-                if (rate) {
-                    setRatingPositive(ratingPositive + 1);
-                    setRatingNegative(ratingNegative - 1);
+            if (rate !== selectedPOI.rate) {
+                if (await rateExistenceFunction(selectedPOI.id, rate)) {
+                    if (rate) {
+                        setRatingPositive(ratingPositive + 1);
+                        setRatingNegative(ratingNegative - 1);
+                    }
+                    else {
+                        setRatingNegative(ratingNegative + 1);
+                        setRatingPositive(ratingPositive - 1);
+                    }
+                    selectedPOI.rate = rate;
                 }
-                else {
-                    setRatingNegative(ratingNegative + 1);
-                    setRatingPositive(ratingPositive - 1);
-                }
+            } else {
+                alert("You new rate is the same as the previous one");
             }
         }
     }
@@ -57,10 +67,10 @@ export default function POIsSidebar({
                     <h5>{selectedPOI.type}</h5>
                     <p className="mt-8">{selectedPOI.description}</p>
                     <div className="flex flex-row gap-3">
-                        <button className="bg-green-600 p-3 rounded flex flex-row items-center grow justify-center " onClick={() => {handleClick(true)}}><AiFillLike color="white" />
+                        <button className="bg-green-600 p-3 rounded flex flex-row items-center grow justify-center " onClick={() => { handleClick(true) }}><AiFillLike color="white" />
                             <span className="text-white ml-3">{ratingPositive}</span>
                         </button>
-                        <button className="bg-red-600 p-3 rounded flex flex-row items-center grow justify-center" onClick={() => {handleClick(false)}}><AiFillDislike color="white" />
+                        <button className="bg-red-600 p-3 rounded flex flex-row items-center grow justify-center" onClick={() => { handleClick(false) }}><AiFillDislike color="white" />
                             <span className="text-white ml-3">{ratingNegative}</span>
                         </button>
                     </div>
@@ -71,3 +81,4 @@ export default function POIsSidebar({
 
 };
 
+export default POIsSidebar;
