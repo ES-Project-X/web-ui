@@ -39,6 +39,7 @@ import Sidebar from "./Sidebar";
 import { Hash } from "crypto";
 import { list } from "postcss";
 import { Direction } from "../structs/direction";
+import RegisterUserModal from "./RegisterUserModal";
 
 export default function MapComponent({
   tileLayerURL,
@@ -369,7 +370,7 @@ export default function MapComponent({
   }
 
   const TOKEN =
-    "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiZjNjMTVkYmEtMzZhNS00NDNmLTkzZGQtOTNkYjA2OGZkMWExIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk2Mjg1MDcsImV4cCI6MTY5OTYzMjEwNywiaWF0IjoxNjk5NjI4NTA3LCJqdGkiOiJkOGY5ZTgzZS1mNjUyLTRhNjUtYjZhMC02ZmQyM2JlNGUwZWUiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.cWW4Fb4gXuaPvOL-ZWeEvZ-TKsx5OO1x-6HrzLgGdCz5w0loAYIps9rR-lmetacdmm2oW1WNV8JkDjr6P8AUGhd-FsnIpscddsFTeH2vudZ1RGNc-hZA5OLZ0fwerIvnRTafAI0TXlgzhnHhRLizTs3vLU_ar_mMCmIK3WE2zq1K4C3qOR2cF8BdBByazv9h044Z2zSNkMWK7f6nrp_0AZCNo7wRes--Lx1NktUBTL-hrK43GhQnkAouCppXmYNPIniRcp-iO8yuBJvCz3D43c4eMgxFBdhLAlON6ZRX8Ju-AH4_bk51x4fedwHE6YjJcAa1Ax-CkBKmP4owVU65Zg";
+    "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiZWNjNDk3YjEtODhhZi00MzYzLTlmZDUtYzBiNDkxZTFlYjY4IiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk4MDIxMjgsImV4cCI6MTY5OTgwNTcyOCwiaWF0IjoxNjk5ODAyMTI4LCJqdGkiOiI1ZDA5YjQ3YS1kZTdjLTRkMGEtYjMxMi0wMTVkMWU4ZTc3ZjYiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.p2h4GEH3Qg5o1ws8bkgAIboCJb-rYL2kBgf0wUPuQe0nk3JZTSlUE0_zIgZIj99fV2qniTexNgfCM2MYqtXampjwplb6g5gpAtb4ZNQLot44pYoQ6HdM_ku7RsL-hp10eu6YiV7S_GgRHEqDa3SL9w288AHK02NFdiVE2-B-joQxe2LFYCaDs-yWEiROZskZYZ9kzPo6Y3ofG06PWh5EVGwy39YCH1Ag6wyNA-lnGR1hhMCSvBI-phnhzIApx2dlIzM0jUBTiU1Eo43ANJFjzSd26Uh1fkNIew6nIAj3nziF1VVoUnGHbqr-9w12_7_BPBu-uNjlDO_TuF1Szyn7_w";
   /* Fetch the user details by username */
   // const res = await fetch(`.../${params.user}`)
   // const data: user = await res.json()
@@ -408,6 +409,34 @@ export default function MapComponent({
     };
     fetchUser();
   }, []);
+  const [isRModalOpen, setIsRModalOpen] = useState(false);
+
+  useEffect(() => {
+    const modal = document.getElementById(
+      "register_user_modal"
+    ) as HTMLDialogElement;
+    if (modal === null) {
+      console.log("modal REGISTER is null");
+      return;
+    }
+
+    if (isRModalOpen) {
+      console.log("modal REGISTER is open");
+      modal.showModal();
+    } else {
+      modal.close();
+      setIsRModalOpen(false);
+    }
+  }, [isRModalOpen]);
+
+  const closeModal = () => {
+    setIsRModalOpen(false);
+  };
+
+  const registerUser = (userData: any) => {
+    console.log("Registering user:", userData);
+    closeModal();
+    }
 
   return (
     <>
@@ -581,6 +610,17 @@ export default function MapComponent({
         </Card>
       }
       <Container className={"map-ui d-flex flex-column h-100"} fluid>
+
+        {isRModalOpen && (
+            <RegisterUserModal
+            onClose={closeModal}
+            onRegisterUser={registerUser}
+            handleKeyDown={(e) => {
+              // Handle key down events if needed
+            }}
+          />
+        )}
+
         {/*
                 {basicPOIs.map(poi => {
                     return (
@@ -661,14 +701,16 @@ export default function MapComponent({
             <a
               href={`https://es-project-x.auth.eu-west-1.amazoncognito.com/login?response_type=token&client_id=5g4bsfslqa95u4pd2posbn0rnu&redirect_uri=https://google.com`}
               className="btn-circle-link me-3"
+              target="_blank"
             >
               <button className="btn">Login</button>
             </a>
             <a
-              href={`https://es-project-x.auth.eu-west-1.amazoncognito.com/signup?response_type=token&client_id=5g4bsfslqa95u4pd2posbn0rnu&redirect_uri=https://google.com`}
               className="btn-circle-link me-3"
             >
-              <button className="btn">Register</button>
+              <button className="btn" onClick={() => setIsRModalOpen(true)}> 
+                Register
+              </button>
             </a>
 
             <ButtonGroup>
