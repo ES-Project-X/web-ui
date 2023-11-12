@@ -7,13 +7,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+COPY package.json package-lock.json ./
+RUN npm ci
 
 
 # Rebuild the source code only when needed
@@ -53,8 +48,6 @@ RUN chown root:root .next
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=root:root --chmod=644 /app/.next/standalone ./
 COPY --from=builder --chown=root:root --chmod=644 /app/.next/static ./.next/static
-
-USER root
 
 EXPOSE 3000
 
