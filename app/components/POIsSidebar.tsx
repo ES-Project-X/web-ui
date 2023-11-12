@@ -85,14 +85,14 @@ const POIsSidebar = ({
                         {selectedPOI.rate === false ?
                             <>
                                 <button style={{borderWidth: "2px", borderStyle: "solid"}} className="bg-white border-red-600 p-3 rounded flex flex-row items-center grow justify-center" onClick={() => { handleClick(false) }}>
-                                    <AiFillLike color="red" /> 
+                                    <AiFillDislike color="red" /> 
                                     <span className="text-red-600 ml-3">{ratingNegative}</span>
                                 </button>
                             </>
                             :
                             <>
                                 <button style={{borderWidth: "2px", borderStyle: "solid"}} className="bg-red-600 p-3 rounded flex flex-row items-center grow justify-center" onClick={() => { handleClick(false) }}>
-                                    <AiFillLike color="white" />
+                                    <AiFillDislike color="white" />
                                     <span className="text-white ml-3">{ratingNegative}</span>
                                 </button>
                             </>

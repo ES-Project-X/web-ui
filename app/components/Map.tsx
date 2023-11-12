@@ -181,7 +181,7 @@ export default function MapComponent({
                 setRatingNegative(data.rating_negative);
             })
             .catch(() => { })
-        return;
+        return 
     }
 
     const filterPOIs = () => {
