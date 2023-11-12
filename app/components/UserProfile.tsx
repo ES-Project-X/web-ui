@@ -88,7 +88,7 @@ const UserProfile = ({ user }: { user: UserProps }) => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyODM1YjczYy1hOTQ4LTQwNWItODJhNi00YzdmZTUzMTBjZGQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiYjhhYjc5ODMtMWIxYS00Yzk4LWE3NTgtNDk4NmVkM2Q4NzFlIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk3NDkzNTEsImV4cCI6MTY5OTc1Mjk1MSwiaWF0IjoxNjk5NzQ5MzUxLCJqdGkiOiI5N2MzNjJlYS00M2M3LTRjNjItOTMwMS1mOGI3ODRiNzQ1ZGYiLCJ1c2VybmFtZSI6IjI4MzViNzNjLWE5NDgtNDA1Yi04MmE2LTRjN2ZlNTMxMGNkZCJ9.w2zNXT4h9ukJR0RHIESWPsRK_JE4hqbKPZSffzdgMgMj8lLF-UVStYB7IBLbf_mAJbfyI6lxHK9o9ehMJqb-W4qirAoU5FnTpbbIfuiLpygSEdN8rBxiLvG1EfDKF7useUavwNspmI9JdjvLddxKbizKNiU2c9hfFroHyQRpjIvhzknnGwJiyGJ7LPzGDAKtHFdnVWxZl_Yk51Goi8RYiwYZOSvETOFR1_H8X_YWx_XUpXJNEzWmAc71hPg7RNpLtbxIOZ4wosoNASiZHy31N4iOJv2CKGX7jUlZSQ6ay_Y6EGqYbUfikt8IvX3gYJ5CNdLRbJVWjvoNfofiRWtOGQ",
+          Authorization: "Bearer TOKEN",
         },
         body: JSON.stringify(userChanges),
       })
