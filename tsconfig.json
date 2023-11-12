@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "jest.config.js"
-  ],
+, "app/components/POIsSidebar", "__tests__/components/markersManager.test.tsx"  ],
   "exclude": [
     "node_modules"
   ]

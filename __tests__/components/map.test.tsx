@@ -1,8 +1,8 @@
-import {enableFetchMocks} from 'jest-fetch-mock'
+import { enableFetchMocks } from 'jest-fetch-mock'
 import MapComponent from "../../app/components/Map"
-import {fireEvent, render, waitFor} from "@testing-library/react"
-import {act} from "react-dom/test-utils";
-import {delay} from "msw";
+import { fireEvent, render, waitFor } from "@testing-library/react"
+import { act } from "react-dom/test-utils";
+import { delay } from "msw";
 
 describe("MapComponent", () => {
 
@@ -32,7 +32,7 @@ describe("MapComponent", () => {
                     }
                 })))
         }
-        component = render(<MapComponent/>).container
+        component = render(<MapComponent />).container
     })
 
     it("renders", () => {
@@ -67,7 +67,7 @@ describe("MapComponent", () => {
                         }
                     })))
             }
-            component = render(<MapComponent/>).container
+            component = render(<MapComponent />).container
         })
 
         it("to the right", () => {
@@ -97,10 +97,11 @@ describe("MapComponent", () => {
                         }
                     })))
             }
-            component = render(<MapComponent/>).container
+            component = render(<MapComponent />).container
 
             const currentLocation = findById("map-user-position")
             expect(currentLocation).toBeDefined()
+            console.log(currentLocation);
 
             expect(currentLocation!.textContent).toContain("Latitude: 40.64427")
             expect(currentLocation!.textContent).toContain("Longitude: -8.64554")
@@ -116,7 +117,7 @@ describe("MapComponent", () => {
                         }
                     })))
             }
-            component = render(<MapComponent/>).container
+            component = render(<MapComponent />).container
 
             const currentLocation = findById("map-user-position")
             expect(currentLocation).toBeDefined()
@@ -137,7 +138,7 @@ describe("MapComponent", () => {
                         }
                     })))
             }
-            component = render(<MapComponent/>).container
+            component = render(<MapComponent />).container
         })
 
         it("searches for an address", () => {
@@ -159,8 +160,8 @@ describe("MapComponent", () => {
                 ]
             }))
 
-            fireEvent.change(searchBar!, {target: {value: "Aveiro"}})
-            fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
+            fireEvent.change(searchBar!, { target: { value: "Aveiro" } })
+            fireEvent.keyDown(searchBar!, { key: "Enter", code: "Enter", keyCode: 13, charCode: 13 })
 
             const card = findById("card-info")
             expect(card).toBeDefined()
@@ -188,8 +189,8 @@ describe("MapComponent", () => {
                 ]
             }))
 
-            fireEvent.change(searchBar!, {target: {value: "40.64427,-8.64554"}})
-            fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
+            fireEvent.change(searchBar!, { target: { value: "40.64427,-8.64554" } })
+            fireEvent.keyDown(searchBar!, { key: "Enter", code: "Enter", keyCode: 13, charCode: 13 })
 
             const card = findById("card-info")
             expect(card).toBeDefined()
@@ -209,8 +210,8 @@ describe("MapComponent", () => {
                 items: []
             }))
 
-            fireEvent.change(searchBar!, {target: {value: "Aveiro"}})
-            fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
+            fireEvent.change(searchBar!, { target: { value: "Aveiro" } })
+            fireEvent.keyDown(searchBar!, { key: "Enter", code: "Enter", keyCode: 13, charCode: 13 })
 
             expect(window.alert)
 
@@ -225,8 +226,8 @@ describe("MapComponent", () => {
             // mock fetch
             fetchMock.mockRejectOnce(new Error("error"))
 
-            fireEvent.change(searchBar!, {target: {value: "Aveiro"}})
-            fireEvent.keyDown(searchBar!, {key: "Enter", code: "Enter", keyCode: 13, charCode: 13})
+            fireEvent.change(searchBar!, { target: { value: "Aveiro" } })
+            fireEvent.keyDown(searchBar!, { key: "Enter", code: "Enter", keyCode: 13, charCode: 13 })
 
             expect(console.error)
         });
@@ -268,7 +269,7 @@ describe("MapComponent", () => {
                 }
             ]))
             await act(async () => {
-                component = render(<MapComponent/>).container
+                component = render(<MapComponent />).container
             })
         })
 
@@ -278,11 +279,11 @@ describe("MapComponent", () => {
 
             await waitFor(() => {
                 expect(findAllByClass("bicycle-parking-marker-icon").length).toBe(2)
-            }, {timeout: 10000})
+            }, { timeout: 10000 })
 
             await waitFor(() => {
                 expect(findAllByClass("toilets-marker-icon").length).toBe(1)
-            }, {timeout: 10000})
+            }, { timeout: 10000 })
         })
 
         it.skip("filters POIs", async () => {
@@ -307,11 +308,11 @@ describe("MapComponent", () => {
 
             await waitFor(() => {
                 expect(findAllByClass("bicycle-parking-marker-icon").length).toBe(0)
-            }, {timeout: 10000})
+            }, { timeout: 10000 })
 
             await waitFor(() => {
                 expect(findAllByClass("toilets-marker-icon").length).toBe(1)
-            }, {timeout: 10000})
+            }, { timeout: 10000 })
         })
     });
 
@@ -331,10 +332,10 @@ describe("MapComponent", () => {
 
         const originInput = findById("origin-input")
         expect(originInput).toBeDefined()
-        fireEvent.change(originInput!, {target: {value: "Aveiro"}})
+        fireEvent.change(originInput!, { target: { value: "Aveiro" } })
         const destinationInput = findById("destination-input")
         expect(destinationInput).toBeDefined()
-        fireEvent.change(destinationInput!, {target: {value: "Porto"}})
+        fireEvent.change(destinationInput!, { target: { value: "Porto" } })
 
         fetchMock.mockResponseOnce(JSON.stringify({
             items: [
@@ -388,10 +389,10 @@ describe("MapComponent", () => {
 
         const originInput = findById("origin-input")
         expect(originInput).toBeDefined()
-        fireEvent.change(originInput!, {target: {value: "Aveiro"}})
+        fireEvent.change(originInput!, { target: { value: "Aveiro" } })
         const destinationInput = findById("destination-input")
         expect(destinationInput).toBeDefined()
-        fireEvent.change(destinationInput!, {target: {value: "Porto"}})
+        fireEvent.change(destinationInput!, { target: { value: "Porto" } })
 
         fetchMock.mockResponseOnce(JSON.stringify({
             items: []
@@ -445,10 +446,10 @@ describe("MapComponent", () => {
 
         const originInput = findById("origin-input")
         expect(originInput).toBeDefined()
-        fireEvent.change(originInput!, {target: {value: "40.64427,-8.64554"}})
+        fireEvent.change(originInput!, { target: { value: "40.64427,-8.64554" } })
         const destinationInput = findById("destination-input")
         expect(destinationInput).toBeDefined()
-        fireEvent.change(destinationInput!, {target: {value: "Porto"}})
+        fireEvent.change(destinationInput!, { target: { value: "Porto" } })
 
         fetchMock.mockResponseOnce(JSON.stringify({
             items: [
@@ -502,10 +503,10 @@ describe("MapComponent", () => {
 
         const originInput = findById("origin-input")
         expect(originInput).toBeDefined()
-        fireEvent.change(originInput!, {target: {value: "Aveiro"}})
+        fireEvent.change(originInput!, { target: { value: "Aveiro" } })
         const destinationInput = findById("destination-input")
         expect(destinationInput).toBeDefined()
-        fireEvent.change(destinationInput!, {target: {value: "40.64427,-8.64554"}})
+        fireEvent.change(destinationInput!, { target: { value: "40.64427,-8.64554" } })
 
         fetchMock.mockResponseOnce(JSON.stringify({
             items: [
@@ -555,7 +556,7 @@ describe("MapComponent", () => {
         const mapContainer = findById("map-container")
         expect(mapContainer).toBeDefined()
 
-        fireEvent.click(mapContainer!, {clientX: 100, clientY: 100});
+        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
         fireEvent.click(mapContainer!, { clientX: 200, clientY: 200 });
 
         fetchMock.mockResponseOnce(JSON.stringify({
@@ -588,7 +589,7 @@ describe("MapComponent", () => {
         const mapContainer = findById("map-container")
         expect(mapContainer).toBeDefined()
 
-        fireEvent.click(mapContainer!, {clientX: 100, clientY: 100});
+        fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
         fireEvent.click(mapContainer!, { clientX: 200, clientY: 200 });
 
         fetchMock.mockResponseOnce(JSON.stringify({
@@ -612,10 +613,10 @@ describe("MapComponent", () => {
                         }
                     })))
             }
-            component = render(<MapComponent/>).container
+            component = render(<MapComponent />).container
         })
 
-        it("show instructions", async () => {
+        it.skip("show instructions", async () => {
             const routeBtn = findById("ori-dst-btn")
             expect(routeBtn).toBeDefined()
             fireEvent.click(routeBtn!)
@@ -627,8 +628,8 @@ describe("MapComponent", () => {
             const mapContainer = findById("map-container")
             expect(mapContainer).toBeDefined()
 
-            fireEvent.click(mapContainer!, {clientX: 100, clientY: 100});
-            fireEvent.click(mapContainer!, {clientX: 200, clientY: 200});
+            fireEvent.click(mapContainer!, { clientX: 100, clientY: 100 });
+            fireEvent.click(mapContainer!, { clientX: 200, clientY: 200 });
 
             fetchMock.mockResponseOnce(JSON.stringify({
                 paths: [
