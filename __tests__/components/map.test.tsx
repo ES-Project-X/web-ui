@@ -55,7 +55,7 @@ describe("MapComponent", () => {
         expect(filterBoard).toBeDefined()
     })
 
-    describe.skip("Rotation", () => {
+    describe("Rotation", () => {
 
         beforeEach(() => {
             global.navigator.geolocation = {
@@ -70,14 +70,14 @@ describe("MapComponent", () => {
             component = render(<MapComponent/>).container
         })
 
-        it.skip("to the right", () => {
+        it("to the right", () => {
             const rotateRight = findById("map-rotate-right-btn")
             expect(rotateRight).toBeDefined()
 
             fireEvent.click(rotateRight!)
         })
 
-        it.skip("to the left", () => {
+        it("to the left", () => {
             const rotateLeft = findById("map-rotate-left-btn")
             expect(rotateLeft).toBeDefined()
 

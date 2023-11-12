@@ -12,7 +12,7 @@ describe("MapPage", () => {
         .setChromeOptions(new chrome.Options().headless())
         .build();
 
-    describe("Rotation", () => {
+    describe.skip("Rotation", () => {
 
         beforeEach(async () => {
             await driver.get(URL)
