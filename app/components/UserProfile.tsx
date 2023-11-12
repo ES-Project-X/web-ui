@@ -8,12 +8,6 @@ const UserProfile = ({ user }: { user: UserProps }) => {
     padding: "20px",
   };
 
-  const avatarStyle = {
-    width: "200px",
-    height: "200px",
-    borderRadius: "50%",
-  };
-
   const userDetailStyle = {
     flex: 1,
   };
@@ -66,11 +60,11 @@ const UserProfile = ({ user }: { user: UserProps }) => {
     if (formUsername !== username) {
       userChanges = { ...userChanges, username: formUsername };
     }
-    
+
     if (formEmail !== email) {
       userChanges = { ...userChanges, email: formEmail };
     }
-    
+
     if (formPassword !== "") {
       userChanges = { ...userChanges, password: formPassword };
     }
@@ -81,14 +75,14 @@ const UserProfile = ({ user }: { user: UserProps }) => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer TOKEN",
+          Authorization: "Bearer eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiZmZjYTEzYi05NDFmLTQwZTMtYmE2MC0yOWY2MjBiMTcyNjYiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiY2MyZWQ3OGUtMGRlNi00Mzg5LTgzOTctNmM3ZjExMTBiNTAyIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk4MTA3NDYsImV4cCI6MTY5OTgxNDM0NiwiaWF0IjoxNjk5ODEwNzQ2LCJqdGkiOiI1NzZjYzhhOS1jOWJmLTQ0MGMtYmY3NC05YjQ5ZTBhNzY1NmMiLCJ1c2VybmFtZSI6ImJmZmNhMTNiLTk0MWYtNDBlMy1iYTYwLTI5ZjYyMGIxNzI2NiJ9.IbQ4b-rFD4CndMLghJi0_XmacSIoexth1f5OpqYTskBaBNNkqMVcZUSQ3d-bToqx1AmidAi0GYh1VHEuSoXWyMK2Cy8aSy8iH3scOGbxP_qqOS_deRKGlHcvcWji2wdXUMlTd9KtxofMduHS-Q0jyFzuYvWj7Ip_y4G8kShz-qx8aTq2hxGR1J1Rtj52Pu0eE1wusFW3VQwfHdbwjF1BTy2WuKfvvP9YjR4VmHpwJBPgobH1CxsSBRn5eu7XWGcXKHZ70xCb5c7TjOcKruGFI6zPf23X1FGtynnKQ_-ZOJAhOtMBSbSJX02b_uxF5V8IEcosiEfsuyoJ6HA03K21HA",
         },
         body: JSON.stringify(userChanges),
       })
         .then((res) => {
           if (res.status === 200) {
             return res.json();
-          } 
+          }
           else if (res.status === 400) {
             throw new Error("Error updating user");
           }
@@ -168,7 +162,12 @@ const UserProfile = ({ user }: { user: UserProps }) => {
           <img
             src={avatar}
             alt={`${fname} ${lname}'s avatar`}
-            style={avatarStyle}
+            style={{
+              width: "200px",
+              height: "200px",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
           />
         </div>
         {!isEditing && (
