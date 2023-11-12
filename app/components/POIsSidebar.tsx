@@ -67,12 +67,36 @@ const POIsSidebar = ({
                     <h5>{selectedPOI.type}</h5>
                     <p className="mt-8">{selectedPOI.description}</p>
                     <div className="flex flex-row gap-3">
-                        <button className="bg-green-600 p-3 rounded flex flex-row items-center grow justify-center " onClick={() => { handleClick(true) }}><AiFillLike color="white" />
-                            <span className="text-white ml-3">{ratingPositive}</span>
-                        </button>
-                        <button className="bg-red-600 p-3 rounded flex flex-row items-center grow justify-center" onClick={() => { handleClick(false) }}><AiFillDislike color="white" />
-                            <span className="text-white ml-3">{ratingNegative}</span>
-                        </button>
+                        {selectedPOI.rate ?
+                            <>
+                                <button style={{borderWidth: "2px", borderStyle: "solid"}} className={"bg-white border-green-600 p-3 rounded flex flex-row items-center grow justify-center"} onClick={() => { handleClick(true) }}>
+                                    <AiFillLike color="green" />
+                                    <span className="text-green-600 ml-3">{ratingPositive}</span>
+                                </button>
+                            </>
+                            :
+                            <>
+                                <button style={{borderWidth: "2px", borderStyle: "solid"}}  className={"bg-green-600 p-3 rounded flex flex-row items-center grow justify-center"} onClick={() => { handleClick(true) }}>
+                                    <AiFillLike color="white" />
+                                    <span className="text-white ml-3">{ratingPositive}</span>
+                                </button>
+                            </>
+                        }
+                        {selectedPOI.rate === false ?
+                            <>
+                                <button style={{borderWidth: "2px", borderStyle: "solid"}} className="bg-white border-red-600 p-3 rounded flex flex-row items-center grow justify-center" onClick={() => { handleClick(false) }}>
+                                    <AiFillLike color="red" /> 
+                                    <span className="text-red-600 ml-3">{ratingNegative}</span>
+                                </button>
+                            </>
+                            :
+                            <>
+                                <button style={{borderWidth: "2px", borderStyle: "solid"}} className="bg-red-600 p-3 rounded flex flex-row items-center grow justify-center" onClick={() => { handleClick(false) }}>
+                                    <AiFillLike color="white" />
+                                    <span className="text-white ml-3">{ratingNegative}</span>
+                                </button>
+                            </>
+                        }
                     </div>
                 </div>
             </div>
