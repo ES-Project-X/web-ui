@@ -3,16 +3,20 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import POIsSidebar from '../../app/components/POIsSidebar';
 
 describe('POIsSidebar', () => {
-  test('renders the component with selected POI', () => {
-    const selectedPOI = {
-      name: 'Test POI',
-      type: 'Test Type',
-      description: 'Test Description',
-      rating_positive: 10,
-      rating_negative: 5,
-    };
 
-    render(<POIsSidebar selectedPOI={selectedPOI} />);
+  const selectedPOI = {
+    name: 'Test POI',
+    type: 'Test Type',
+    description: 'Test Description',
+    picture_url: '../../benfica.png',
+  };
+
+  beforeEach(() => {
+    render(<POIsSidebar selectedPOI={selectedPOI} rateExistenceFunction={() => { }} ratingPositive={10} ratingNegative={5} setRatingNegative={() => { }} setRatingPositive={() => { }} />);
+  })
+
+  it('renders the component with selected POI', () => {
+
 
     // Assert that the component renders the selected POI's name
     expect(screen.getByText('Test POI')).toBeInTheDocument();
@@ -30,24 +34,14 @@ describe('POIsSidebar', () => {
     expect(screen.getAllByText('5')).toHaveLength(1);
   });
 
- 
-  test('hides the card when close button is clicked', () => {
-    const selectedPOI = {
-      name: 'Test POI',
-      type: 'Test Type',
-      description: 'Test Description',
-      rating_positive: 10,
-      rating_negative: 5,
-    };
 
-    render(<POIsSidebar selectedPOI={selectedPOI} />);
+  test('hides the card when close button is clicked', () => {
 
     // Assert that the component is initially visible
     expect(screen.getByTestId('poi-sidebar')).toBeVisible();
 
     // Click the close button
     fireEvent.click(screen.getByTestId('close-button'));
-
-    
   });
+
 });
