@@ -115,6 +115,7 @@ export default function MapComponent({
     }
   };
 
+
   const getIcon = (poiType: string) => {
     switch (poiType) {
       case "bicycle-parking":
@@ -427,7 +428,7 @@ export default function MapComponent({
   }
 
   const TOKEN =
-    "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiZjNjMTVkYmEtMzZhNS00NDNmLTkzZGQtOTNkYjA2OGZkMWExIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk2Mjg1MDcsImV4cCI6MTY5OTYzMjEwNywiaWF0IjoxNjk5NjI4NTA3LCJqdGkiOiJkOGY5ZTgzZS1mNjUyLTRhNjUtYjZhMC02ZmQyM2JlNGUwZWUiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.cWW4Fb4gXuaPvOL-ZWeEvZ-TKsx5OO1x-6HrzLgGdCz5w0loAYIps9rR-lmetacdmm2oW1WNV8JkDjr6P8AUGhd-FsnIpscddsFTeH2vudZ1RGNc-hZA5OLZ0fwerIvnRTafAI0TXlgzhnHhRLizTs3vLU_ar_mMCmIK3WE2zq1K4C3qOR2cF8BdBByazv9h044Z2zSNkMWK7f6nrp_0AZCNo7wRes--Lx1NktUBTL-hrK43GhQnkAouCppXmYNPIniRcp-iO8yuBJvCz3D43c4eMgxFBdhLAlON6ZRX8Ju-AH4_bk51x4fedwHE6YjJcAa1Ax-CkBKmP4owVU65Zg";
+    "TOKEN";
   /* Fetch the user details by username */
   // const res = await fetch(`.../${params.user}`)
   // const data: user = await res.json()
@@ -836,7 +837,7 @@ export default function MapComponent({
                 <Card.Title>User Position</Card.Title>
                 <Card.Text id={"map-user-position"}>
                   {userPosition.latitude !== undefined &&
-                  userPosition.longitude !== undefined
+                    userPosition.longitude !== undefined
                     ? `Latitude: ${userPosition.latitude} | Longitude: ${userPosition.longitude}`
                     : "Please enable location to see your current location"}
                 </Card.Text>
