@@ -108,14 +108,14 @@ export default function MapComponent({
       .filter((type) => type.selected)
       .map((type) => type.value);
 
-    const url = new URL(URL_API + "poi");
+    const url = new URL(URL_API);
     name.length > 0 && url.searchParams.append("name", name);
     typesFetch.forEach((type) => url.searchParams.append("type", type));
 
     fetch(url.toString())
       .then((response) => response.json())
       .then((data) => setBasicPOIs(data))
-      .catch(() => {});
+      .catch(() => { });
   };
 
   const getIcon = (poiType: string) => {
@@ -369,7 +369,7 @@ export default function MapComponent({
   }
 
   const TOKEN =
-    "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiZjNjMTVkYmEtMzZhNS00NDNmLTkzZGQtOTNkYjA2OGZkMWExIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk2Mjg1MDcsImV4cCI6MTY5OTYzMjEwNywiaWF0IjoxNjk5NjI4NTA3LCJqdGkiOiJkOGY5ZTgzZS1mNjUyLTRhNjUtYjZhMC02ZmQyM2JlNGUwZWUiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.cWW4Fb4gXuaPvOL-ZWeEvZ-TKsx5OO1x-6HrzLgGdCz5w0loAYIps9rR-lmetacdmm2oW1WNV8JkDjr6P8AUGhd-FsnIpscddsFTeH2vudZ1RGNc-hZA5OLZ0fwerIvnRTafAI0TXlgzhnHhRLizTs3vLU_ar_mMCmIK3WE2zq1K4C3qOR2cF8BdBByazv9h044Z2zSNkMWK7f6nrp_0AZCNo7wRes--Lx1NktUBTL-hrK43GhQnkAouCppXmYNPIniRcp-iO8yuBJvCz3D43c4eMgxFBdhLAlON6ZRX8Ju-AH4_bk51x4fedwHE6YjJcAa1Ax-CkBKmP4owVU65Zg";
+    "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIyODM1YjczYy1hOTQ4LTQwNWItODJhNi00YzdmZTUzMTBjZGQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiMzJhODg3ZDctMmJhZC00OWIzLTgyZGQtOWYyOWYyYTkxNTljIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk3NDU1MTQsImV4cCI6MTY5OTc0OTExNCwiaWF0IjoxNjk5NzQ1NTE0LCJqdGkiOiIzYWI3MDFmZS04ZjU0LTQzZTItYjcxNC02NTcyZGNiNWM2YjciLCJ1c2VybmFtZSI6IjI4MzViNzNjLWE5NDgtNDA1Yi04MmE2LTRjN2ZlNTMxMGNkZCJ9.CORjsTDrpCj1TcKieTwEe2-T3rKuz1TvfvnpT-91sYKxPfB8gUeq-a_ttO_KirxJ5RseEk16j8k2BLCfLrcN9bIeBOJQSFUPaxDEUgaVPaWDIthm69Ural6mvOZBdZlK4MeTTQMoMyX7ESExoMdVCeLwY9Jugp18rAGy0AjSFCOPE_kT7dnOWhlkUJCwu6i9uVc2Uto75q_WMq07UjgcNO-8HiCqVB9cNuc4Y20jmfNZkc0-a8QJlskY4QNXXmAYyia-7Y6TOml_kmzrF7NSctQAxoFQQK67s9UZaHMvGTPwv3fdACdXg8SDLSdC1namP3jbTfZuRNqxY3Qyz9K1_Q";
   /* Fetch the user details by username */
   // const res = await fetch(`.../${params.user}`)
   // const data: user = await res.json()
@@ -723,7 +723,7 @@ export default function MapComponent({
                 <Card.Title>User Position</Card.Title>
                 <Card.Text id={"map-user-position"}>
                   {userPosition.latitude !== undefined &&
-                  userPosition.longitude !== undefined
+                    userPosition.longitude !== undefined
                     ? `Latitude: ${userPosition.latitude} | Longitude: ${userPosition.longitude}`
                     : "Please enable location to see your current location"}
                 </Card.Text>
