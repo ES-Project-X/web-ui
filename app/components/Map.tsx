@@ -40,8 +40,6 @@ import {
 import Sidebar from "./Sidebar";
 import GetClusters from "./GetClusters";
 import POIsSidebar from "./POIsSidebar";
-import {Hash} from "crypto";
-import {list} from "postcss";
 import { Direction } from "../structs/direction";
 
 const API_KEY = process.env.PUBLIC_KEY_HERE;
@@ -68,8 +66,6 @@ export default function MapComponent({
     const [origin, setOrigin] = useState<string>("");
     const [destination, setDestination] = useState<string>("");
     const [odmap, setodmap] = useState(false);
-
-    const [basicPOIs, setBasicPOIs] = useState<BasicPOI[]>([])
 
     const [markers, setMarkers] = useState<BasicPOI[]>([]);
     const [selectedPOI, setSelectedPOI] = useState(null)
@@ -563,8 +559,7 @@ export default function MapComponent({
                     </Form>
                 </Card.Body>
             </Card>
-            if (directions[currentIndex] !== undefined){" "}
-            {
+            {directions[currentIndex] !== undefined &&
                 <Card
                     id={"ins-card"}
                     style={{
@@ -608,19 +603,6 @@ export default function MapComponent({
             }
             <Container className={"map-ui d-flex flex-column h-100"} fluid>
                 {/*
-                {basicPOIs.map(poi => {
-                    return (
-                        <Marker
-                            key={poi.id}
-                            icon={getIcon(poi.type)}
-                            position={new LatLng(poi.latitude, poi.longitude)}
-                        >
-                            <Popup>
-                                {poi.name} <br/> {poi.type}
-                            </Popup>
-                        </Marker>
-                    )
-                })}
             </MapContainer>
             <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{ zIndex: 1, scale: "100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black" }}>Route</Button>
             <Card id={"card-ori-dest"} style={{ zIndex: 1, top: "1%", left: "5%", width: "15%", position: "absolute", display: "none" }}>

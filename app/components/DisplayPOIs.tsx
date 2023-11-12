@@ -2,7 +2,6 @@ import { BasicPOI } from "../structs/poi";
 import L from "leaflet";
 import "leaflet.markercluster";
 
-
 const clusterGroup = L.markerClusterGroup();
 
 export function updateClusterGroup(toAddMarkers: BasicPOI[], mapRef: any, fetchPOIDetails: Function) {
@@ -19,5 +18,3 @@ export function updateClusterGroup(toAddMarkers: BasicPOI[], mapRef: any, fetchP
     });
     mapRef.current.addLayer(clusterGroup);
 }
-
-

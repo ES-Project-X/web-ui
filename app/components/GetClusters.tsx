@@ -28,7 +28,6 @@ export default function GetClusters({
                 setMinLng(sw.lng);
             }
             else {
-                console.log("max_lat: " + max_lat + " min_lat: " + min_lat + " max_lng: " + max_lng + " min_lng: " + min_lng);
                 if (ne.lat > max_lat) {
                     search_clusters.push([ne.lat, max_lat, max_lng, min_lng]);
                     setMaxLat(ne.lat);
