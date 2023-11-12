@@ -46,6 +46,15 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
 
+      - name: Create .env file
+        run: |
+          echo "PUBLIC_KEY_HERE=${{ vars.PUBLIC_KEY_HERE }}" > .env
+          echo "DATABASE_API_URL=${{ vars.DATABASE_API_URL }}" >> .env
+          echo "URL_ROUTING=${{ vars.URL_ROUTING }}" >> .env
+
+      - name: Display .env content
+        run: cat .env
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
