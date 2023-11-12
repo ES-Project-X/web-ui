@@ -52,6 +52,7 @@ const URL_ROUTING = process.env.URL_ROUTING;
 const COGNITO_LOGIN_URL = process.env.COGNITO_LOGIN_URL;
 
 const TOKEN = Cookies.get('COGNITO_TOKEN')
+console.log(TOKEN)
 
 export default function MapComponent({
     tileLayerURL,
@@ -760,7 +761,7 @@ export default function MapComponent({
                     </Col>
 
                     <Col xs="auto" className="d-flex align-items-center">
-                        {TOKEN === null || TOKEN === "" ?
+                        {TOKEN === null || TOKEN === "" || TOKEN === undefined ?
                             <>
                                 <a
                                     href={COGNITO_LOGIN_URL}
