@@ -776,37 +776,35 @@ export default function MapComponent({
                                 </a>
                             </>
                             :
-                            null
+                            <ButtonGroup>
+                                <a href={`/profile`} className="btn-circle-link me-3">
+                                    <Button
+                                        style={{
+                                            backgroundColor: "transparent",
+                                            border: "none",
+                                            padding: "0",
+                                        }}
+                                        className="btn-circle"
+                                    >
+                                        {avatar === "" ? (
+                                            <img
+                                                src="https://i.imgur.com/8Km9tLL.png"
+                                                alt={"Default pfp"}
+                                                className="rounded-circle"
+                                                style={{ height: "100%" }}
+                                            />
+                                        ) : (
+                                            <img
+                                                src={avatar}
+                                                alt={`${fname}'s profile`}
+                                                className="rounded-circle"
+                                                style={{ height: "100%", objectFit: "cover" }}
+                                            />
+                                        )}
+                                    </Button>
+                                </a>
+                            </ButtonGroup>
                         }
-
-                        <ButtonGroup>
-                            <a href={`/profile`} className="btn-circle-link me-3">
-                                <Button
-                                    style={{
-                                        backgroundColor: "transparent",
-                                        border: "none",
-                                        padding: "0",
-                                    }}
-                                    className="btn-circle"
-                                >
-                                    {avatar === "" ? (
-                                        <img
-                                            src="https://i.imgur.com/8Km9tLL.png"
-                                            alt={"Default pfp"}
-                                            className="rounded-circle"
-                                            style={{ height: "100%" }}
-                                        />
-                                    ) : (
-                                        <img
-                                            src={avatar}
-                                            alt={`${fname}'s profile`}
-                                            className="rounded-circle"
-                                            style={{ height: "100%", objectFit: "cover" }}
-                                        />
-                                    )}
-                                </Button>
-                            </a>
-                        </ButtonGroup>
                     </Col>
                 </Row>
                 {/*
