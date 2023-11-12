@@ -8,13 +8,6 @@ const UserProfile = ({ user }: { user: UserProps }) => {
     padding: "20px",
   };
 
-  const avatarStyle = {
-    width: "200px",
-    height: "200px",
-    borderRadius: "50%",
-    objectFit: "cover",
-  };
-
   const userDetailStyle = {
     flex: 1,
   };
@@ -67,11 +60,11 @@ const UserProfile = ({ user }: { user: UserProps }) => {
     if (formUsername !== username) {
       userChanges = { ...userChanges, username: formUsername };
     }
-    
+
     if (formEmail !== email) {
       userChanges = { ...userChanges, email: formEmail };
     }
-    
+
     if (formPassword !== "") {
       userChanges = { ...userChanges, password: formPassword };
     }
@@ -89,7 +82,7 @@ const UserProfile = ({ user }: { user: UserProps }) => {
         .then((res) => {
           if (res.status === 200) {
             return res.json();
-          } 
+          }
           else if (res.status === 400) {
             throw new Error("Error updating user");
           }
@@ -169,7 +162,12 @@ const UserProfile = ({ user }: { user: UserProps }) => {
           <img
             src={avatar}
             alt={`${fname} ${lname}'s avatar`}
-            style={avatarStyle}
+            style={{
+              width: "200px",
+              height: "200px",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
           />
         </div>
         {!isEditing && (
