@@ -48,9 +48,9 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "PUBLIC_KEY_HERE=${{ vars.PUBLIC_KEY_HERE }}" > .env
-          echo "DATABASE_API_URL=${{ vars.DATABASE_API_URL }}" >> .env
-          echo "URL_ROUTING=${{ vars.URL_ROUTING }}" >> .env
+          echo "PUBLIC_KEY_HERE=${{ vars.PUBLIC_KEY_HERE }}" > .env.local
+          echo "DATABASE_API_URL=${{ vars.DATABASE_API_URL }}" >> .env.local
+          echo "URL_ROUTING=${{ vars.URL_ROUTING }}" >> .env.local
 
       - name: Display .env content
         run: cat .env
