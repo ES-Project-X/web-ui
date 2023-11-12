@@ -471,16 +471,16 @@ export default function MapComponent({
             })
     }
 
-    const TOKEN =
-        "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiZmZjYTEzYi05NDFmLTQwZTMtYmE2MC0yOWY2MjBiMTcyNjYiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiYjIwYzVhZmItYzczNy00NmY2LWI4NTEtOGRkNTNlZjQ0ZGRiIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk4MDQ4NDksImV4cCI6MTY5OTgwODQ0OSwiaWF0IjoxNjk5ODA0ODQ5LCJqdGkiOiIxOWYxNTdkZC04M2E2LTRkMDUtODYxMi0zNzMwNWFjODRlYTkiLCJ1c2VybmFtZSI6ImJmZmNhMTNiLTk0MWYtNDBlMy1iYTYwLTI5ZjYyMGIxNzI2NiJ9.s3OLm7bpStC1_D4KbVFaygSUndcqCd0rK9sPPZ3dKURCEQEsXb2RkXIOfDb2-Q2u5NEGBA6LxVUkx8NzXT5mZh9lgBAdtyDlPJoO7LI4fbkvkwMSZGdkNB_nq74TOZspqb8vw4ewwE2kGjttz4uvvhKcf81eqM88tA6_7GX49PtG-Y_A4Ivz14fALydmtou8teDMffEYO4RzLDrTbTFkSCzJRLy__CinL02WThe9vZlYVmr8XQiS4eh08gqkQL7lp3RMmC8Xk4iejCAcowwh7BBEL0R1th-6K7Pv1IfCXjcdLGFtFYh5dLWOHsApg6vB7eduxQfseR7m31VTAsYWwQ";
-    /* Fetch the user details by username */
-    // const res = await fetch(`.../${params.user}`)
-    // const data: user = await res.json()
-    // const URL_USER = process.env.API_URL;
-    const [user, setUser] = useState(null);
-    const [username, setUsername] = useState("");
-    const [avatar, setAvatar] = useState("");
-    const [fname, setFname] = useState("");
+  const TOKEN =
+    "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiZjNjMTVkYmEtMzZhNS00NDNmLTkzZGQtOTNkYjA2OGZkMWExIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk2Mjg1MDcsImV4cCI6MTY5OTYzMjEwNywiaWF0IjoxNjk5NjI4NTA3LCJqdGkiOiJkOGY5ZTgzZS1mNjUyLTRhNjUtYjZhMC02ZmQyM2JlNGUwZWUiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.cWW4Fb4gXuaPvOL-ZWeEvZ-TKsx5OO1x-6HrzLgGdCz5w0loAYIps9rR-lmetacdmm2oW1WNV8JkDjr6P8AUGhd-FsnIpscddsFTeH2vudZ1RGNc-hZA5OLZ0fwerIvnRTafAI0TXlgzhnHhRLizTs3vLU_ar_mMCmIK3WE2zq1K4C3qOR2cF8BdBByazv9h044Z2zSNkMWK7f6nrp_0AZCNo7wRes--Lx1NktUBTL-hrK43GhQnkAouCppXmYNPIniRcp-iO8yuBJvCz3D43c4eMgxFBdhLAlON6ZRX8Ju-AH4_bk51x4fedwHE6YjJcAa1Ax-CkBKmP4owVU65Zg";
+  /* Fetch the user details by username */
+  // const res = await fetch(`.../${params.user}`)
+  // const data: user = await res.json()
+  // const URL_USER = process.env.API_URL;
+  const [user, setUser] = useState(null);
+  const [username, setUsername] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [fname, setFname] = useState("");
 
     useEffect(() => {
         const headers = { Authorization: `Bearer ${TOKEN}` };
