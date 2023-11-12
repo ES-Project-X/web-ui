@@ -45,7 +45,7 @@ export default function GetClusters({
                     setMinLng(sw.lng);
                 }
             }
-            if (search_clusters.length > 0){
+            if (search_clusters.length > 0) {
                 fetchFunction(search_clusters);
             }
         }
