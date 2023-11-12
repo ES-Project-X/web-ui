@@ -1,53 +1,217 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { enableFetchMocks } from 'jest-fetch-mock'
 import POIsSidebar from '../../app/components/POIsSidebar';
+import { mock } from 'node:test';
+
 
 describe('POIsSidebar', () => {
-  test('renders the component with selected POI', () => {
+
+    enableFetchMocks();
+
     const selectedPOI = {
-      name: 'Test POI',
-      type: 'Test Type',
-      description: 'Test Description',
-      rating_positive: 10,
-      rating_negative: 5,
+        id: "rtyu",
+        name: 'Test POI',
+        type: 'Test Type',
+        description: 'Test Description',
+        picture_url: '../../benfica.png',
+        latitude: 40.64427,
+        longitude: -8.64554,
+        rate: null,
     };
 
-    render(<POIsSidebar selectedPOI={selectedPOI} />);
-
-    // Assert that the component renders the selected POI's name
-    expect(screen.getByText('Test POI')).toBeInTheDocument();
-
-    // Assert that the component renders the selected POI's type
-    expect(screen.getByText('Test Type')).toBeInTheDocument();
-
-    // Assert that the component renders the selected POI's description
-    expect(screen.getByText('Test Description')).toBeInTheDocument();
-
-    // Assert that the component renders the selected POI's positive rating (number type)
-    expect(screen.getAllByText('10')).toHaveLength(1);
-
-    // Assert that the component renders the selected POI's negative rating
-    expect(screen.getAllByText('5')).toHaveLength(1);
-  });
-
- 
-  test('hides the card when close button is clicked', () => {
-    const selectedPOI = {
-      name: 'Test POI',
-      type: 'Test Type',
-      description: 'Test Description',
-      rating_positive: 10,
-      rating_negative: 5,
+    const selectedPOI2 = {
+        id: "rtyu",
+        name: 'Test POI',
+        type: 'Test Type',
+        description: 'Test Description',
+        picture_url: '../../benfica.png',
+        latitude: 40.64427,
+        longitude: -8.64554,
+        rate: true,
     };
 
-    render(<POIsSidebar selectedPOI={selectedPOI} />);
+    const selectedPOI3 = {
+        id: "rtyu",
+        name: 'Test POI',
+        type: 'Test Type',
+        description: 'Test Description',
+        picture_url: '../../benfica.png',
+        latitude: 40.64427,
+        longitude: -8.64554,
+        rate: false,
+    };
 
-    // Assert that the component is initially visible
-    expect(screen.getByTestId('poi-sidebar')).toBeVisible();
+    const mockRateExistenceFunction = jest.fn();
+    const mockSetRatingPositive = jest.fn();
+    const mockSetRatingNegative = jest.fn();
 
-    // Click the close button
-    fireEvent.click(screen.getByTestId('close-button'));
+    it('renders the component with selected POI', () => {
 
-    
-  });
+        render(<POIsSidebar
+            selectedPOI={selectedPOI}
+            rateExistenceFunction={mockRateExistenceFunction}
+            ratingPositive={10}
+            setRatingPositive={mockSetRatingPositive}
+            ratingNegative={5}
+            setRatingNegative={mockSetRatingNegative}
+        />);
+
+
+        // Assert that the component renders the selected POI's name
+        expect(screen.getByText('Test POI')).toBeInTheDocument();
+
+        // Assert that the component renders the selected POI's type
+        expect(screen.getByText('Test Type')).toBeInTheDocument();
+
+        // Assert that the component renders the selected POI's description
+        expect(screen.getByText('Test Description')).toBeInTheDocument();
+
+        // Assert that the component renders the selected POI's positive rating (number type)
+        expect(screen.getAllByText('10')).toHaveLength(1);
+
+        // Assert that the component renders the selected POI's negative rating
+        expect(screen.getAllByText('5')).toHaveLength(1);
+    });
+
+
+    it('hides the card when close button is clicked', () => {
+
+        render(<POIsSidebar
+            selectedPOI={selectedPOI}
+            rateExistenceFunction={mockRateExistenceFunction}
+            ratingPositive={10}
+            setRatingPositive={mockSetRatingPositive}
+            ratingNegative={5}
+            setRatingNegative={mockSetRatingNegative}
+        />);
+
+        // Assert that the component is initially visible
+        expect(screen.getByTestId('poi-sidebar')).toBeVisible();
+
+        // Click the close button
+        const close_button = screen.getByRole('button', { name: '' });
+        fireEvent.click(close_button);
+    });
+
+    it('changes the rating when the positive button is clicked', async () => {
+
+        render(<POIsSidebar
+            selectedPOI={selectedPOI}
+            rateExistenceFunction={mockRateExistenceFunction}
+            ratingPositive={10}
+            setRatingPositive={mockSetRatingPositive}
+            ratingNegative={5}
+            setRatingNegative={mockSetRatingNegative}
+        />);
+
+        // Assert that the component is initially visible
+        expect(screen.getByTestId('poi-sidebar')).toBeVisible();
+
+        mockRateExistenceFunction.mockReturnValueOnce(true);
+
+        // Click the positive button
+        const positive_button = screen.getByRole('button', { name: '10' });
+        fireEvent.click(positive_button);
+
+        expect(mockRateExistenceFunction).toHaveBeenCalled();
+        expect(mockSetRatingPositive).toHaveBeenCalled();
+    });
+
+    it('changes the rating when the negative button is clicked', async () => {
+
+        render(<POIsSidebar
+            selectedPOI={selectedPOI}
+            rateExistenceFunction={mockRateExistenceFunction}
+            ratingPositive={10}
+            setRatingPositive={mockSetRatingPositive}
+            ratingNegative={6}
+            setRatingNegative={mockSetRatingNegative}
+        />);
+
+        // Assert that the component is initially visible
+        expect(screen.getByTestId('poi-sidebar')).toBeVisible();
+
+        mockRateExistenceFunction.mockReturnValueOnce(true);
+
+        // Click the negative button
+        const negative_button = screen.getByText('6');
+        console.log(negative_button.innerHTML);
+        fireEvent.click(negative_button);
+
+        expect(mockRateExistenceFunction).toHaveBeenCalled();
+    });
+
+    it('changes the rating when the positive button is clicked and the POI already has the same rating', async () => {
+
+        render(<POIsSidebar
+            selectedPOI={selectedPOI2}
+            rateExistenceFunction={mockRateExistenceFunction}
+            ratingPositive={10}
+            setRatingPositive={mockSetRatingPositive}
+            ratingNegative={5}
+            setRatingNegative={mockSetRatingNegative}
+        />);
+
+        // Assert that the component is initially visible
+        expect(screen.getByTestId('poi-sidebar')).toBeVisible();
+
+        mockRateExistenceFunction.mockReturnValueOnce(true);
+
+        // Click the positive button
+        const positive_button = screen.getByRole('button', { name: '10' });
+        fireEvent.click(positive_button);
+
+        expect(mockRateExistenceFunction).toHaveBeenCalled();
+        expect(mockSetRatingPositive).toHaveBeenCalled();
+    });
+
+    it('changes the rating when the negative button is clicked and the POI already has a positive rating', async () => {
+
+        render(<POIsSidebar
+            selectedPOI={selectedPOI2}
+            rateExistenceFunction={mockRateExistenceFunction}
+            ratingPositive={10}
+            setRatingPositive={mockSetRatingPositive}
+            ratingNegative={5}
+            setRatingNegative={mockSetRatingNegative}
+        />);
+
+        // Assert that the component is initially visible´
+        expect(screen.getByTestId('poi-sidebar')).toBeVisible();
+
+        // Click the negative button
+        const negative_button = screen.getByText('5');
+        fireEvent.click(negative_button);
+
+        mockRateExistenceFunction.mockReturnValueOnce(true);
+
+        expect(mockRateExistenceFunction).toHaveBeenCalled();
+        expect(mockSetRatingNegative).toHaveBeenCalled();
+    });
+
+    it('changes the rating when the positive button is clicked and the POI already has a negative rating', async () => {
+
+        render(<POIsSidebar
+            selectedPOI={selectedPOI3}
+            rateExistenceFunction={mockRateExistenceFunction}
+            ratingPositive={10}
+            setRatingPositive={mockSetRatingPositive}
+            ratingNegative={5}
+            setRatingNegative={mockSetRatingNegative}
+        />);
+
+        // Assert that the component is initially visible
+        expect(screen.getByTestId('poi-sidebar')).toBeVisible();
+
+        // Click the positive button
+        const positive_button = screen.getByRole('button', { name: '10' });
+        fireEvent.click(positive_button);
+
+        mockRateExistenceFunction.mockReturnValueOnce(true);
+
+        expect(mockRateExistenceFunction).toHaveBeenCalled();
+        expect(mockSetRatingPositive).toHaveBeenCalled();
+    });
+
 });

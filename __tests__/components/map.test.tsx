@@ -675,4 +675,5 @@ describe("MapComponent", () => {
             fireEvent.click(prevInsBtn!)
         })
     })
+
 })

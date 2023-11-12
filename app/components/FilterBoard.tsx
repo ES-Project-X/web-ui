@@ -1,6 +1,6 @@
-import {Form} from "react-bootstrap";
-import {useEffect, useState} from "react";
-import {FilterType} from "../structs/poi";
+import { Form } from "react-bootstrap";
+import { useEffect } from "react";
+import { FilterType } from "../structs/poi";
 
 export default function FilterBoardComponent(
     {
