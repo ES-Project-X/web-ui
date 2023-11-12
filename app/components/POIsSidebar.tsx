@@ -60,8 +60,8 @@ const POIsSidebar = ({
                     <div className={"flex justify-end pb-2"}>
                         <button className="close-button" data-testid="close-button"><AiFillCloseCircle onClick={() => { hideCard() }} />
                         </button></div>
-                    <div style={{ width: "300px", height: "300px", overflow: "cover", display: "flex", alignItems: "center" }}>
-                        <img style={{ width: "100%", height: "auto" }} className="w-fit rounded-xl" src={selectedPOI.picture_url} alt="poi_image" />
+                    <div style={{ width: "250px", height: "250px", overflow: "cover", display: "flex", alignItems: "center" }}>
+                        <img style={{ height: "100%", objectFit: "cover" }} className="w-fit rounded-xl" src={selectedPOI.picture_url} alt="poi_image" />
                     </div>
                     <h2 className="mt-4">{selectedPOI.name}</h2>
                     <h5>{selectedPOI.type}</h5>
