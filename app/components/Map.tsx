@@ -13,11 +13,7 @@ import {
     Container,
     Col,
 } from "react-bootstrap";
-import {
-    MapContainer,
-    Polyline,
-    TileLayer,
-} from "react-leaflet";
+import { MapContainer, Polyline, TileLayer } from "react-leaflet";
 import { LatLng } from "leaflet";
 import "leaflet-rotate";
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -44,9 +40,14 @@ import { Direction } from "../structs/direction";
 
 const API_KEY = process.env.PUBLIC_KEY_HERE;
 const URL_API = process.env.DATABASE_API_URL;
-const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
-const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
+const URL_GEO =
+    "https://geocode.search.hereapi.com/v1/geocode?apiKey=" +
+    API_KEY +
+    "&in=countryCode:PRT";
+const URL_REV =
+    "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
 const URL_ROUTING = process.env.URL_ROUTING;
+import RegisterUserModal from "./RegisterUserModal";
 
 export default function MapComponent({
     tileLayerURL,
@@ -68,7 +69,7 @@ export default function MapComponent({
     const [odmap, setodmap] = useState(false);
 
     const [markers, setMarkers] = useState<BasicPOI[]>([]);
-    const [selectedPOI, setSelectedPOI] = useState(null)
+    const [selectedPOI, setSelectedPOI] = useState(null);
 
     const [filterName, setFilterName] = useState<string>("");
     const [filterTypes, setFilterTypes] = useState<FilterType[]>([
@@ -76,7 +77,7 @@ export default function MapComponent({
         { label: "Bicycle Shop", value: "bicycle-shop", selected: true },
         { label: "Drinking Water", value: "drinking-water", selected: true },
         { label: "Toilets", value: "toilets", selected: true },
-        { label: "Bench", value: "bench", selected: true }
+        { label: "Bench", value: "bench", selected: true },
     ]);
 
     const [points, setPoints] = useState<LatLng[][]>([]);
@@ -107,11 +108,11 @@ export default function MapComponent({
     const addToBearing = (amount: number) => {
         if (mapRef.current) {
             // @ts-ignore
-            const nextBearing = mapRef.current.getBearing() + amount % 360;
+            const nextBearing = mapRef.current.getBearing() + (amount % 360);
             // @ts-ignore
             mapRef.current.setBearing(nextBearing);
         }
-    }
+    };
 
     const getIcon = (poiType: string) => {
         switch (poiType) {
@@ -128,7 +129,7 @@ export default function MapComponent({
             default:
                 return RedMarker;
         }
-    }
+    };
 
     const updateMarkers = (data: any) => {
         const pois: BasicPOI[] = data.map((poi: any) => {
@@ -138,18 +139,18 @@ export default function MapComponent({
                 type: poi.type,
                 latitude: poi.latitude,
                 longitude: poi.longitude,
-                icon: getIcon(poi.type)
-            }
-        })
+                icon: getIcon(poi.type),
+            };
+        });
         if (pois.length > 0) {
             let new_pois = markers;
             pois.forEach((poi: BasicPOI) => {
                 new_pois.push(poi);
-            })
+            });
             setMarkers(new_pois);
             filterPOIs();
         }
-    }
+    };
 
     const fetchPOIs = (clusters: number[][]) => {
         const url = new URL(URL_API + "poi/cluster");
@@ -161,10 +162,10 @@ export default function MapComponent({
         });
 
         fetch(url.toString())
-            .then(response => response.json())
-            .then(data => updateMarkers(data))
-            .catch(() => { })
-    }
+            .then((response) => response.json())
+            .then((data) => updateMarkers(data))
+            .catch(() => { });
+    };
 
     function fetchPOIDetails(id: string) {
         const headers = {
@@ -184,18 +185,19 @@ export default function MapComponent({
     }
 
     const filterPOIs = () => {
-        const filteredMarkers = markers.filter((marker) => {
-            return filterTypes.some((type) => {
-                return type.selected && marker.type === type.value;
+        const filteredMarkers = markers
+            .filter((marker) => {
+                return filterTypes.some((type) => {
+                    return type.selected && marker.type === type.value;
+                });
             })
-        })
             .filter((marker) => {
                 return marker.name.toLowerCase().includes(filterName.toLowerCase());
             });
         if (mapRef.current) {
             updateClusterGroup(filteredMarkers, mapRef, fetchPOIDetails);
         }
-    }
+    };
 
     const getGeoLocation = (query: string) => {
         fetch(query)
@@ -319,25 +321,28 @@ export default function MapComponent({
             setGettingRoute(true);
         }
         let url = URL_ROUTING;
-        if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
+        if (
+            origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
             destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
         ) {
-            console.log("HERE1")
+            console.log("HERE1");
             url += "&point=" + origin + "&point=" + destination;
-        } else if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
+        } else if (
+            origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
             !destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
         ) {
-            console.log("HERE2")
+            console.log("HERE2");
             let dest = await geoCode(URL_GEO + "&q=" + destination);
             url += "&point=" + origin + "&point=" + dest;
-        } else if (!origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
+        } else if (
+            !origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
             destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
         ) {
-            console.log("HERE3")
+            console.log("HERE3");
             let ori = await geoCode(URL_GEO + "&q=" + origin);
             url += "&point=" + ori + "&point=" + destination;
         } else {
-            console.log("HERE4")
+            console.log("HERE4");
             let ori = await geoCode(URL_GEO + "&q=" + origin);
             let dest = await geoCode(URL_GEO + "&q=" + destination);
             url += "&point=" + ori + "&point=" + dest;
@@ -373,11 +378,10 @@ export default function MapComponent({
                     document.getElementById("ins-card").style.display = "block";
                 })
                 .catch((error) => {
-                    console.error('Error:', error);
+                    console.error("Error:", error);
                 });
-
         }
-    }
+    };
 
     const hidecard = () => {
         // @ts-ignore
@@ -480,7 +484,7 @@ export default function MapComponent({
 
     useEffect(() => {
         const headers = { Authorization: `Bearer ${TOKEN}` };
-        console.log(URL_API + "user")
+        console.log(URL_API + "user");
         const url = new URL(URL_API + "user");
 
         const fetchUser = async () => {
@@ -508,6 +512,34 @@ export default function MapComponent({
         };
         fetchUser();
     }, []);
+    const [isRModalOpen, setIsRModalOpen] = useState(false);
+
+    useEffect(() => {
+        const modal = document.getElementById(
+            "register_user_modal"
+        ) as HTMLDialogElement;
+        if (modal === null) {
+            console.log("modal REGISTER is null");
+            return;
+        }
+
+        if (isRModalOpen) {
+            console.log("modal REGISTER is open");
+            modal.showModal();
+        } else {
+            modal.close();
+            setIsRModalOpen(false);
+        }
+    }, [isRModalOpen]);
+
+    const closeModal = () => {
+        setIsRModalOpen(false);
+    };
+
+    const registerUser = (userData: any) => {
+        console.log("Registering user:", userData);
+        closeModal();
+    };
 
     return (
         <>
@@ -652,6 +684,15 @@ export default function MapComponent({
                 </Card>
             }
             <Container className={"map-ui d-flex flex-column h-100"} fluid>
+                {isRModalOpen && (
+                    <RegisterUserModal
+                        onClose={closeModal}
+                        onRegisterUser={registerUser}
+                        handleKeyDown={(e) => {
+                            // Handle key down events if needed
+                        }}
+                    />
+                )}
                 {/*
             </MapContainer>
             <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{ zIndex: 1, scale: "100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black" }}>Route</Button>
@@ -703,6 +744,61 @@ export default function MapComponent({
                 {/*
                     UPPER PART OF THE UI
                 */}
+                <Row className={"pt-2"}>
+                    <Col xs={"auto"} className={"mx-auto"}>
+                        <Form>
+                            <Form.Group controlId={"search-bar"}>
+                                <Form.Control
+                                    type={"text"}
+                                    placeholder={"Search"}
+                                    onKeyDown={handleKeyDown}
+                                />
+                            </Form.Group>
+                        </Form>
+                    </Col>
+                    <Col xs="auto" className="d-flex align-items-center">
+                        <a
+                            href={`https://es-project-x.auth.eu-west-1.amazoncognito.com/login?response_type=token&client_id=5g4bsfslqa95u4pd2posbn0rnu&redirect_uri=https://google.com`}
+                            className="btn-circle-link me-3"
+                            target="_blank"
+                        >
+                            <button className="btn">Login</button>
+                        </a>
+                        <a className="btn-circle-link me-3">
+                            <button className="btn" onClick={() => setIsRModalOpen(true)}>
+                                Register
+                            </button>
+                        </a>
+
+                        <ButtonGroup>
+                            <a href={`/profile/${username}`} className="btn-circle-link me-3">
+                                <Button
+                                    style={{
+                                        backgroundColor: "transparent",
+                                        border: "none",
+                                        padding: "0",
+                                    }}
+                                    className="btn-circle"
+                                >
+                                    {avatar === "" ? (
+                                        <img
+                                            src="https://i.imgur.com/8Km9tLL.png"
+                                            alt={"Default pfp"}
+                                            className="rounded-circle"
+                                        />
+                                    ) : (
+                                        <img
+                                            src={avatar}
+                                            alt={`${fname}'s profile`}
+                                            className="rounded-circle"
+                                        />
+                                    )}
+                                </Button>
+                            </a>
+                        </ButtonGroup>
+                    </Col>
+                </Row>
+                {/*
                 <Row className={"pt-2"}>
                     <Col xs={"auto"} className={"mx-auto"}>
                         <Form>
