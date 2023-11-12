@@ -53,11 +53,9 @@ const UserProfile = ({ user }: { user: UserProps }) => {
     // here u need to update the user profile in the DB
     /* @Gonçalo */
     const userLS = JSON.parse(localStorage.getItem("user") || "{}");
-    //console.log("userLS:", userLS);
 
 
     if (formPassword === "") {
-      //alert("Please confirm your password!");
       setFormUsername(username); // Reset formUsername
       setFormEmail(email); // Reset formEmail
       setIsEditing(false);
@@ -65,7 +63,6 @@ const UserProfile = ({ user }: { user: UserProps }) => {
     }
 
     if (formUsername === username && formEmail === email) {
-      //alert("No changes were made!");
       setIsEditing(false);
       return;
     }
@@ -97,13 +94,10 @@ const UserProfile = ({ user }: { user: UserProps }) => {
             return res.json();
           } 
           else if (res.status === 400) {
-            //alert("Incorrect Password!");
             throw new Error("Error updating user");
           }
         })
         .then((data) => {
-          //alert("User updated successfully!");
-          //console.log("data:", data);
           localStorage.setItem("user", JSON.stringify(data));
           setUsername(data.username);
           setEmail(data.email);
@@ -111,7 +105,6 @@ const UserProfile = ({ user }: { user: UserProps }) => {
           setFormEmail(data.email);
           setPassword("");
           setIsEditing(false);
-          useEffect
         })
         .catch((err) => {
           console.log("error:", err);
