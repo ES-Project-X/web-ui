@@ -42,9 +42,6 @@ const UserProfile = ({ user }: { user: UserProps }) => {
 
   let userChanges = {};
 
-  const API_URL = process.env.DATABASE_API_URL;
-
-
   const updateProfile = () => {
     console.log("update profile");
     console.log("username:", username);
@@ -52,7 +49,6 @@ const UserProfile = ({ user }: { user: UserProps }) => {
 
     // here u need to update the user profile in the DB
     /* @Gonçalo */
-    const userLS = JSON.parse(localStorage.getItem("user") || "{}");
 
 
     if (formPassword === "") {
