@@ -115,20 +115,6 @@ export default function MapComponent({
     }
   };
 
-  const fetchPOIs = (name: string, types: FilterType[]) => {
-    const typesFetch = types
-      .filter((type) => type.selected)
-      .map((type) => type.value);
-
-    const url = new URL(URL_API);
-    name.length > 0 && url.searchParams.append("name", name);
-    typesFetch.forEach((type) => url.searchParams.append("type", type));
-
-    fetch(url.toString())
-      .then((response) => response.json())
-      .then((data) => setBasicPOIs(data))
-      .catch(() => { });
-  };
 
   const getIcon = (poiType: string) => {
     switch (poiType) {
