@@ -418,8 +418,35 @@ export default function MapComponent({
         )}`;
     }
 
+    function rateExistenceFunction(id: string, existence: boolean) {
+        const headers = { "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}` };
+        const url = new URL(URL_API + "poi/exists");
+        let body = {
+            id: id,
+            rating: existence
+        }
+        return fetch(url.toString(), {
+            headers,
+            method: "PUT",
+            body: JSON.stringify(body)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "OK") {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            })
+            .catch(() => {
+                return false;
+            })
+    }
+
     const TOKEN =
-        "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiIzMGM4NjM5Yy1jMGE0LTQ0ZjktYjNhZC04MDU5NTk0MTAzZDQiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiZjNjMTVkYmEtMzZhNS00NDNmLTkzZGQtOTNkYjA2OGZkMWExIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk2Mjg1MDcsImV4cCI6MTY5OTYzMjEwNywiaWF0IjoxNjk5NjI4NTA3LCJqdGkiOiJkOGY5ZTgzZS1mNjUyLTRhNjUtYjZhMC02ZmQyM2JlNGUwZWUiLCJ1c2VybmFtZSI6IjMwYzg2MzljLWMwYTQtNDRmOS1iM2FkLTgwNTk1OTQxMDNkNCJ9.cWW4Fb4gXuaPvOL-ZWeEvZ-TKsx5OO1x-6HrzLgGdCz5w0loAYIps9rR-lmetacdmm2oW1WNV8JkDjr6P8AUGhd-FsnIpscddsFTeH2vudZ1RGNc-hZA5OLZ0fwerIvnRTafAI0TXlgzhnHhRLizTs3vLU_ar_mMCmIK3WE2zq1K4C3qOR2cF8BdBByazv9h044Z2zSNkMWK7f6nrp_0AZCNo7wRes--Lx1NktUBTL-hrK43GhQnkAouCppXmYNPIniRcp-iO8yuBJvCz3D43c4eMgxFBdhLAlON6ZRX8Ju-AH4_bk51x4fedwHE6YjJcAa1Ax-CkBKmP4owVU65Zg";
+        "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiZmZjYTEzYi05NDFmLTQwZTMtYmE2MC0yOWY2MjBiMTcyNjYiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6Im9wZW5pZCBlbWFpbCIsImF1dGhfdGltZSI6MTY5OTc1OTc4NywiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LXdlc3QtMS5hbWF6b25hd3MuY29tXC9ldS13ZXN0LTFfZHpnWUw4ZlBYIiwiZXhwIjoxNjk5NzYzMzg3LCJpYXQiOjE2OTk3NTk3ODcsInZlcnNpb24iOjIsImp0aSI6IjdlMDM3YjQzLTA2NzYtNDAzOS1iZTgxLTQwZTBmZjU2MTAxNiIsImNsaWVudF9pZCI6IjVnNGJzZnNscWE5NXU0cGQycG9zYm4wcm51IiwidXNlcm5hbWUiOiJiZmZjYTEzYi05NDFmLTQwZTMtYmE2MC0yOWY2MjBiMTcyNjYifQ.Vu-WnMTMb0ZB9r5KWj1_FbIuJTDOA2SlKRnvzxZbk5R_ikaOvvlhtHCbern2e2unhRsLQ1POkqR3lIAa4h27BMugpNeacH-PxJdfcxzFIF1yyycWMH5c0abnMEZJKJoXrt9d9WULEc1DDbMYWTOrkv_GWfo1aEvPQYgPL5k9pq7Zsj3UQBlU5-DvCRznNDZ4RJY3zarpPDTu5i1h40zCXc6S3X1QH3v8wJNz9QQldfsy-4iFTT6l8JIUnl46RSOr5dSgd-ql3li46tCFlDQ5kesLAdOdxxCXxbokezLUYdtMlHAPLqJTJyxiIS-RsfSyt3joFpSkUFcIFpMyd4XrNg";
     /* Fetch the user details by username */
     // const res = await fetch(`.../${params.user}`)
     // const data: user = await res.json()
@@ -470,6 +497,7 @@ export default function MapComponent({
 
             <MapContainer
                 id={"map-container"}
+                ref={mapRef}
                 className={"map"}
                 center={center}
                 zoom={13}
@@ -683,7 +711,7 @@ export default function MapComponent({
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
                         <Card id={"poi-sidebar"} style={{ display: "none" }}>
                             <Card.Body>
-                                <POIsSidebar selectedPOI={selectedPOI} />
+                                <POIsSidebar selectedPOI={selectedPOI} rateExistenceFunction={rateExistenceFunction} />
                             </Card.Body>
                         </Card>
                     </Col>

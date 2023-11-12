@@ -6,7 +6,6 @@ const clusterGroup = L.markerClusterGroup();
 
 export function updateClusterGroup(toAddMarkers: BasicPOI[], mapRef: any, fetchPOIDetails: Function) {
     clusterGroup.clearLayers();
-    console.log(toAddMarkers);
 
     toAddMarkers.forEach((marker) => {
         const addMarker = L.marker([marker.latitude, marker.longitude], { icon: marker.icon })
