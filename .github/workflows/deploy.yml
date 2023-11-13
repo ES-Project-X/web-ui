@@ -54,8 +54,8 @@ jobs:
           echo "URL_ROUTING=${{ vars.URL_ROUTING }}" >> .env.local
           echo "COGNITO_LOGIN_URL=${{ vars.COGNITO_LOGIN_URL }}" >> .env.local
 
-      - name: Display .env content
-        run: cat .env
+      - name: Display .env.local content
+        run: cat .env.local
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
