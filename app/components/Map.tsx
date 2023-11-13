@@ -476,6 +476,11 @@ export default function MapComponent({
             })
     }
 
+    function removeCookie() {
+        Cookies.remove('COGNITO_TOKEN');
+        window.location.reload();
+    }
+
     /* Fetch the user details by username */
     // const res = await fetch(`.../${params.user}`)
     // const data: user = await res.json()
@@ -766,7 +771,7 @@ export default function MapComponent({
                                 <a
                                     href={COGNITO_LOGIN_URL}
                                     className="btn-circle-link me-3"
-                                    target="_blank"
+                                    target="_self"
                                 >
                                     <button className="btn">Login</button>
                                 </a>
@@ -777,34 +782,41 @@ export default function MapComponent({
                                 </a>
                             </>
                             :
-                            <ButtonGroup>
-                                <a href={`/profile`} className="btn-circle-link me-3">
-                                    <Button
-                                        style={{
-                                            backgroundColor: "transparent",
-                                            border: "none",
-                                            padding: "0",
-                                        }}
-                                        className="btn-circle"
-                                    >
-                                        {avatar === "" ? (
-                                            <img
-                                                src="https://i.imgur.com/8Km9tLL.png"
-                                                alt={"Default pfp"}
-                                                className="rounded-circle"
-                                                style={{ height: "100%" }}
-                                            />
-                                        ) : (
-                                            <img
-                                                src={avatar}
-                                                alt={`${fname}'s profile`}
-                                                className="rounded-circle"
-                                                style={{ height: "100%", objectFit: "cover" }}
-                                            />
-                                        )}
-                                    </Button>
+                            <>
+                                <a className="btn-circle-link me-3">
+                                    <button className="btn" onClick={() => removeCookie()}>
+                                        Logout
+                                    </button>
                                 </a>
-                            </ButtonGroup>
+                                <ButtonGroup>
+                                    <a href={`/profile`} className="btn-circle-link me-3">
+                                        <Button
+                                            style={{
+                                                backgroundColor: "transparent",
+                                                border: "none",
+                                                padding: "0",
+                                            }}
+                                            className="btn-circle"
+                                        >
+                                            {avatar === "" ? (
+                                                <img
+                                                    src="https://i.imgur.com/8Km9tLL.png"
+                                                    alt={"Default pfp"}
+                                                    className="rounded-circle"
+                                                    style={{ height: "100%" }}
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={avatar}
+                                                    alt={`${fname}'s profile`}
+                                                    className="rounded-circle"
+                                                    style={{ height: "100%", objectFit: "cover" }}
+                                                />
+                                            )}
+                                        </Button>
+                                    </a>
+                                </ButtonGroup>
+                            </>
                         }
                     </Col>
                 </Row>

@@ -113,10 +113,10 @@ const UserProfile = ({ user }: { user: UserProps }) => {
     console.log("userLS:", userLS);
 
     if (userLS) {
-      if (userLS.image_url === "") {
-        setAvatar("https://i.imgur.com/8Km9tLL.png");
-      } else {
+      if (userLS.image_url) {
         setAvatar(userLS.image_url);
+      } else {
+        setAvatar("https://i.imgur.com/8Km9tLL.png");
       }
       setFname(userLS.first_name);
       setLname(userLS.last_name);
