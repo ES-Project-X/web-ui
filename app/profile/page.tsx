@@ -1,14 +1,9 @@
 "use client";
 
-import UserProfile from "@/app/components/UserProfile";
-import React, { useEffect, useState } from "react";
+import UserProfile from "../../app/components/UserProfile";
 import { UserProps } from "../structs/user";
 
-export default async function Page({
-  params,
-}: {
-  params: { user: UserProps };
-}) {
+export default function Page() {
   const data: UserProps = {
     id: 1,
     username: "",

@@ -23,11 +23,11 @@ const UserProfile = ({ user }: { user: UserProps }) => {
   };
 
   const [isEditing, setIsEditing] = useState(false);
-  const [username, setUsername] = useState("");
-  const [fname, setFname] = useState("");
-  const [lname, setLname] = useState("");
-  const [email, setEmail] = useState("");
-  const [avatar, setAvatar] = useState("");
+  const [username, setUsername] = useState(user.username);
+  const [fname, setFname] = useState(user.fname);
+  const [lname, setLname] = useState(user.lname);
+  const [email, setEmail] = useState(user.email);
+  const [avatar, setAvatar] = useState(user.avatar);
   const [password, setPassword] = useState("");
 
   const [formUsername, setFormUsername] = useState("");
@@ -125,14 +125,7 @@ const UserProfile = ({ user }: { user: UserProps }) => {
       setFormEmail(userLS.email);
       setFormUsername(userLS.username);
 
-    } else {
-      setAvatar(user.avatar);
-      setFname(user.fname);
-      setLname(user.lname);
-      setUsername(user.username);
-      setEmail(user.email);
-
-    }
+    } 
   }, [user]);
 
   return (
