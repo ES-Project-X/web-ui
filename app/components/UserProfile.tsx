@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import { UserProps } from "../structs/user";
 import { Form, FloatingLabel } from "react-bootstrap";
 import { Button } from "react-bootstrap";
+import Cookies from "js-cookie";
+
+const TOKEN = Cookies.get('COGNITO_TOKEN')
+const URL_API = process.env.DATABASE_API_URL;
 
 const UserProfile = ({ user }: { user: UserProps }) => {
   const avatarContainerStyle = {
@@ -19,11 +23,11 @@ const UserProfile = ({ user }: { user: UserProps }) => {
   };
 
   const [isEditing, setIsEditing] = useState(false);
-  const [username, setUsername] = useState("");
-  const [fname, setFname] = useState("");
-  const [lname, setLname] = useState("");
-  const [email, setEmail] = useState("");
-  const [avatar, setAvatar] = useState("");
+  const [username, setUsername] = useState(user.username);
+  const [fname, setFname] = useState(user.fname);
+  const [lname, setLname] = useState(user.lname);
+  const [email, setEmail] = useState(user.email);
+  const [avatar, setAvatar] = useState(user.avatar);
   const [password, setPassword] = useState("");
 
   const [formUsername, setFormUsername] = useState("");
@@ -71,11 +75,11 @@ const UserProfile = ({ user }: { user: UserProps }) => {
 
 
     if (isEditing) {
-      fetch("http://127.0.0.1:8000/user/edit", {
+      fetch( URL_API + "user/edit", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiZmZjYTEzYi05NDFmLTQwZTMtYmE2MC0yOWY2MjBiMTcyNjYiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiY2MyZWQ3OGUtMGRlNi00Mzg5LTgzOTctNmM3ZjExMTBiNTAyIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk4MTA3NDYsImV4cCI6MTY5OTgxNDM0NiwiaWF0IjoxNjk5ODEwNzQ2LCJqdGkiOiI1NzZjYzhhOS1jOWJmLTQ0MGMtYmY3NC05YjQ5ZTBhNzY1NmMiLCJ1c2VybmFtZSI6ImJmZmNhMTNiLTk0MWYtNDBlMy1iYTYwLTI5ZjYyMGIxNzI2NiJ9.IbQ4b-rFD4CndMLghJi0_XmacSIoexth1f5OpqYTskBaBNNkqMVcZUSQ3d-bToqx1AmidAi0GYh1VHEuSoXWyMK2Cy8aSy8iH3scOGbxP_qqOS_deRKGlHcvcWji2wdXUMlTd9KtxofMduHS-Q0jyFzuYvWj7Ip_y4G8kShz-qx8aTq2hxGR1J1Rtj52Pu0eE1wusFW3VQwfHdbwjF1BTy2WuKfvvP9YjR4VmHpwJBPgobH1CxsSBRn5eu7XWGcXKHZ70xCb5c7TjOcKruGFI6zPf23X1FGtynnKQ_-ZOJAhOtMBSbSJX02b_uxF5V8IEcosiEfsuyoJ6HA03K21HA",
+          Authorization: `Bearer ${TOKEN}`,
         },
         body: JSON.stringify(userChanges),
       })
@@ -109,10 +113,10 @@ const UserProfile = ({ user }: { user: UserProps }) => {
     console.log("userLS:", userLS);
 
     if (userLS) {
-      if (userLS.image_url === "") {
-        setAvatar("https://i.imgur.com/8Km9tLL.png");
-      } else {
+      if (userLS.image_url) {
         setAvatar(userLS.image_url);
+      } else {
+        setAvatar("https://i.imgur.com/8Km9tLL.png");
       }
       setFname(userLS.first_name);
       setLname(userLS.last_name);
@@ -121,14 +125,7 @@ const UserProfile = ({ user }: { user: UserProps }) => {
       setFormEmail(userLS.email);
       setFormUsername(userLS.username);
 
-    } else {
-      setAvatar(user.avatar);
-      setFname(user.fname);
-      setLname(user.lname);
-      setUsername(user.username);
-      setEmail(user.email);
-
-    }
+    } 
   }, [user]);
 
   return (

@@ -13,7 +13,6 @@ on:
   push:
     branches:
       - master
-      - ES-60-create-dockerfile-for-api-and-web-app
 
 env:
   AWS_REGION: eu-west-1                           # set this to your preferred AWS region, e.g. us-west-1
@@ -51,9 +50,10 @@ jobs:
           echo "PUBLIC_KEY_HERE=${{ vars.PUBLIC_KEY_HERE }}" > .env.local
           echo "DATABASE_API_URL=${{ vars.DATABASE_API_URL }}" >> .env.local
           echo "URL_ROUTING=${{ vars.URL_ROUTING }}" >> .env.local
+          echo "COGNITO_LOGIN_URL=${{ vars.COGNITO_LOGIN_URL }}" >> .env.local
 
-      - name: Display .env content
-        run: cat .env
+      - name: Display .env.local content
+        run: cat .env.local
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image

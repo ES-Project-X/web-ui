@@ -38,6 +38,7 @@ import GetClusters from "./GetClusters";
 import POIsSidebar from "./POIsSidebar";
 import { Direction } from "../structs/direction";
 import RegisterUserModal from "./RegisterUserModal";
+import Cookies from 'js-cookie';
 
 const API_KEY = process.env.PUBLIC_KEY_HERE;
 const URL_API = process.env.DATABASE_API_URL;
@@ -48,6 +49,10 @@ const URL_GEO =
 const URL_REV =
     "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
 const URL_ROUTING = process.env.URL_ROUTING;
+const COGNITO_LOGIN_URL = process.env.COGNITO_LOGIN_URL;
+
+const TOKEN = Cookies.get('COGNITO_TOKEN')
+console.log(TOKEN)
 
 export default function MapComponent({
     tileLayerURL,
@@ -471,8 +476,11 @@ export default function MapComponent({
             })
     }
 
-    const TOKEN =
-        "eyJraWQiOiJSc0d4ckllKzZFXC9SVVlPOUFxU1RVaXJCZ2lvamZFUUZucGpXN0FTQVFDWT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJiZmZjYTEzYi05NDFmLTQwZTMtYmE2MC0yOWY2MjBiMTcyNjYiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuZXUtd2VzdC0xLmFtYXpvbmF3cy5jb21cL2V1LXdlc3QtMV9kemdZTDhmUFgiLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI1ZzRic2ZzbHFhOTV1NHBkMnBvc2JuMHJudSIsImV2ZW50X2lkIjoiY2MyZWQ3OGUtMGRlNi00Mzg5LTgzOTctNmM3ZjExMTBiNTAyIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJvcGVuaWQgZW1haWwiLCJhdXRoX3RpbWUiOjE2OTk4MTA3NDYsImV4cCI6MTY5OTgxNDM0NiwiaWF0IjoxNjk5ODEwNzQ2LCJqdGkiOiI1NzZjYzhhOS1jOWJmLTQ0MGMtYmY3NC05YjQ5ZTBhNzY1NmMiLCJ1c2VybmFtZSI6ImJmZmNhMTNiLTk0MWYtNDBlMy1iYTYwLTI5ZjYyMGIxNzI2NiJ9.IbQ4b-rFD4CndMLghJi0_XmacSIoexth1f5OpqYTskBaBNNkqMVcZUSQ3d-bToqx1AmidAi0GYh1VHEuSoXWyMK2Cy8aSy8iH3scOGbxP_qqOS_deRKGlHcvcWji2wdXUMlTd9KtxofMduHS-Q0jyFzuYvWj7Ip_y4G8kShz-qx8aTq2hxGR1J1Rtj52Pu0eE1wusFW3VQwfHdbwjF1BTy2WuKfvvP9YjR4VmHpwJBPgobH1CxsSBRn5eu7XWGcXKHZ70xCb5c7TjOcKruGFI6zPf23X1FGtynnKQ_-ZOJAhOtMBSbSJX02b_uxF5V8IEcosiEfsuyoJ6HA03K21HA";
+    function removeCookie() {
+        Cookies.remove('COGNITO_TOKEN');
+        window.location.reload();
+    }
+
     /* Fetch the user details by username */
     // const res = await fetch(`.../${params.user}`)
     // const data: user = await res.json()
@@ -756,48 +764,60 @@ export default function MapComponent({
                             </Form.Group>
                         </Form>
                     </Col>
-                    <Col xs="auto" className="d-flex align-items-center">
-                        <a
-                            href={`https://es-project-x.auth.eu-west-1.amazoncognito.com/login?response_type=token&client_id=5g4bsfslqa95u4pd2posbn0rnu&redirect_uri=https://google.com`}
-                            className="btn-circle-link me-3"
-                            target="_blank"
-                        >
-                            <button className="btn">Login</button>
-                        </a>
-                        <a className="btn-circle-link me-3">
-                            <button className="btn" onClick={() => setIsRModalOpen(true)}>
-                                Register
-                            </button>
-                        </a>
 
-                        <ButtonGroup>
-                            <a href={`/profile/${username}`} className="btn-circle-link me-3">
-                                <Button
-                                    style={{
-                                        backgroundColor: "transparent",
-                                        border: "none",
-                                        padding: "0",
-                                    }}
-                                    className="btn-circle"
+                    <Col xs="auto" className="d-flex align-items-center">
+                        {TOKEN === null || TOKEN === "" || TOKEN === undefined ?
+                            <>
+                                <a
+                                    href={COGNITO_LOGIN_URL}
+                                    className="btn-circle-link me-3"
+                                    target="_self"
                                 >
-                                    {avatar === "" ? (
-                                        <img
-                                            src="https://i.imgur.com/8Km9tLL.png"
-                                            alt={"Default pfp"}
-                                            className="rounded-circle"
-                                            style={{ height: "100%" }}
-                                        />
-                                    ) : (
-                                        <img
-                                            src={avatar}
-                                            alt={`${fname}'s profile`}
-                                            className="rounded-circle"
-                                            style={{ height: "100%", objectFit: "cover" }}
-                                        />
-                                    )}
-                                </Button>
-                            </a>
-                        </ButtonGroup>
+                                    <button className="btn">Login</button>
+                                </a>
+                                <a className="btn-circle-link me-3">
+                                    <button className="btn" onClick={() => setIsRModalOpen(true)}>
+                                        Register
+                                    </button>
+                                </a>
+                            </>
+                            :
+                            <>
+                                <a className="btn-circle-link me-3">
+                                    <button className="btn" onClick={() => removeCookie()}>
+                                        Logout
+                                    </button>
+                                </a>
+                                <ButtonGroup>
+                                    <a href={`/profile`} className="btn-circle-link me-3">
+                                        <Button
+                                            style={{
+                                                backgroundColor: "transparent",
+                                                border: "none",
+                                                padding: "0",
+                                            }}
+                                            className="btn-circle"
+                                        >
+                                            {avatar === "" ? (
+                                                <img
+                                                    src="https://i.imgur.com/8Km9tLL.png"
+                                                    alt={"Default pfp"}
+                                                    className="rounded-circle"
+                                                    style={{ height: "100%" }}
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={avatar}
+                                                    alt={`${fname}'s profile`}
+                                                    className="rounded-circle"
+                                                    style={{ height: "100%", objectFit: "cover" }}
+                                                />
+                                            )}
+                                        </Button>
+                                    </a>
+                                </ButtonGroup>
+                            </>
+                        }
                     </Col>
                 </Row>
                 {/*

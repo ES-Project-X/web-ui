@@ -1,8 +1,25 @@
+'use client';
+
 import Image from 'next/image'
-import {redirect} from "next/navigation";
+import Cookies from 'js-cookie';
+import { useEffect } from "react";
+import { redirect } from 'next/navigation';
 
 export default function Root() {
-  // redirect("/map")
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.href);
+    const access_token = params.get('access_token');
+
+    console.log('COGNITO_TOKEN', Cookies.get('COGNITO_TOKEN'));
+
+    if (Cookies.get('COGNITO_TOKEN')) {
+      redirect('/map');
+    }
+
+    Cookies.set('COGNITO_TOKEN', access_token || '');
+    redirect('/map');
+  }, [])
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
