@@ -1,0 +1,5 @@
+left todo:
+	-> Fix coords! One is checking the click and the dragend checks the marker coords!! (não bate 100% as vezes, which makes sense)
+	-> Make route markers draggable (and update their coords on dragend) 
+
+	-> FIX INPUT BOXES COLORS AND closing btns colors!!!
