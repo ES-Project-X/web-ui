@@ -11,7 +11,7 @@ import {
     Row,
     CloseButton,
     Container,
-    Col,
+    Col, FormGroup, FormLabel,
 } from "react-bootstrap";
 import { MapContainer, Polyline, TileLayer } from "react-leaflet";
 import { LatLng } from "leaflet";
@@ -96,6 +96,8 @@ export default function MapComponent({
 
     const [ratingPositive, setRatingPositive] = useState(0)
     const [ratingNegative, setRatingNegative] = useState(0)
+
+    const [test, setTest] = useState(false)
 
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
@@ -317,41 +319,7 @@ export default function MapComponent({
             });
     };
 
-    const getRoute = async () => {
-        if (origin === "" || destination === "") {
-            window.alert("Please fill in both fields");
-            return;
-        }
-        if (odmap) {
-            setGettingRoute(true);
-        }
-        let url = URL_ROUTING;
-        if (
-            origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
-            destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
-        ) {
-            console.log("HERE1");
-            url += "&point=" + origin + "&point=" + destination;
-        } else if (
-            origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
-            !destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
-        ) {
-            console.log("HERE2");
-            let dest = await geoCode(URL_GEO + "&q=" + destination);
-            url += "&point=" + origin + "&point=" + dest;
-        } else if (
-            !origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
-            destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
-        ) {
-            console.log("HERE3");
-            let ori = await geoCode(URL_GEO + "&q=" + origin);
-            url += "&point=" + ori + "&point=" + destination;
-        } else {
-            console.log("HERE4");
-            let ori = await geoCode(URL_GEO + "&q=" + origin);
-            let dest = await geoCode(URL_GEO + "&q=" + destination);
-            url += "&point=" + ori + "&point=" + dest;
-        }
+    const drawRoute = (url: string) => {
         if (url) {
             fetch(url)
                 .then((response) => response.json())
@@ -386,6 +354,46 @@ export default function MapComponent({
                     console.error("Error:", error);
                 });
         }
+    }
+
+    const getRoute = async () => {
+        if (origin === "" || destination === "") {
+            window.alert("Please fill in both fields");
+            return;
+        }
+        if (odmap) {
+            setGettingRoute(true);
+        }
+        setTest(true)
+        let url = URL_ROUTING;
+
+        if(origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)){
+            url += "&point=" + origin;
+        } else {
+            let ori = await geoCode(URL_GEO + "&q=" + origin);
+            url += "&point=" + ori;
+        }
+
+        for(let i = 0; i < numberOfIntermediates; i++){
+            let intermediate = (document.getElementById("intermediate-input-" + i) as HTMLInputElement).value;
+            if(intermediate.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)){
+                url += "&point=" + intermediate;
+            } else if (intermediate === ""){
+            }
+            else {
+                    let inter = await geoCode(URL_GEO + "&q=" + intermediate);
+                    url += "&point=" + inter;
+            }
+        }
+
+        if(destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)){
+            url += "&point=" + destination;
+        } else {
+            let dest = await geoCode(URL_GEO + "&q=" + destination);
+            url += "&point=" + dest;
+        }
+
+        drawRoute(url!);
     };
 
     const hidecard = () => {
@@ -403,6 +411,7 @@ export default function MapComponent({
     const cancelRoute = () => {
         setPoints([]);
         setGettingRoute(false);
+        setTest(false)
         setCurrentIndex(0);
         // @ts-ignore
         document.getElementById("ins-card").style.display = "none";
@@ -549,6 +558,51 @@ export default function MapComponent({
         closeModal();
     };
 
+    const [numberOfIntermediates, setNumberOfIntermediates] = useState(0)
+    const [canCall, setCanCall] = useState(false)
+
+    let intermediates: any[];
+    intermediates = [];
+
+    const eliminateIntermediate = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        const id = event.currentTarget.id;
+        intermediates.splice(parseInt(id[id.length - 1]), 1);
+        setNumberOfIntermediates(numberOfIntermediates - 1);
+        setCanCall(true);
+    }
+
+    for(let i = 0; i < numberOfIntermediates; i++){
+        let string = "Intermediate " + (i+1);
+        intermediates.push(
+            <FormGroup id={"intermediate" + i}>
+                <FormLabel>{string}</FormLabel>
+                <Row style={{paddingLeft:"5%", marginRight:"5%"}}>
+                    <Form.Control
+                        style={{width:"82%", marginRight:"2%"}}
+                        id={"intermediate-input-" + i}
+                        type={"text"}
+                        placeholder={"Intermediate " + (i+1)}
+                        readOnly={false}/>
+                    <Button id={"intermediate-minus-btn-" + i} onClick={eliminateIntermediate} style={{width:"30px"}}>
+                        -
+                    </Button>
+                </Row>
+                <br />
+            </FormGroup>
+        )
+    }
+
+    useEffect(() => {
+        if (canCall && test && origin !== "" && destination !== "") {
+            getRoute();
+        }
+        setCanCall(false);
+    }, [numberOfIntermediates]);
+
+    const addIntermediate = () => {
+        setNumberOfIntermediates(numberOfIntermediates + 1);
+    }
+
     return (
         <>
             {/* Sidebar */}
@@ -622,6 +676,7 @@ export default function MapComponent({
                             />
                         </Form.Group>
                         <br />
+                        {intermediates}
                         <Form.Group>
                             <Form.Label>Destination</Form.Label>
                             <Form.Control
@@ -633,6 +688,8 @@ export default function MapComponent({
                                 readOnly={false}
                             />
                         </Form.Group>
+                        <br />
+                        <Button id={"add-intermediate-btn"} onClick={addIntermediate} style={{width:"60%", marginLeft:"20%"}}>Add Intermediate</Button>
                         <br />
                         <Form.Group className="mb-3">
                             <Form.Check
