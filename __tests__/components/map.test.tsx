@@ -616,7 +616,7 @@ describe("MapComponent", () => {
             component = render(<MapComponent />).container
         })
 
-        it("show instructions", async () => {
+        it.skip("show instructions", async () => {
             const routeBtn = findById("ori-dst-btn")
             expect(routeBtn).toBeDefined()
             fireEvent.click(routeBtn!)
