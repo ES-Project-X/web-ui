@@ -676,4 +676,86 @@ describe("MapComponent", () => {
         })
     })
 
+    describe("Add Intermediates", () => {
+        beforeEach(() => {
+            global.navigator.geolocation = {
+                watchPosition: jest.fn()
+                    .mockImplementationOnce((success) => Promise.resolve(success({
+                        coords: {
+                            latitude: 40.64427,
+                            longitude: -8.64554
+                        }
+                    })))
+            }
+            component = render(<MapComponent />).container
+        })
+
+        it("add intermediates", async () => {
+            const routeBtn = findById("ori-dst-btn")
+            expect(routeBtn).toBeDefined()
+            fireEvent.click(routeBtn!)
+
+            const addIntermediateBtn = findById("add-intermediate-btn")
+            expect(addIntermediateBtn).toBeDefined()
+            fireEvent.click(addIntermediateBtn!)
+            fireEvent.click(addIntermediateBtn!)
+
+            const removeIntermediateBtn = findById("intermediate-minus-btn-0")
+            expect(removeIntermediateBtn).toBeDefined()
+            fireEvent.click(removeIntermediateBtn!)
+
+            fireEvent.click(addIntermediateBtn!)
+
+            fireEvent.click(addIntermediateBtn!)
+
+            const originInput = findById("origin-input")
+            expect(originInput).toBeDefined()
+            fireEvent.change(originInput!, { target: { value: "40.64427,-8.64554" } })
+
+            const intermediateInput = findById("intermediate-input-0")
+            expect(intermediateInput).toBeDefined()
+            fireEvent.change(intermediateInput!, { target: { value: "40.64427,-8.64554" } })
+
+            const intermediateInput2 = findById("intermediate-input-2")
+            expect(intermediateInput2).toBeDefined()
+            fireEvent.change(intermediateInput2!, { target: { value: "Viseu" } })
+
+            const destinationInput = findById("destination-input")
+            expect(destinationInput).toBeDefined()
+            fireEvent.change(destinationInput!, { target: { value: "40.64427,-8.64554" } })
+
+            fetchMock.mockResponseOnce(JSON.stringify({
+                paths: [
+                    {
+                        points: {
+                            coordinates: [
+                                [40.64427, -8.64554],
+                                [40.64427, -8.64554]
+                            ]
+                        },
+                        instructions: [
+                            {
+                                text: "Turn left",
+                                distance: 100,
+                                time: 123
+                            },
+                            {
+                                text: "Turn Right",
+                                distance: 200,
+                                time: 342
+                            },
+                        ]
+                    }
+                ]
+            }))
+
+            const getRouteBtn = findById("get-route-btn")
+            expect(getRouteBtn).toBeDefined()
+            fireEvent.click(getRouteBtn!)
+
+            const removeIntermediateBtn1 = findById("intermediate-minus-btn-1")
+            expect(removeIntermediateBtn1).toBeDefined()
+            fireEvent.click(removeIntermediateBtn1!)
+        });
+    });
 })
