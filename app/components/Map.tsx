@@ -97,7 +97,7 @@ export default function MapComponent({
     const [ratingPositive, setRatingPositive] = useState(0)
     const [ratingNegative, setRatingNegative] = useState(0)
 
-    const [test, setTest] = useState(false)
+    const [gettingInterRoute, setGettingInterRoute] = useState(false)
 
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
@@ -364,7 +364,7 @@ export default function MapComponent({
         if (odmap) {
             setGettingRoute(true);
         }
-        setTest(true)
+        setGettingInterRoute(true)
         let url = URL_ROUTING;
 
         if(origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)){
@@ -411,7 +411,7 @@ export default function MapComponent({
     const cancelRoute = () => {
         setPoints([]);
         setGettingRoute(false);
-        setTest(false)
+        setGettingInterRoute(false)
         setCurrentIndex(0);
         // @ts-ignore
         document.getElementById("ins-card").style.display = "none";
@@ -593,7 +593,7 @@ export default function MapComponent({
     }
 
     useEffect(() => {
-        if (canCall && test && origin !== "" && destination !== "") {
+        if (canCall && gettingInterRoute && origin !== "" && destination !== "") {
             getRoute();
         }
         setCanCall(false);
