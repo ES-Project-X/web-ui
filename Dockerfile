@@ -13,6 +13,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Build arguments environment variables
+RUN echo "COGNITO_LOGIN_URL=${COGNITO_LOGIN_URL}" > .env.local && \
+    echo "DATABASE_API_URL=${DATABASE_API_URL}" >> .env.local && \
+    echo "PUBLIC_KEY_HERE=${PUBLIC_KEY_HERE}" >> .env.local && \
+    echo "URL_ROUTING=${URL_ROUTING}" >> .env.local
+
 # Build the app
 RUN npm run build
 
@@ -24,21 +30,16 @@ ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Fixed environment variables
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
-
-# Build arguments environment variables
-ENV COGNITO_LOGIN_URL=$COGNITO_LOGIN_URL
-ENV DATABASE_API_URL=$DATABASE_API_URL
-ENV PUBLIC_KEY_HERE=$PUBLIC_KEY_HERE
-ENV URL_ROUTING=$URL_ROUTING
 
 # Copy necessary files from builder stage
 COPY --from=builder /app/public ./public
 RUN mkdir .next && chown root:root .next
 COPY --from=builder --chown=root:root --chmod=644 /app/.next/standalone ./
 COPY --from=builder --chown=root:root --chmod=644 /app/.next/static ./.next/static
+
+# Fixed environment variables
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
 
 EXPOSE $PORT
 
