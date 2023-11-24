@@ -18,6 +18,8 @@ RUN echo "COGNITO_LOGIN_URL=${COGNITO_LOGIN_URL}" > .env.local && \
     echo "DATABASE_API_URL=${DATABASE_API_URL}" >> .env.local && \
     echo "PUBLIC_KEY_HERE=${PUBLIC_KEY_HERE}" >> .env.local && \
     echo "URL_ROUTING=${URL_ROUTING}" >> .env.local
+RUN cat .env.local
+RUN ls
 
 # Build the app
 RUN npm run build
