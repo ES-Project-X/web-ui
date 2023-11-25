@@ -1,0 +1,4 @@
+PUBLIC_KEY_HERE=HlogdPHLwPTb9a-4u-7ep-WFPOaUOZVjYx7_--mEJfw
+DATABASE_API_URL=http://rest-api-alb-1687632437.eu-west-1.elb.amazonaws.com/
+URL_ROUTING=http://graphhopper-alb-983495359.eu-west-1.elb.amazonaws.com/route?points_encoded=false&profile=bike
+COGNITO_LOGIN_URL=https://es-project-x.auth.eu-west-1.amazoncognito.com/login?response_type=token&client_id=5g4bsfslqa95u4pd2posbn0rnu&redirect_uri=http://localhost:3000
