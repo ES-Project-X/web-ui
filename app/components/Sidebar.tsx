@@ -32,6 +32,13 @@ export default function Sidebar({
         draw(url!);
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Enter") {
+            let r = e.currentTarget.id;
+            drawR(r);
+        }
+    }
+
     function show() {
         if (routes.length === 0) {
             return <p>No routes found</p>
@@ -40,7 +47,7 @@ export default function Sidebar({
             return (
                 routes.map((route) => (
                     <div className="route" key={route.name}>
-                        <p id={route.name} onClick={() => drawR(route.name)} style={{fontSize:"20px"}}>{route.name}</p>
+                        <p id={route.name} onKeyDown={handleKeyDown} onClick={() => drawR(route.name)} style={{fontSize:"20px"}}>{route.name}</p>
                     </div>
                 ))
             )
