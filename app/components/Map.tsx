@@ -97,6 +97,9 @@ export default function MapComponent({
     const [ratingPositive, setRatingPositive] = useState(0)
     const [ratingNegative, setRatingNegative] = useState(0)
 
+    const [ratingPositiveStat, setRatingPositiveStat] = useState(0)
+    const [ratingNegativeStat, setRatingNegativeStat] = useState(0)
+
     const [gettingInterRoute, setGettingInterRoute] = useState(false)
 
     useEffect(() => {
@@ -477,6 +480,44 @@ export default function MapComponent({
                     minutes = minutes % 60;
                     let time = `${padTo2Digits(hours)}h${padTo2Digits(minutes)}m${padTo2Digits(seconds)}s`;
                     window.alert("You have already rated this POI, please wait " + time + " to rate again");
+                    return false;
+                }
+            })
+            .catch(() => {
+                return false;
+            })
+    }
+
+    function rateStatusFunction(id: string, status: boolean) {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`
+        };
+        const url = new URL(URL_API + "poi/rate");
+        let body = {
+            id: id,
+            status: status
+        }
+        console.log("body:", body)
+        return fetch(url.toString(), {
+            headers,
+            method: "PUT",
+            body: JSON.stringify(body)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.time === 0) {
+                    return true;
+                }
+                else {
+                    // covert seconds in 00h00m00s
+                    let seconds = data.time;
+                    let minutes = Math.floor(seconds / 60);
+                    let hours = Math.floor(minutes / 60);
+                    seconds = seconds % 60;
+                    minutes = minutes % 60;
+                    let time = `${padTo2Digits(hours)}h${padTo2Digits(minutes)}m${padTo2Digits(seconds)}s`;
+                    window.alert("You have already rated this POI, please wait " + time + " to rate its status again!");
                     return false;
                 }
             })
@@ -908,7 +949,7 @@ export default function MapComponent({
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
                         <Card id={"poi-sidebar"} style={{ display: "none" }}>
                             <Card.Body>
-                                <POIsSidebar selectedPOI={selectedPOI} rateExistenceFunction={rateExistenceFunction} ratingPositive={ratingPositive} setRatingPositive={setRatingPositive} ratingNegative={ratingNegative} setRatingNegative={setRatingNegative} />
+                                <POIsSidebar selectedPOI={selectedPOI} rateExistenceFunction={rateExistenceFunction} rateStatusFunction={rateStatusFunction} ratingPositive={ratingPositive} setRatingPositive={setRatingPositive} ratingNegative={ratingNegative} setRatingNegative={setRatingNegative} ratingPositiveStat={ratingPositiveStat} setRatingPositiveStat={setRatingPositiveStat} ratingNegativeStat={ratingNegativeStat} setRatingNegativeStat={setRatingNegativeStat} />
                             </Card.Body>
                         </Card>
                     </Col>

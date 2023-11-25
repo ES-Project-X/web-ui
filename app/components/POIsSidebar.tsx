@@ -6,10 +6,15 @@ import LineChart from "react-linechart";
 const POIsSidebar = ({
   selectedPOI,
   rateExistenceFunction,
+  rateStatusFunction,
   ratingPositive,
   setRatingPositive,
   ratingNegative,
   setRatingNegative,
+  ratingPositiveStat,
+  setRatingPositiveStat,
+  ratingNegativeStat,
+  setRatingNegativeStat,
 }: {
   selectedPOI: any;
   rateExistenceFunction: Function;
@@ -17,6 +22,11 @@ const POIsSidebar = ({
   setRatingPositive: Function;
   ratingNegative: number;
   setRatingNegative: Function;
+  rateStatusFunction: Function;
+  ratingPositiveStat: number;
+  setRatingPositiveStat: Function;
+  ratingNegativeStat: number;
+  setRatingNegativeStat: Function;
 }) => {
   if (!selectedPOI) return;
 
@@ -36,7 +46,7 @@ const POIsSidebar = ({
     document
       .getElementById("poi-sidebar")
       ?.style.setProperty("display", "none");
-      setShowDetails(false);
+    setShowDetails(false);
   };
 
   async function handleClick(rate: boolean) {
@@ -67,8 +77,30 @@ const POIsSidebar = ({
   }
 
   async function handleClickStatus(rate: boolean) {
-    var value = rate ? 1 : 0;
-    console.log("value:", value);
+    if (selectedPOI.status === null) {
+      rateStatusFunction(selectedPOI.id, rate);
+      if (rate) {
+        setRatingPositiveStat(ratingPositiveStat + 1);
+      } else {
+        setRatingNegativeStat(ratingNegativeStat + 1);
+      }
+      selectedPOI.status = rate;
+    } else {
+      if (rate !== selectedPOI.status) {
+        if (await rateStatusFunction(selectedPOI.id, rate)) {
+          if (rate) {
+            setRatingPositiveStat(ratingPositiveStat + 1);
+            setRatingNegativeStat(ratingNegativeStat - 1);
+          } else {
+            setRatingNegativeStat(ratingNegativeStat + 1);
+            setRatingPositiveStat(ratingPositiveStat - 1);
+          }
+          selectedPOI.status = rate;
+        }
+      } else {
+        alert("You new rate is the same as the previous one");
+      }
+    }
   }
 
   const [showDetails, setShowDetails] = useState(false);
