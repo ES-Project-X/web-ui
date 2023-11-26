@@ -69,6 +69,7 @@ const POIsSidebar = ({
             setRatingPositive(ratingPositive - 1);
           }
           selectedPOI.rate = rate;
+          alert("You have successfully rated this POI!")
         }
       } else {
         alert("You new rate is the same as the previous one");
