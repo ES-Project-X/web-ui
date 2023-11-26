@@ -496,7 +496,7 @@ export default function MapComponent({
         const url = new URL(URL_API + "poi/rate");
         let body = {
             id: id,
-            status: status
+            rating: status
         }
         console.log("body:", body)
         return fetch(url.toString(), {
@@ -506,6 +506,7 @@ export default function MapComponent({
         })
             .then(response => response.json())
             .then(data => {
+                console.log("data:", data)
                 if (data.time === 0) {
                     return true;
                 }
