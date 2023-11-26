@@ -1,44 +1,67 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { slide as Menu } from "react-burger-menu";
 import "../globals.css";
 
-const Sidebar = () => {
-  const searchRoute = () => {
-    console.log("searching route from origin to destiny");
-    console.log("org:", (document.getElementById("origin_input") as HTMLInputElement)?.value);
-    console.log("dest:", (document.getElementById("dest_input") as HTMLInputElement)?.value);
-    // clear inputs after search
-    (document.getElementById("origin_input") as HTMLInputElement).value = "";
-    (document.getElementById("dest_input") as HTMLInputElement).value = "";
-  }
+interface Route {
+    name: string;
+    points: {latitude: number; longitude: number}[];
+}
 
-  return (
-    <Menu>
-      <a className="menu-item">
-        <p className="text-2xl font-bold text-left">Origin Point</p>
-        <input
-          id="origin_input"
-          type="text"
-          placeholder="Type here"
-          className="input input-ghost w-full max-w-xs"
-        />
-      </a>
-      <a className="menu-item">
-        <p className="text-2xl font-bold text-left">Destiny</p>
-        <input
-          id="dest_input"
-          type="text"
-          placeholder="Type here"
-          className="input input-ghost w-full max-w-xs"
-        />
-      </a>
-      <a className="menu-item">
-        <button className="btn btn-accent" onClick={searchRoute}>Search route</button>
-      </a>
-    </Menu>
-  );
-};
+export default function Sidebar({
+    routes,getRoutes,draw}: {
+    routes: Route[];
+    getRoutes(): void;
+    draw(url:string): void;
+}) {
 
-Sidebar.displayName = "Sidebar";
+    const URL_ROUTING = process.env.URL_ROUTING;
 
-export default Sidebar;
+    useEffect(() => {
+        getRoutes();
+    }, []);
+
+    const drawR = (r:string) => {
+        let url = URL_ROUTING;
+        let p = routes.find((route) => route.name === r)?.points;
+        if (p) {
+            p.forEach((point) => {
+                let temp = point.latitude + "," + point.longitude;
+                url += "&point=" + temp;
+            });
+        }
+        draw(url!);
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Enter") {
+            let r = e.currentTarget.id;
+            drawR(r);
+        }
+    }
+
+    function show() {
+        if (routes.length === 0) {
+            return <p>No routes found</p>
+        }
+        else {
+            return (
+                routes.map((route) => (
+                    <div className="route" key={route.name}>
+                        <p id={route.name} onKeyDown={handleKeyDown} onClick={() => drawR(route.name)} style={{fontSize:"20px"}}>{route.name}</p>
+                    </div>
+                ))
+            )
+        }
+    }
+
+    return (
+        <Menu>
+            <div className="sidebar">
+                <h1>Routes</h1>
+                <div className="routes">
+                    {show()}
+                </div>
+            </div>
+        </Menu>
+    );
+}

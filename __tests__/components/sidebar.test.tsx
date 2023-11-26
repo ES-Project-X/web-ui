@@ -3,50 +3,31 @@ import { render, fireEvent } from "@testing-library/react";
 import Sidebar from "../../app/components/Sidebar"; // Import your Sidebar component here
 
 describe("Sidebar", () => {
-  it("should clear inputs after searching route", () => {
+
+  let component: HTMLElement
+
+  const findById = (id: string) => {
+    return component.querySelector(`#${id}`) ?? undefined
+  }
+
+  it("test", () => {
+
+    let routes = [{"name":"test","points":[{"latitude":1,"longitude":1}]},{"name":"test2","points":[{"latitude":2,"longitude":2}]}];
+
+    const draw = (url:string) => {
+      console.log(url);
+    }
+
+    const getRoutes = () => {
+      console.log("test");
+    }
+
     // Arrange
-    const { container } = render(<Sidebar />);
+    component = render(<Sidebar routes={routes} draw={draw} getRoutes={getRoutes} />).container;
 
-    // Mock input values
-    const originInput = container.querySelector("#origin_input") as HTMLInputElement;
-    const destInput = container.querySelector("#dest_input") as HTMLInputElement;
+    const testElement = findById("test")
+    expect(testElement).toBeDefined()
+    fireEvent.click(testElement!)
 
-    originInput.value = "Origin Value";
-    destInput.value = "Destiny Value";
-
-    // Act
-    const searchButton = container.querySelector(".btn");
-    fireEvent.click(searchButton);
-
-    // Assert
-    expect(originInput.value).toBe("");
-    expect(destInput.value).toBe("");
-  });
-
-  it("should log the origin and destiny when searching route", () => {
-    // Arrange
-    const { container } = render(<Sidebar />);
-
-    // Mock input values
-    const originInput = container.querySelector("#origin_input") as HTMLInputElement;
-    const destInput = container.querySelector("#dest_input") as HTMLInputElement;
-
-    originInput.value = "Origin Value";
-    destInput.value = "Destiny Value";
-
-    const consoleLogSpy = jest.spyOn(console, "log");
-    consoleLogSpy.mockImplementation(() => {}); // Mock the console.log to prevent actual logging.
-
-    // Act
-    const searchButton = container.querySelector(".btn");
-    fireEvent.click(searchButton);
-
-    // Assert
-    expect(consoleLogSpy).toHaveBeenCalledWith("searching route from origin to destiny");
-    expect(consoleLogSpy).toHaveBeenCalledWith("org:", "Origin Value");
-    expect(consoleLogSpy).toHaveBeenCalledWith("dest:", "Destiny Value");
-
-    // Clean up
-    consoleLogSpy.mockRestore(); // Restore the original console.log
   });
 });
