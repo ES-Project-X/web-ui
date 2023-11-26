@@ -9,7 +9,7 @@ const URL_API = process.env.DATABASE_API_URL;
 
 const UserProfile = ({ user }: { user: UserProps }) => {
   const avatarContainerStyle = {
-    padding: "20px",
+    padding: "10px",
   };
 
   const userDetailStyle = {
@@ -18,8 +18,31 @@ const UserProfile = ({ user }: { user: UserProps }) => {
 
   const nameStyle = {
     fontSize: "24px",
-    margin: "10px 0",
+    margin: "10px",
     color: "#f2f2f2",
+  };
+
+  const centerText = {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  };
+
+  const headerHeight = {
+    height: '60px', // adjust as needed
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    fontWeight: 'bold',
+  };
+
+  const buttonContainerStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    width: '100%',
+    position: 'absolute',
+    top: '0px',
+    right: '10px',
   };
 
   const [isEditing, setIsEditing] = useState(false);
@@ -29,6 +52,12 @@ const UserProfile = ({ user }: { user: UserProps }) => {
   const [email, setEmail] = useState(user.email);
   const [avatar, setAvatar] = useState(user.avatar);
   const [password, setPassword] = useState("");
+  const [total_xp, setTotal_xp] = useState(0);
+  const [added_pois_count, setAddedPoiCount] = useState(0);
+  const [received_ratings_count, setReceivedRatingCount] = useState(0);
+  const [given_ratings_count, setGivenRatingCount] = useState(0);
+
+
 
   const [formUsername, setFormUsername] = useState("");
   const [formEmail, setFormEmail] = useState("");
@@ -75,7 +104,7 @@ const UserProfile = ({ user }: { user: UserProps }) => {
 
 
     if (isEditing) {
-      fetch( URL_API + "user/edit", {
+      fetch(URL_API + "user/edit", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -124,62 +153,92 @@ const UserProfile = ({ user }: { user: UserProps }) => {
       setEmail(userLS.email);
       setFormEmail(userLS.email);
       setFormUsername(userLS.username);
-
-    } 
+      setTotal_xp(userLS.total_xp);
+      setAddedPoiCount(userLS.added_pois_count);
+      setReceivedRatingCount(userLS.received_ratings_count);
+      setGivenRatingCount(userLS.given_ratings_count);
+    }
   }, [user]);
 
   return (
     <div
-      className="container"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        textAlign: "center",
-      }}
+      className="row justify-content-center align-items-start w-100 min-h-screen m-0 p-0 bg-dark"
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          top: "50%",
-          position: "absolute",
-        }}
-      >
+      <div className="row justify-content-end" >
         <Button
           variant="success"
-          className="mt-3"
+          className="my-3"
+          style={{ width: "200px" }}
           onClick={() => (window.location.href = "/map")}
         >
           Go back to Map
         </Button>
-        <div style={avatarContainerStyle}>
+      </div>
+      <div className="row justify-content-center align-items-center text-center" style={{
+        maxWidth: "700px",
+      }}>
+        <div className="row justify-content-center">
           <img
             src={avatar}
             alt={`${fname} ${lname}'s avatar`}
             style={{
+              padding: "0px",
               width: "200px",
               height: "200px",
               borderRadius: "50%",
               objectFit: "cover",
             }}
           />
-        </div>
-        {!isEditing && (
-          <Button
-            variant="secondary"
-            className="mt-3"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            Modify Profile
-          </Button>
-        )}
-        <div style={userDetailStyle}>
-          <h1 style={nameStyle} className="mb-3">
+          <h1 style={nameStyle}>
             {fname} {lname}
           </h1>
+        </div>
+        <div className="row mt-3 mb-4">
+          <div className="col-lg-3 col-md-6 mb-3">
+            <div className="card text-white bg-primary h-100" >
+              <div className="card-header" style={headerHeight}>Total XP</div>
+              <div className="card-body" style={centerText}>
+                <h5 className="card-title">{total_xp}</h5>
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-3 col-md-6 mb-3">
+            <div className="card text-white bg-success h-100">
+              <div className="card-header" style={headerHeight}>Added POIs</div>
+              <div className="card-body" style={centerText}>
+                <h5 className="card-title">{added_pois_count}</h5>
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-3 col-md-6 mb-3">
+            <div className="card text-white bg-info h-100">
+              <div className="card-header" style={headerHeight}>Received Ratings</div>
+              <div className="card-body" style={centerText}>
+                <h5 className="card-title" >{received_ratings_count}</h5>
+              </div>
+            </div>
+          </div>
+          <div className="col-lg-3 col-md-6 mb-3" >
+            <div className="card text-white bg-warning h-100">
+              <div className="card-header" style={headerHeight}>Given Ratings</div>
+              <div className="card-body" style={centerText}>
+                <h5 className="card-title">{given_ratings_count}</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="row justify-content-center">
+          {!isEditing && (
+            <Button
+              variant="secondary"
+              className="my-3 w-50"
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              Modify Profile
+            </Button>
+          )}</div>
+
+        <div className="col-md-8 justify-content-center">
           <div className="mb-3">
             <FloatingLabel controlId="floatingInput1" label="Username">
               <Form.Control
@@ -214,11 +273,13 @@ const UserProfile = ({ user }: { user: UserProps }) => {
             </FloatingLabel>
           </div>)}
         </div>
-        {isEditing && (
-          <Button variant="primary" className="mt-3" title="Save Profile" onClick={updateProfile} >
-            Save Profile
-          </Button>
-        )}
+        <div className="row justify-content-center">
+          {isEditing && (
+            <Button variant="primary" className="mt-3 w-50" title="Save Profile" onClick={updateProfile} >
+              Save Profile
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
