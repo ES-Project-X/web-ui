@@ -162,39 +162,27 @@ const UserProfile = ({ user }: { user: UserProps }) => {
 
   return (
     <div
-      className="container"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        textAlign: "center",
-      }}
+      className="row justify-content-center align-items-start w-100 min-h-screen m-0 p-0 bg-dark"
     >
-      <div style={buttonContainerStyle}>
+      <div className="row justify-content-end" >
         <Button
           variant="success"
-          className="mt-3"
+          className="my-3"
+          style={{ width: "200px" }}
           onClick={() => (window.location.href = "/map")}
         >
           Go back to Map
         </Button>
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          top: "50%",
-          position: "absolute",
-        }}
-      >
-
-        <div style={avatarContainerStyle}>
+      <div className="row justify-content-center align-items-center text-center" style={{
+        maxWidth: "700px",
+      }}>
+        <div className="row justify-content-center">
           <img
             src={avatar}
             alt={`${fname} ${lname}'s avatar`}
             style={{
+              padding: "0px",
               width: "200px",
               height: "200px",
               borderRadius: "50%",
@@ -205,7 +193,7 @@ const UserProfile = ({ user }: { user: UserProps }) => {
             {fname} {lname}
           </h1>
         </div>
-        <div className="row mt-3">
+        <div className="row mt-3 mb-4">
           <div className="col-lg-3 col-md-6 mb-3">
             <div className="card text-white bg-primary h-100" >
               <div className="card-header" style={headerHeight}>Total XP</div>
@@ -239,17 +227,18 @@ const UserProfile = ({ user }: { user: UserProps }) => {
             </div>
           </div>
         </div>
-        {!isEditing && (
-          <Button
-            variant="secondary"
-            className="mt-3 mb-3"
-            onClick={() => setIsEditing(!isEditing)}
-          >
-            Modify Profile
-          </Button>
-        )}
+        <div className="row justify-content-center">
+          {!isEditing && (
+            <Button
+              variant="secondary"
+              className="my-3 w-50"
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              Modify Profile
+            </Button>
+          )}</div>
 
-        <div style={userDetailStyle}>
+        <div className="col-md-8 justify-content-center">
           <div className="mb-3">
             <FloatingLabel controlId="floatingInput1" label="Username">
               <Form.Control
@@ -284,11 +273,13 @@ const UserProfile = ({ user }: { user: UserProps }) => {
             </FloatingLabel>
           </div>)}
         </div>
-        {isEditing && (
-          <Button variant="primary" className="mt-3" title="Save Profile" onClick={updateProfile} >
-            Save Profile
-          </Button>
-        )}
+        <div className="row justify-content-center">
+          {isEditing && (
+            <Button variant="primary" className="mt-3 w-50" title="Save Profile" onClick={updateProfile} >
+              Save Profile
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
