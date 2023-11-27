@@ -13,7 +13,7 @@ import {
     Container,
     Col,
 } from "react-bootstrap";
-import { MapContainer, Polyline, TileLayer } from "react-leaflet";
+import { MapContainer, Polyline, TileLayer, useMapEvents } from "react-leaflet";
 import { LatLng } from "leaflet";
 import "leaflet-rotate";
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -39,6 +39,7 @@ import POIsSidebar from "./POIsSidebar";
 import { Direction } from "../structs/direction";
 import RegisterUserModal from "./RegisterUserModal";
 import Cookies from 'js-cookie';
+import "../globals.css";
 
 const API_KEY = process.env.PUBLIC_KEY_HERE;
 const URL_API = process.env.DATABASE_API_URL;
@@ -51,8 +52,7 @@ const URL_REV =
 const URL_ROUTING = process.env.URL_ROUTING;
 const COGNITO_LOGIN_URL = process.env.COGNITO_LOGIN_URL;
 
-const TOKEN = Cookies.get('COGNITO_TOKEN')
-console.log(TOKEN)
+const TOKEN = Cookies.get('COGNITO_TOKEN');
 
 export default function MapComponent({
     tileLayerURL,
@@ -476,6 +476,8 @@ export default function MapComponent({
             })
     }
 
+    const [loggedIn, setLoggedIn] = useState(false);
+
     function removeCookie() {
         Cookies.remove('COGNITO_TOKEN');
         window.location.reload();
@@ -485,54 +487,48 @@ export default function MapComponent({
     // const res = await fetch(`.../${params.user}`)
     // const data: user = await res.json()
     // const URL_USER = process.env.API_URL;
-    const [user, setUser] = useState(null);
-    const [username, setUsername] = useState("");
     const [avatar, setAvatar] = useState("");
     const [fname, setFname] = useState("");
 
+
+    const [isRModalOpen, setIsRModalOpen] = useState(false);
+
     useEffect(() => {
-        const headers = { Authorization: `Bearer ${TOKEN}` };
-        console.log(URL_API + "user");
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`
+        };
         const url = new URL(URL_API + "user");
 
-        const fetchUser = async () => {
-            // console.log("fetching user");
-            // console.log("URL_USER:", URL_USER);
-            // console.log("TOKEN:", TOKEN);
-            try {
-                await fetch(url.toString(), { headers })
-                    .then((res) => res.json())
-                    .then((data) => {
-                        setUser(data);
-                        //console.log(data);
-                        localStorage.setItem("user", JSON.stringify(data));
-                        setUsername(data.username);
-                        setAvatar(data.image_url);
-                        setFname(data.first_name);
-                    });
-            } catch (error) {
-                console.log("error guy:", error);
-                console.log(error);
-                setUsername("a"); // JUST TO MAKE SURE IT GETS TO PROFILE PAGE - MUST FIX
-                setAvatar("");
-                setFname("");
-            }
-        };
-        fetchUser();
+        if (TOKEN === undefined) {
+            setLoggedIn(false);
+            return;
+        }
+
+        fetch(url.toString(), { headers })
+            .then((res) => res.json())
+            .then((data) => {
+                setAvatar(data.image_url);
+                setFname(data.first_name);
+                localStorage.setItem("user", JSON.stringify(data));
+                setLoggedIn(true);
+            })
+            .catch(() => {
+                setLoggedIn(false);
+                setIsRModalOpen(true);
+            });
+
     }, []);
-    const [isRModalOpen, setIsRModalOpen] = useState(false);
+
 
     useEffect(() => {
         const modal = document.getElementById(
             "register_user_modal"
         ) as HTMLDialogElement;
         if (modal === null) {
-            console.log("modal REGISTER is null");
             return;
         }
-
         if (isRModalOpen) {
-            console.log("modal REGISTER is open");
             modal.showModal();
         } else {
             modal.close();
@@ -545,8 +541,31 @@ export default function MapComponent({
     };
 
     const registerUser = (userData: any) => {
-        console.log("Registering user:", userData);
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`
+        };
+        const url = new URL(URL_API + "auth/register");
+        console.log(userData);
+
+        fetch(url.toString(), {
+            headers,
+            method: "POST",
+            body: JSON.stringify(userData)
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setAvatar(data.image_url);
+                setFname(data.first_name);
+                localStorage.setItem("user", JSON.stringify(data));
+                setLoggedIn(true);
+            })
+            .catch((err) => {
+                console.log("error:", err);
+            });
+
         closeModal();
+        window.location.reload();
     };
 
     return (
@@ -702,33 +721,6 @@ export default function MapComponent({
                     />
                 )}
                 {/*
-            </MapContainer>
-            <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{ zIndex: 1, scale: "100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black" }}>Route</Button>
-            <Card id={"card-ori-dest"} style={{ zIndex: 1, top: "1%", left: "5%", width: "15%", position: "absolute", display: "none" }}>
-                <Card.Body>
-                    <Form>
-                        <Form.Group>
-                            <Form.Label>Origin</Form.Label>
-                            <Form.Control id={"origin-input"} type={"text"} placeholder={"Origin"} onChange={updateOrigin} value={origin} readOnly={false} />
-                        </Form.Group>
-                        <br />
-                        <Form.Group>
-                            <Form.Label>Destination</Form.Label>
-                            <Form.Control id={"destination-input"} type={"text"} placeholder={"Destination"} onChange={updateDestination} value={destination} readOnly={false} />
-                        </Form.Group>
-                        <br />
-                        <Form.Group className="mb-3" >
-                            <Form.Check id="mapcbox" type="checkbox" onChange={getFromMap} label="Select in Map" />
-                        </Form.Group>
-                        <Form.Group>
-                            <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%" }}>Get Route</Button>
-                            <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%", marginLeft: "20%" }}>Cancel</Button>
-                        </Form.Group>
-                    </Form>
-                </Card.Body>
-            </Card>
-            <Container className={"map-ui d-flex flex-column h-100"} fluid>
-                {/*
                     POPUP CARD
                 */}
                 <Card
@@ -766,25 +758,10 @@ export default function MapComponent({
                     </Col>
 
                     <Col xs="auto" className="d-flex align-items-center">
-                        {TOKEN === null || TOKEN === "" || TOKEN === undefined ?
-                            <>
-                                <a
-                                    href={COGNITO_LOGIN_URL}
-                                    className="btn-circle-link me-3"
-                                    target="_self"
-                                >
-                                    <button className="btn">Login</button>
-                                </a>
-                                <a className="btn-circle-link me-3">
-                                    <button className="btn" onClick={() => setIsRModalOpen(true)}>
-                                        Register
-                                    </button>
-                                </a>
-                            </>
-                            :
+                        {loggedIn ?
                             <>
                                 <a className="btn-circle-link me-3">
-                                    <button className="btn" onClick={() => removeCookie()}>
+                                    <button className="btn" onClick={() => { removeCookie() }}>
                                         Logout
                                     </button>
                                 </a>
@@ -817,21 +794,15 @@ export default function MapComponent({
                                     </a>
                                 </ButtonGroup>
                             </>
+                            :
+                            <a
+                                href={COGNITO_LOGIN_URL}
+                                className="btn-circle-link me-3"
+                                target="_self"
+                            >
+                                <button className="btn">Login</button>
+                            </a>
                         }
-                    </Col>
-                </Row>
-                {/*
-                <Row className={"pt-2"}>
-                    <Col xs={"auto"} className={"mx-auto"}>
-                        <Form>
-                            <Form.Group controlId={"search-bar"}>
-                                <Form.Control
-                                    type={"text"}
-                                    placeholder={"Search"}
-                                    onKeyDown={handleKeyDown}
-                                />
-                            </Form.Group>
-                        </Form>
                     </Col>
                 </Row>
                 {/*
