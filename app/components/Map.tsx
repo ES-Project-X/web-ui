@@ -12,8 +12,10 @@ import {
     CloseButton,
     Container,
     Col,
+    FormGroup,
+    FormLabel,
 } from "react-bootstrap";
-import { MapContainer, Polyline, TileLayer } from "react-leaflet";
+import { MapContainer, Polyline, TileLayer, useMapEvents } from "react-leaflet";
 import { LatLng } from "leaflet";
 import "leaflet-rotate";
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -38,7 +40,7 @@ import GetClusters from "./GetClusters";
 import POIsSidebar from "./POIsSidebar";
 import { Direction } from "../structs/direction";
 import RegisterUserModal from "./RegisterUserModal";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 const API_KEY = process.env.PUBLIC_KEY_HERE;
 const URL_API = process.env.DATABASE_API_URL;
@@ -51,8 +53,7 @@ const URL_REV =
 const URL_ROUTING = process.env.URL_ROUTING;
 const COGNITO_LOGIN_URL = process.env.COGNITO_LOGIN_URL;
 
-const TOKEN = Cookies.get('COGNITO_TOKEN')
-console.log(TOKEN)
+const TOKEN = Cookies.get('COGNITO_TOKEN');
 
 export default function MapComponent({
     tileLayerURL,
@@ -94,14 +95,22 @@ export default function MapComponent({
     const [directions, setDirections] = useState<Direction[]>(d);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const [ratingPositive, setRatingPositive] = useState(0)
-    const [ratingNegative, setRatingNegative] = useState(0)
+    const [ratingPositive, setRatingPositive] = useState(0);
+    const [ratingNegative, setRatingNegative] = useState(0);
+
+    const [ratingPositiveStat, setRatingPositiveStat] = useState(0);
+    const [ratingNegativeStat, setRatingNegativeStat] = useState(0);
+
+    const [gettingInterRoute, setGettingInterRoute] = useState(false);
+
+    const [routes, setRoutes] = useState([]);
 
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
             const { latitude, longitude } = location.coords;
             setUserPosition({ latitude, longitude });
         });
+        getRoutes();
     }, []);
 
     useEffect(() => {
@@ -158,6 +167,7 @@ export default function MapComponent({
     };
 
     const fetchPOIs = (clusters: number[][]) => {
+        console.log("fetching pois");
         const url = new URL(URL_API + "poi/cluster");
         clusters.forEach((cluster: number[]) => {
             url.searchParams.append("max_lat", cluster[0].toString());
@@ -169,24 +179,26 @@ export default function MapComponent({
         fetch(url.toString())
             .then((response) => response.json())
             .then((data) => updateMarkers(data))
-            .catch(() => { });
+            .catch((error) => console.log(error));
+
+        console.log("response:", url.toString());
     };
 
     function fetchPOIDetails(id: string) {
         const headers = {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${TOKEN}`
+            Authorization: `Bearer ${TOKEN}`,
         };
         const url = new URL(URL_API + "poi/" + id);
         fetch(url.toString(), { headers })
-            .then(response => response.json())
-            .then(data => {
+            .then((response) => response.json())
+            .then((data) => {
                 setSelectedPOI(data);
                 setRatingPositive(data.rating_positive);
                 setRatingNegative(data.rating_negative);
             })
-            .catch(() => { })
-        return
+            .catch(() => { });
+        return;
     }
 
     const filterPOIs = () => {
@@ -317,41 +329,7 @@ export default function MapComponent({
             });
     };
 
-    const getRoute = async () => {
-        if (origin === "" || destination === "") {
-            window.alert("Please fill in both fields");
-            return;
-        }
-        if (odmap) {
-            setGettingRoute(true);
-        }
-        let url = URL_ROUTING;
-        if (
-            origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
-            destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
-        ) {
-            console.log("HERE1");
-            url += "&point=" + origin + "&point=" + destination;
-        } else if (
-            origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
-            !destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
-        ) {
-            console.log("HERE2");
-            let dest = await geoCode(URL_GEO + "&q=" + destination);
-            url += "&point=" + origin + "&point=" + dest;
-        } else if (
-            !origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
-            destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
-        ) {
-            console.log("HERE3");
-            let ori = await geoCode(URL_GEO + "&q=" + origin);
-            url += "&point=" + ori + "&point=" + destination;
-        } else {
-            console.log("HERE4");
-            let ori = await geoCode(URL_GEO + "&q=" + origin);
-            let dest = await geoCode(URL_GEO + "&q=" + destination);
-            url += "&point=" + ori + "&point=" + dest;
-        }
+    const drawRoute = (url: string) => {
         if (url) {
             fetch(url)
                 .then((response) => response.json())
@@ -381,11 +359,125 @@ export default function MapComponent({
                     setDirections(directions);
                     // @ts-ignore
                     document.getElementById("ins-card").style.display = "block";
+                    // @ts-ignore
+                    document.getElementById("cancel-route-btn").style.display = "block";
                 })
                 .catch((error) => {
                     console.error("Error:", error);
                 });
         }
+    };
+
+    const [loggedIn, setLoggedIn] = useState(false);
+
+    function getRoutes() {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`
+        };
+        const url = new URL(URL_API + "route/get");
+        return fetch(url.toString(), { headers })
+            .then(response => response.json())
+            .then(data => {
+                if (data.detail) {
+                    return;
+                } else {
+                    setRoutes(data);
+                }
+            })
+            .catch(() => {
+                alert("Error getting routes")
+            })
+    }
+
+    function storeRoute(points: string[], names: string[]) {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+        };
+        const url = new URL(URL_API + "route/create");
+        let name = "";
+        for (let i = 0; i < names.length; i++) {
+            if (i === names.length - 1) {
+                name += names[i];
+            } else {
+                name += names[i] + "-";
+            }
+        }
+        let body = {
+            name: name,
+            points: points,
+        };
+        return fetch(url.toString(), {
+            headers,
+            method: "POST",
+            body: JSON.stringify(body),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                getRoutes();
+                return true;
+            })
+            .catch(() => {
+                return false;
+            });
+    }
+
+    const getRoute = async () => {
+        let points = [];
+
+        if (origin === "" || destination === "") {
+            window.alert("Please fill in both fields");
+            return;
+        }
+        if (odmap) {
+            setGettingRoute(true);
+        }
+        setGettingInterRoute(true);
+        let url = URL_ROUTING;
+
+        let names = [];
+        names.push(origin);
+
+        if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            url += "&point=" + origin;
+            points.push(origin);
+        } else {
+            let ori = await geoCode(URL_GEO + "&q=" + origin);
+            url += "&point=" + ori;
+            points.push(ori);
+        }
+
+        for (let i = 0; i < numberOfIntermediates; i++) {
+            let intermediate = (
+                document.getElementById("intermediate-input-" + i) as HTMLInputElement
+            ).value;
+            names.push(intermediate);
+            if (intermediate.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+                url += "&point=" + intermediate;
+                points.push(intermediate);
+            } else if (intermediate === "") {
+            } else {
+                let inter = await geoCode(URL_GEO + "&q=" + intermediate);
+                url += "&point=" + inter;
+                points.push(inter);
+            }
+        }
+
+        names.push(destination);
+
+        if (destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            url += "&point=" + destination;
+            points.push(destination);
+        } else {
+            let dest = await geoCode(URL_GEO + "&q=" + destination);
+            url += "&point=" + dest;
+            points.push(dest);
+        }
+
+        storeRoute(points, names);
+
+        drawRoute(url!);
     };
 
     const hidecard = () => {
@@ -403,9 +495,14 @@ export default function MapComponent({
     const cancelRoute = () => {
         setPoints([]);
         setGettingRoute(false);
+        setGettingInterRoute(false);
         setCurrentIndex(0);
         // @ts-ignore
         document.getElementById("ins-card").style.display = "none";
+        // @ts-ignore
+        document.getElementById("cancel-route-btn").style.display = "none";
+        // @ts-ignore
+        document.getElementById("card-ori-dest").style.display = "none";
     };
 
     const handleNext = () => {
@@ -442,42 +539,72 @@ export default function MapComponent({
     function rateExistenceFunction(id: string, existence: boolean) {
         const headers = {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${TOKEN}`
+            Authorization: `Bearer ${TOKEN}`,
         };
         const url = new URL(URL_API + "poi/exists");
         let body = {
             id: id,
-            rating: existence
-        }
+            rating: existence,
+        };
         return fetch(url.toString(), {
             headers,
             method: "PUT",
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
         })
-            .then(response => response.json())
-            .then(data => {
+            .then((response) => response.json())
+            .then((data) => {
                 if (data.time === 0) {
                     return true;
-                }
-                else {
+                } else {
                     // covert seconds in 00h00m00s
                     let seconds = data.time;
                     let minutes = Math.floor(seconds / 60);
                     let hours = Math.floor(minutes / 60);
                     seconds = seconds % 60;
                     minutes = minutes % 60;
-                    let time = `${padTo2Digits(hours)}h${padTo2Digits(minutes)}m${padTo2Digits(seconds)}s`;
-                    window.alert("You have already rated this POI, please wait " + time + " to rate again");
+                    let time = `${padTo2Digits(hours)}h${padTo2Digits(
+                        minutes
+                    )}m${padTo2Digits(seconds)}s`;
+                    window.alert(
+                        "You have already rated this POI, please wait " +
+                        time +
+                        " to rate again"
+                    );
                     return false;
                 }
             })
             .catch(() => {
                 return false;
-            })
+            });
+    }
+    const [existsClicked, setExistsClicked] = useState(false);
+    const [fakeNewsClicked, setFakeNewsClicked] = useState(false);
+    const [showDetails, setShowDetails] = useState(false);
+
+    const toggleDetails = () => {
+        setShowDetails(!showDetails);
+    };
+
+    function rateStatusFunction(id: string, status: boolean) {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+        };
+        const url = new URL(URL_API + "poi/status");
+        let body = {
+            id: id,
+            status: status,
+        };
+        console.log("body:", body);
+        return fetch(url.toString(), {
+            headers,
+            method: "PUT",
+            body: JSON.stringify(body),
+        });
     }
 
     function removeCookie() {
-        Cookies.remove('COGNITO_TOKEN');
+        Cookies.remove("COGNITO_TOKEN");
         window.location.reload();
     }
 
@@ -485,54 +612,48 @@ export default function MapComponent({
     // const res = await fetch(`.../${params.user}`)
     // const data: user = await res.json()
     // const URL_USER = process.env.API_URL;
-    const [user, setUser] = useState(null);
-    const [username, setUsername] = useState("");
     const [avatar, setAvatar] = useState("");
     const [fname, setFname] = useState("");
 
+
+    const [isRModalOpen, setIsRModalOpen] = useState(false);
+
     useEffect(() => {
-        const headers = { Authorization: `Bearer ${TOKEN}` };
-        console.log(URL_API + "user");
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`
+        };
         const url = new URL(URL_API + "user");
 
-        const fetchUser = async () => {
-            // console.log("fetching user");
-            // console.log("URL_USER:", URL_USER);
-            // console.log("TOKEN:", TOKEN);
-            try {
-                await fetch(url.toString(), { headers })
-                    .then((res) => res.json())
-                    .then((data) => {
-                        setUser(data);
-                        //console.log(data);
-                        localStorage.setItem("user", JSON.stringify(data));
-                        setUsername(data.username);
-                        setAvatar(data.image_url);
-                        setFname(data.first_name);
-                    });
-            } catch (error) {
-                console.log("error guy:", error);
-                console.log(error);
-                setUsername("a"); // JUST TO MAKE SURE IT GETS TO PROFILE PAGE - MUST FIX
-                setAvatar("");
-                setFname("");
-            }
-        };
-        fetchUser();
+        if (TOKEN === undefined) {
+            setLoggedIn(false);
+            return;
+        }
+
+        fetch(url.toString(), { headers })
+            .then((res) => res.json())
+            .then((data) => {
+                setAvatar(data.image_url);
+                setFname(data.first_name);
+                localStorage.setItem("user", JSON.stringify(data));
+                setLoggedIn(true);
+            })
+            .catch(() => {
+                setLoggedIn(false);
+                setIsRModalOpen(true);
+            });
+
     }, []);
-    const [isRModalOpen, setIsRModalOpen] = useState(false);
+
 
     useEffect(() => {
         const modal = document.getElementById(
             "register_user_modal"
         ) as HTMLDialogElement;
         if (modal === null) {
-            console.log("modal REGISTER is null");
             return;
         }
-
         if (isRModalOpen) {
-            console.log("modal REGISTER is open");
             modal.showModal();
         } else {
             modal.close();
@@ -545,15 +666,90 @@ export default function MapComponent({
     };
 
     const registerUser = (userData: any) => {
-        console.log("Registering user:", userData);
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`
+        };
+        const url = new URL(URL_API + "auth/register");
+        console.log(userData);
+
+        fetch(url.toString(), {
+            headers,
+            method: "POST",
+            body: JSON.stringify(userData)
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setAvatar(data.image_url);
+                setFname(data.first_name);
+                localStorage.setItem("user", JSON.stringify(data));
+                setLoggedIn(true);
+            })
+            .catch((err) => {
+                console.log("error:", err);
+            });
+
         closeModal();
+        window.location.reload();
+    };
+
+    const [numberOfIntermediates, setNumberOfIntermediates] = useState(0);
+    const [canCall, setCanCall] = useState(false);
+
+    let intermediates: any[];
+    intermediates = [];
+
+    const eliminateIntermediate = (
+        event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    ) => {
+        const id = event.currentTarget.id;
+        intermediates.splice(parseInt(id[id.length - 1]), 1);
+        setNumberOfIntermediates(numberOfIntermediates - 1);
+        setCanCall(true);
+    };
+
+    for (let i = 0; i < numberOfIntermediates; i++) {
+        let string = "Intermediate " + (i + 1);
+        intermediates.push(
+            <FormGroup id={"intermediate" + i}>
+                <FormLabel>{string}</FormLabel>
+                <Row style={{ paddingLeft: "5%", marginRight: "5%" }}>
+                    <Form.Control
+                        style={{ width: "82%", marginRight: "2%" }}
+                        id={"intermediate-input-" + i}
+                        type={"text"}
+                        placeholder={"Intermediate " + (i + 1)}
+                        readOnly={false}
+                    />
+                    <Button
+                        id={"intermediate-minus-btn-" + i}
+                        onClick={eliminateIntermediate}
+                        style={{ width: "30px" }}
+                    >
+                        -
+                    </Button>
+                </Row>
+                <br />
+            </FormGroup>
+        );
+    }
+
+    useEffect(() => {
+        if (canCall && gettingInterRoute && origin !== "" && destination !== "") {
+            getRoute();
+        }
+        setCanCall(false);
+    }, [numberOfIntermediates]);
+
+    const addIntermediate = () => {
+        setNumberOfIntermediates(numberOfIntermediates + 1);
     };
 
     return (
         <>
             {/* Sidebar */}
 
-            <Sidebar />
+            <Sidebar routes={routes} getRoutes={getRoutes} draw={drawRoute} />
 
             {/* eventually change this to the main page, but for now fica aqui */}
 
@@ -568,7 +764,10 @@ export default function MapComponent({
                 bearing={0}
                 maxZoom={18}
                 minZoom={2}
-                maxBounds={[[-90, -180], [90, 180]]}
+                maxBounds={[
+                    [-90, -180],
+                    [90, 180],
+                ]}
                 // @ts-ignore
                 rotateControl={{ closeOnZeroBearing: false }}
                 touchRotate={true}
@@ -579,7 +778,8 @@ export default function MapComponent({
                 <MarkersManager
                     setOrigin={setOrigin}
                     setDestination={setDestination}
-                    creatingRoute={creatingRoute} />
+                    creatingRoute={creatingRoute}
+                />
                 <GetClusters fetchFunction={fetchPOIs} />
             </MapContainer>
             <Button
@@ -596,6 +796,22 @@ export default function MapComponent({
                 }}
             >
                 Route
+            </Button>
+            <Button
+                id={"cancel-route-btn"}
+                onClick={cancelRoute}
+                variant={"light"}
+                style={{
+                    zIndex: 1,
+                    scale: "100%",
+                    bottom: "1%",
+                    left: "5%",
+                    position: "absolute",
+                    border: ".1em solid black",
+                    display: "none",
+                }}
+            >
+                Cancel
             </Button>
             <Card
                 id={"card-ori-dest"}
@@ -622,6 +838,7 @@ export default function MapComponent({
                             />
                         </Form.Group>
                         <br />
+                        {intermediates}
                         <Form.Group>
                             <Form.Label>Destination</Form.Label>
                             <Form.Control
@@ -634,6 +851,14 @@ export default function MapComponent({
                             />
                         </Form.Group>
                         <br />
+                        <Button
+                            id={"add-intermediate-btn"}
+                            onClick={addIntermediate}
+                            style={{ width: "60%", marginLeft: "20%" }}
+                        >
+                            Add Intermediate
+                        </Button>
+                        <br />
                         <Form.Group className="mb-3">
                             <Form.Check
                                 id="mapcbox"
@@ -643,13 +868,19 @@ export default function MapComponent({
                             />
                         </Form.Group>
                         <Row>
-                            <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%" }}>Get Route</Button>
-                            <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%", marginLeft: "20%" }}>Cancel</Button>
+                            <Button
+                                id={"get-route-btn"}
+                                onClick={getRoute}
+                                variant={"light"}
+                                style={{ border: ".1em solid black", width: "40%" }}
+                            >
+                                Get Route
+                            </Button>
                         </Row>
                     </Form>
                 </Card.Body>
             </Card>
-            {directions[currentIndex] !== undefined &&
+            {directions[currentIndex] !== undefined && (
                 <Card
                     id={"ins-card"}
                     style={{
@@ -690,7 +921,7 @@ export default function MapComponent({
                         </Button>
                     </Card.Body>
                 </Card>
-            }
+            )}
             <Container className={"map-ui d-flex flex-column h-100"} fluid>
                 {isRModalOpen && (
                     <RegisterUserModal
@@ -766,25 +997,10 @@ export default function MapComponent({
                     </Col>
 
                     <Col xs="auto" className="d-flex align-items-center">
-                        {TOKEN === null || TOKEN === "" || TOKEN === undefined ?
-                            <>
-                                <a
-                                    href={COGNITO_LOGIN_URL}
-                                    className="btn-circle-link me-3"
-                                    target="_self"
-                                >
-                                    <button className="btn">Login</button>
-                                </a>
-                                <a className="btn-circle-link me-3">
-                                    <button className="btn" onClick={() => setIsRModalOpen(true)}>
-                                        Register
-                                    </button>
-                                </a>
-                            </>
-                            :
+                        {loggedIn ?
                             <>
                                 <a className="btn-circle-link me-3">
-                                    <button className="btn" onClick={() => removeCookie()}>
+                                    <button className="btn" onClick={() => { removeCookie() }}>
                                         Logout
                                     </button>
                                 </a>
@@ -817,41 +1033,57 @@ export default function MapComponent({
                                     </a>
                                 </ButtonGroup>
                             </>
+                            :
+                            <a
+                                href={COGNITO_LOGIN_URL}
+                                className="btn-circle-link me-3"
+                                target="_self"
+                            >
+                                <button className="btn">Login</button>
+                            </a>
                         }
-                    </Col>
-                </Row>
-                {/*
-                <Row className={"pt-2"}>
-                    <Col xs={"auto"} className={"mx-auto"}>
-                        <Form>
-                            <Form.Group controlId={"search-bar"}>
-                                <Form.Control
-                                    type={"text"}
-                                    placeholder={"Search"}
-                                    onKeyDown={handleKeyDown}
-                                />
-                            </Form.Group>
-                        </Form>
                     </Col>
                 </Row>
                 {/*
                     MIDDLE PART OF THE UI
                 */}
                 <Row className={"flex-grow-1"}>
-                    <Col xs={"auto"} className={"flex-grow-1"}>
-                    </Col>
+                    <Col xs={"auto"} className={"flex-grow-1"}></Col>
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
                         <Card id={"filter-board"}>
                             <Card.Body>
                                 <FilterBoardComponent
-                                    filterPOIs={filterPOIs} setFilterName={setFilterName} setFilterTypes={setFilterTypes} types={filterTypes} />
+                                    filterPOIs={filterPOIs}
+                                    setFilterName={setFilterName}
+                                    setFilterTypes={setFilterTypes}
+                                    types={filterTypes}
+                                />
                             </Card.Body>
                         </Card>
                     </Col>
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
                         <Card id={"poi-sidebar"} style={{ display: "none" }}>
                             <Card.Body>
-                                <POIsSidebar selectedPOI={selectedPOI} rateExistenceFunction={rateExistenceFunction} ratingPositive={ratingPositive} setRatingPositive={setRatingPositive} ratingNegative={ratingNegative} setRatingNegative={setRatingNegative} />
+                                <POIsSidebar
+                                    selectedPOI={selectedPOI}
+                                    rateExistenceFunction={rateExistenceFunction}
+                                    rateStatusFunction={rateStatusFunction}
+                                    ratingPositive={ratingPositive}
+                                    setRatingPositive={setRatingPositive}
+                                    ratingNegative={ratingNegative}
+                                    setRatingNegative={setRatingNegative}
+                                    ratingPositiveStat={ratingPositiveStat}
+                                    setRatingPositiveStat={setRatingPositiveStat}
+                                    ratingNegativeStat={ratingNegativeStat}
+                                    setRatingNegativeStat={setRatingNegativeStat}
+                                    existsClicked={existsClicked}
+                                    setExistsClicked={setExistsClicked}
+                                    fakeNewsClicked={fakeNewsClicked}
+                                    setFakeNewsClicked={setFakeNewsClicked}
+                                    showDetails={showDetails}
+                                    toggleDetails={toggleDetails}
+                                    setShowDetails={setShowDetails}
+                                />
                             </Card.Body>
                         </Card>
                     </Col>

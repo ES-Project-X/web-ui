@@ -14,10 +14,7 @@ export default function Page() {
   };
 
   return (
-    <div>
-      <div className="container">
-        <UserProfile user={data} />
-      </div>
-    </div>
+    <UserProfile user={data} />
+
   );
 }
