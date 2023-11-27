@@ -104,11 +104,14 @@ export default function MapComponent({
 
   const [gettingInterRoute, setGettingInterRoute] = useState(false);
 
+  const [routes, setRoutes] = useState([]);
+
   useEffect(() => {
     navigator.geolocation.watchPosition((location) => {
       const { latitude, longitude } = location.coords;
       setUserPosition({ latitude, longitude });
     });
+    getRoutes();
   }, []);
 
   useEffect(() => {
@@ -357,6 +360,8 @@ export default function MapComponent({
           setDirections(directions);
           // @ts-ignore
           document.getElementById("ins-card").style.display = "block";
+          // @ts-ignore
+          document.getElementById("cancel-route-btn").style.display = "block";
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -364,7 +369,62 @@ export default function MapComponent({
     }
   };
 
+  function getRoutes() {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${TOKEN}`,
+    };
+    const url = new URL(URL_API + "route/get");
+    return fetch(url.toString(), { headers })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.detail) {
+          return;
+        } else {
+          setRoutes(data);
+        }
+      })
+      .catch(() => {
+        alert("Error getting routes");
+      });
+  }
+
+  function storeRoute(points: string[], names: string[]) {
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${TOKEN}`,
+    };
+    const url = new URL(URL_API + "route/create");
+    let name = "";
+    for (let i = 0; i < names.length; i++) {
+      if (i === names.length - 1) {
+        name += names[i];
+      } else {
+        name += names[i] + "-";
+      }
+    }
+    let body = {
+      name: name,
+      points: points,
+    };
+    return fetch(url.toString(), {
+      headers,
+      method: "POST",
+      body: JSON.stringify(body),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        getRoutes();
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
+  }
+
   const getRoute = async () => {
+    let points = [];
+
     if (origin === "" || destination === "") {
       window.alert("Please fill in both fields");
       return;
@@ -375,32 +435,46 @@ export default function MapComponent({
     setGettingInterRoute(true);
     let url = URL_ROUTING;
 
+    let names = [];
+    names.push(origin);
+
     if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
       url += "&point=" + origin;
+      points.push(origin);
     } else {
       let ori = await geoCode(URL_GEO + "&q=" + origin);
       url += "&point=" + ori;
+      points.push(ori);
     }
 
     for (let i = 0; i < numberOfIntermediates; i++) {
       let intermediate = (
         document.getElementById("intermediate-input-" + i) as HTMLInputElement
       ).value;
+      names.push(intermediate);
       if (intermediate.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
         url += "&point=" + intermediate;
+        points.push(intermediate);
       } else if (intermediate === "") {
       } else {
         let inter = await geoCode(URL_GEO + "&q=" + intermediate);
         url += "&point=" + inter;
+        points.push(inter);
       }
     }
 
+    names.push(destination);
+
     if (destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
       url += "&point=" + destination;
+      points.push(destination);
     } else {
       let dest = await geoCode(URL_GEO + "&q=" + destination);
       url += "&point=" + dest;
+      points.push(dest);
     }
+
+    storeRoute(points, names);
 
     drawRoute(url!);
   };
@@ -424,6 +498,10 @@ export default function MapComponent({
     setCurrentIndex(0);
     // @ts-ignore
     document.getElementById("ins-card").style.display = "none";
+    // @ts-ignore
+    document.getElementById("cancel-route-btn").style.display = "none";
+    // @ts-ignore
+    document.getElementById("card-ori-dest").style.display = "none";
   };
 
   const handleNext = () => {
@@ -653,7 +731,7 @@ export default function MapComponent({
     <>
       {/* Sidebar */}
 
-      <Sidebar />
+      <Sidebar routes={routes} getRoutes={getRoutes} draw={drawRoute} />
 
       {/* eventually change this to the main page, but for now fica aqui */}
 
@@ -700,6 +778,22 @@ export default function MapComponent({
         }}
       >
         Route
+      </Button>
+      <Button
+        id={"cancel-route-btn"}
+        onClick={cancelRoute}
+        variant={"light"}
+        style={{
+          zIndex: 1,
+          scale: "100%",
+          bottom: "1%",
+          left: "5%",
+          position: "absolute",
+          border: ".1em solid black",
+          display: "none",
+        }}
+      >
+        Cancel
       </Button>
       <Card
         id={"card-ori-dest"}
@@ -763,18 +857,6 @@ export default function MapComponent({
                 style={{ border: ".1em solid black", width: "40%" }}
               >
                 Get Route
-              </Button>
-              <Button
-                id={"cancel-route-btn"}
-                onClick={cancelRoute}
-                variant={"light"}
-                style={{
-                  border: ".1em solid black",
-                  width: "40%",
-                  marginLeft: "20%",
-                }}
-              >
-                Cancel
               </Button>
             </Row>
           </Form>
@@ -1001,9 +1083,9 @@ export default function MapComponent({
                   setExistsClicked={setExistsClicked}
                   fakeNewsClicked={fakeNewsClicked}
                   setFakeNewsClicked={setFakeNewsClicked}
-                    showDetails={showDetails}
-                    toggleDetails={toggleDetails}
-                    setShowDetails={setShowDetails}
+                  showDetails={showDetails}
+                  toggleDetails={toggleDetails}
+                  setShowDetails={setShowDetails}
                 />
               </Card.Body>
             </Card>
