@@ -13,8 +13,6 @@ on:
   push:
     branches:
       - master
-      - ES-60-create-dockerfile-for-api-and-web-app
-      - ES-3-Log-In
 
 env:
   AWS_REGION: eu-west-1                           # set this to your preferred AWS region, e.g. us-west-1
@@ -54,8 +52,8 @@ jobs:
           echo "URL_ROUTING=${{ vars.URL_ROUTING }}" >> .env.local
           echo "COGNITO_LOGIN_URL=${{ vars.COGNITO_LOGIN_URL }}" >> .env.local
 
-      - name: Display .env content
-        run: cat .env
+      - name: Display .env.local content
+        run: cat .env.local
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
