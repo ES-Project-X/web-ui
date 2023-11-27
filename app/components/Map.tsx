@@ -361,7 +361,12 @@ export default function MapComponent({
         }
     }
 
+    const [loggedIn, setLoggedIn] = useState(false);
+
     function getRoutes() {
+        if (loggedIn === false) {
+            return;
+        }
         const headers = {
             "Content-Type": "application/json",
             Authorization: `Bearer ${TOKEN}`
@@ -486,7 +491,7 @@ export default function MapComponent({
     const cancelRoute = () => {
         setPoints([]);
         setGettingRoute(false);
-        setGettingInterRoute(false)
+        setGettingInterRoute(false);
         setCurrentIndex(0);
         // @ts-ignore
         document.getElementById("ins-card").style.display = "none";
@@ -563,8 +568,6 @@ export default function MapComponent({
                 return false;
             })
     }
-
-    const [loggedIn, setLoggedIn] = useState(false);
 
     function removeCookie() {
         Cookies.remove('COGNITO_TOKEN');
