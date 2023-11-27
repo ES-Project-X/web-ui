@@ -45,25 +45,19 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
 
-      - name: Create .env file
-        run: |
-          echo "PUBLIC_KEY_HERE=${{ vars.PUBLIC_KEY_HERE }}" > .env.local
-          echo "DATABASE_API_URL=${{ vars.DATABASE_API_URL }}" >> .env.local
-          echo "URL_ROUTING=${{ vars.URL_ROUTING }}" >> .env.local
-          echo "COGNITO_LOGIN_URL=${{ vars.COGNITO_LOGIN_URL }}" >> .env.local
-
-      - name: Display .env.local content
-        run: cat .env.local
-
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          COGNITO_LOGIN_URL: ${{ vars.COGNITO_LOGIN_URL }}
+          DATABASE_API_URL: ${{ vars.DATABASE_API_URL }}
+          PUBLIC_KEY_HERE: ${{ vars.PUBLIC_KEY_HERE }}
+          URL_ROUTING: ${{ vars.URL_ROUTING }}
         run: |
           # Build a docker container and
           # push it to ECR so that it can
           # be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker build --build-arg COGNITO_LOGIN_URL=$COGNITO_LOGIN_URL --build-arg DATABASE_API_URL=$DATABASE_API_URL --build-arg PUBLIC_KEY_HERE=$PUBLIC_KEY_HERE --build-arg URL_ROUTING=$URL_ROUTING -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
 
