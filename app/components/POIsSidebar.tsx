@@ -15,6 +15,10 @@ const POIsSidebar = ({
   setRatingPositiveStat,
   ratingNegativeStat,
   setRatingNegativeStat,
+  existsClicked,
+  setExistsClicked,
+  fakeNewsClicked,
+  setFakeNewsClicked,
 }: {
   selectedPOI: any;
   rateExistenceFunction: Function;
@@ -27,6 +31,10 @@ const POIsSidebar = ({
   setRatingPositiveStat: Function;
   ratingNegativeStat: number;
   setRatingNegativeStat: Function;
+  existsClicked: boolean;
+  setExistsClicked: Function;
+  fakeNewsClicked: boolean;
+  setFakeNewsClicked: Function;
 }) => {
   if (!selectedPOI) return;
 
@@ -77,8 +85,6 @@ const POIsSidebar = ({
     }
   }
 
-  const [existsClicked, setExistsClicked] = useState(false);
-  const [fakeNewsClicked, setFakeNewsClicked] = useState(false);
 
   async function handleClickStatus(sx: boolean) {
     console.log("status: ", sx);

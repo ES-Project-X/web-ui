@@ -491,6 +491,8 @@ export default function MapComponent({
                 return false;
             })
     }
+    const [existsClicked, setExistsClicked] = useState(false);
+    const [fakeNewsClicked, setFakeNewsClicked] = useState(false);
 
     function rateStatusFunction(id: string, status: boolean) {
         const headers = {
@@ -933,7 +935,7 @@ export default function MapComponent({
                     <Col xs={"auto"} className={"d-flex align-items-center"}>
                         <Card id={"poi-sidebar"} style={{ display: "none" }}>
                             <Card.Body>
-                                <POIsSidebar selectedPOI={selectedPOI} rateExistenceFunction={rateExistenceFunction} rateStatusFunction={rateStatusFunction} ratingPositive={ratingPositive} setRatingPositive={setRatingPositive} ratingNegative={ratingNegative} setRatingNegative={setRatingNegative} ratingPositiveStat={ratingPositiveStat} setRatingPositiveStat={setRatingPositiveStat} ratingNegativeStat={ratingNegativeStat} setRatingNegativeStat={setRatingNegativeStat} />
+                                <POIsSidebar selectedPOI={selectedPOI} rateExistenceFunction={rateExistenceFunction} rateStatusFunction={rateStatusFunction} ratingPositive={ratingPositive} setRatingPositive={setRatingPositive} ratingNegative={ratingNegative} setRatingNegative={setRatingNegative} ratingPositiveStat={ratingPositiveStat} setRatingPositiveStat={setRatingPositiveStat} ratingNegativeStat={ratingNegativeStat} setRatingNegativeStat={setRatingNegativeStat} existsClicked={existsClicked} setExistsClicked={setExistsClicked} fakeNewsClicked={fakeNewsClicked} setFakeNewsClicked={setFakeNewsClicked} />
                             </Card.Body>
                         </Card>
                     </Col>
