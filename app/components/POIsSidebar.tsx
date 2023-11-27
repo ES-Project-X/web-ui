@@ -69,7 +69,7 @@ const POIsSidebar = ({
             setRatingPositive(ratingPositive - 1);
           }
           selectedPOI.rate = rate;
-          alert("You have successfully rated this POI!")
+          alert("You have successfully rated this POI!");
         }
       } else {
         alert("You new rate is the same as the previous one");
@@ -77,30 +77,27 @@ const POIsSidebar = ({
     }
   }
 
-  async function handleClickStatus(rate: boolean) {
-    if (selectedPOI.status === null) {
-      rateStatusFunction(selectedPOI.id, rate);
-      if (rate) {
+  const [existsClicked, setExistsClicked] = useState(false);
+  const [fakeNewsClicked, setFakeNewsClicked] = useState(false);
+
+  async function handleClickStatus(sx: boolean) {
+    console.log("status: ", sx);
+    console.log("selectedPOI: ", selectedPOI);
+    if (selectedPOI.rate === true && selectedPOI.status === false) {
+      if (sx) {
         setRatingPositiveStat(ratingPositiveStat + 1);
+        setExistsClicked(true);
       } else {
-        setRatingNegativeStat(ratingNegativeStat + 1);
+        setRatingNegativeStat(ratingNegativeStat - 1);
+        setFakeNewsClicked(true);
       }
-      selectedPOI.status = rate;
+      await rateStatusFunction(selectedPOI.id, sx);
+      selectedPOI.status = true;
+      alert("You have successfully rated this POI!");
+    } else if (selectedPOI.rate === true && selectedPOI.status === true) {
+      alert("You have already rated this POI! Try again tomorrow.");
     } else {
-      if (rate !== selectedPOI.status) {
-        if (await rateStatusFunction(selectedPOI.id, rate)) {
-          if (rate) {
-            setRatingPositiveStat(ratingPositiveStat + 1);
-            setRatingNegativeStat(ratingNegativeStat - 1);
-          } else {
-            setRatingNegativeStat(ratingNegativeStat + 1);
-            setRatingPositiveStat(ratingPositiveStat - 1);
-          }
-          selectedPOI.status = rate;
-        }
-      } else {
-        alert("You new rate is the same as the previous one");
-      }
+      alert("You must rate its existence first!");
     }
   }
 
@@ -210,6 +207,21 @@ const POIsSidebar = ({
     </div>
   );
 
+  const buttonStyleExists = existsClicked
+    ? {
+        flex: 1,
+        backgroundColor: "white",
+        border: "2px solid green",
+      }
+    : { flex: 1 };
+  const buttonStyleFakeNews = fakeNewsClicked
+    ? {
+        flex: 1,
+        backgroundColor: "white",
+        border: "2px solid red",
+      }
+    : { flex: 1 };
+
   const displayDetails = (
     <div className="additional-details text-center">
       {/* Display detailed view */}
@@ -244,33 +256,63 @@ const POIsSidebar = ({
           </div>
         </div>
 
-        <div
-          className="rate-status-buttons"
-          style={{
-            display: "flex",
-            gap: "10px",
-            justifyContent: "center",
-            paddingTop: "20px",
-          }}
-        >
-          {" "}
-          {/* Added display flex and gap */}
-          <button
-            className="btn btn-success"
-            style={{ flex: 1 }}
-            onClick={() => handleClickStatus(true)}
-          >
-            Exists
-          </button>
-          <button
-            className="btn btn-error"
-            style={{ flex: 1 }}
-            onClick={() => handleClickStatus(false)}
-          >
-            FakeNews
-          </button>
-        </div>
+        {selectedPOI.rate ? (
+          (console.log("selectedPOI.rate: ", selectedPOI.rate),
+          console.log("selectedPOI.status: ", selectedPOI.status),
+          (
+            <>
+              <div
+                className="rate-status-buttons"
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  justifyContent: "center",
+                  paddingTop: "20px",
+                }}
+              >
+                {selectedPOI.status ? (
+                  <p>
+                    {" "}
+                    You have already rated this POI! Try again in the next day.{" "}
+                  </p>
+                ) : (
+                  <>
+                    <button
+                      className="btn btn-success"
+                      style={buttonStyleExists}
+                      onClick={() => handleClickStatus(true)}
+                    >
+                      Exists
+                    </button>
+                    <button
+                      className="btn btn-error"
+                      style={buttonStyleFakeNews}
+                      onClick={() => handleClickStatus(false)}
+                    >
+                      FakeNews
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          ))
+        ) : (
+          <>
+            <div
+              className="rate-status-buttons"
+              style={{
+                display: "flex",
+                gap: "10px",
+                justifyContent: "center",
+                paddingTop: "20px",
+              }}
+            >
+              <p> Must rate its existence first! </p>
+            </div>
+          </>
+        )}
       </div>
+
       <button className="show-details" onClick={toggleDetails}>
         Hide Details
       </button>

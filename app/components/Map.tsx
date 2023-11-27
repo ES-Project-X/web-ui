@@ -493,38 +493,17 @@ export default function MapComponent({
             "Content-Type": "application/json",
             Authorization: `Bearer ${TOKEN}`
         };
-        const url = new URL(URL_API + "poi/rate");
+        const url = new URL(URL_API + "poi/status");
         let body = {
             id: id,
-            rating: status
+            status: status
         }
         console.log("body:", body)
         return fetch(url.toString(), {
             headers,
             method: "PUT",
             body: JSON.stringify(body)
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log("data:", data)
-                if (data.time === 0) {
-                    return true;
-                }
-                else {
-                    // covert seconds in 00h00m00s
-                    let seconds = data.time;
-                    let minutes = Math.floor(seconds / 60);
-                    let hours = Math.floor(minutes / 60);
-                    seconds = seconds % 60;
-                    minutes = minutes % 60;
-                    let time = `${padTo2Digits(hours)}h${padTo2Digits(minutes)}m${padTo2Digits(seconds)}s`;
-                    window.alert("You have already rated this POI, please wait " + time + " to rate its status again!");
-                    return false;
-                }
-            })
-            .catch(() => {
-                return false;
-            })
+        })       
     }
 
     function removeCookie() {
