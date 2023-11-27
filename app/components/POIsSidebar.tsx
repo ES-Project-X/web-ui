@@ -19,6 +19,9 @@ const POIsSidebar = ({
   setExistsClicked,
   fakeNewsClicked,
   setFakeNewsClicked,
+  showDetails,
+  setShowDetails,
+  toggleDetails,
 }: {
   selectedPOI: any;
   rateExistenceFunction: Function;
@@ -35,6 +38,9 @@ const POIsSidebar = ({
   setExistsClicked: Function;
   fakeNewsClicked: boolean;
   setFakeNewsClicked: Function;
+  showDetails: boolean;
+  setShowDetails: Function;
+  toggleDetails: Function;
 }) => {
   if (!selectedPOI) return;
 
@@ -106,12 +112,6 @@ const POIsSidebar = ({
       alert("You must rate its existence first!");
     }
   }
-
-  const [showDetails, setShowDetails] = useState(false);
-
-  const toggleDetails = () => {
-    setShowDetails(!showDetails);
-  };
 
   const displayMainContent = (
     <div className="main-content text-center">
@@ -206,7 +206,7 @@ const POIsSidebar = ({
             )}
           </div>
         </div>
-        <button className="show-details text-center" onClick={toggleDetails}>
+        <button className="show-details text-center" onClick={() => toggleDetails}>
           Show Details
         </button>
       </div>
@@ -319,7 +319,7 @@ const POIsSidebar = ({
         )}
       </div>
 
-      <button className="show-details" onClick={toggleDetails}>
+      <button className="show-details" onClick={() => toggleDetails}>
         Hide Details
       </button>
     </div>
