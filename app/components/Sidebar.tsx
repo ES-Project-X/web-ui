@@ -1,6 +1,5 @@
 import React, {useEffect} from "react";
 import { slide as Menu } from "react-burger-menu";
-import "../globals.css";
 
 interface Route {
     name: string;

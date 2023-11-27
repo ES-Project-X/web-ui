@@ -7,6 +7,7 @@ interface RegisterUserModalProps {
 }
 
 interface UserData {
+  email: string;
   username: string;
   first_name: string;
   last_name: string;
@@ -19,6 +20,7 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
   handleKeyDown,
 }) => {
   const [userData, setUserData] = useState<UserData>({
+    email: "",
     username: "",
     first_name: "",
     last_name: "",
@@ -38,6 +40,20 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
       <div className="modal-box">
         <h3 className="font-bold text-lg">Register User Modal</h3>
         <form>
+          <div className="form-field">
+            <label htmlFor="email" className="label">
+              <span className="label-text">Email:</span>
+            </label>
+            <input
+              type="text"
+              id="email"
+              name="email"
+              placeholder="email goes here"
+              className="input input-bordered w-full max-w-xm"
+              value={userData.email}
+              onChange={handleInputChange}
+            />
+          </div>
           <div className="form-field">
             <label htmlFor="username" className="label">
               <span className="label-text">Username:</span>

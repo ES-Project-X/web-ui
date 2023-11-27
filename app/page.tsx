@@ -11,8 +11,6 @@ export default function Root() {
     const params = new URLSearchParams(window.location.href);
     const access_token = params.get('access_token');
 
-    console.log('COGNITO_TOKEN', Cookies.get('COGNITO_TOKEN'));
-
     if (Cookies.get('COGNITO_TOKEN')) {
       redirect('/map');
     }
