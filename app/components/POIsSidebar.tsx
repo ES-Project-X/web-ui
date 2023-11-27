@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AiFillCloseCircle, AiFillDislike, AiFillLike } from "react-icons/ai";
-import LineChart from "react-linechart";
+// import LineChart from "react-linechart";
 
 // @ts-ignore
 const POIsSidebar = ({
@@ -257,7 +257,8 @@ const POIsSidebar = ({
           {/* Added padding top */}
           <div style={{ maxHeight: "250px", maxWidth: "400px" }}>
             <div className="App">
-              <LineChart width={400} height={210} data={data} />
+              {/* <LineChart width={400} height={210} data={data} /> */}
+              <p> Graph goes here </p>
             </div>
           </div>
         </div>
