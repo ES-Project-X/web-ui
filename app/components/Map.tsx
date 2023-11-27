@@ -163,6 +163,7 @@ export default function MapComponent({
     };
 
     const fetchPOIs = (clusters: number[][]) => {
+        console.log("fetching pois");
         const url = new URL(URL_API + "poi/cluster");
         clusters.forEach((cluster: number[]) => {
             url.searchParams.append("max_lat", cluster[0].toString());
@@ -174,7 +175,10 @@ export default function MapComponent({
         fetch(url.toString())
             .then((response) => response.json())
             .then((data) => updateMarkers(data))
-            .catch(() => { });
+            .catch((error) => console.log(error))
+
+            console.log("response:", url.toString());
+
     };
 
     function fetchPOIDetails(id: string) {
