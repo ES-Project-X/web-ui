@@ -368,8 +368,6 @@ export default function MapComponent({
         }
     };
 
-    const [loggedIn, setLoggedIn] = useState(false);
-
     function getRoutes() {
         const headers = {
             "Content-Type": "application/json",
@@ -602,6 +600,8 @@ export default function MapComponent({
             body: JSON.stringify(body),
         });
     }
+
+    const [loggedIn, setLoggedIn] = useState(false);
 
     function removeCookie() {
         Cookies.remove("COGNITO_TOKEN");
