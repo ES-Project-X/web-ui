@@ -5,7 +5,8 @@ const nextConfig = {
         DATABASE_API_URL: process.env.DATABASE_API_URL,
         URL_ROUTING: process.env.URL_ROUTING,
         COGNITO_LOGIN_URL: process.env.COGNITO_LOGIN_URL,
-    }
+    },
+     output: "standalone"
 }
 
 module.exports = nextConfig
