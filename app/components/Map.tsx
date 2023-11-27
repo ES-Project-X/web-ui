@@ -11,7 +11,7 @@ import {
     Row,
     CloseButton,
     Container,
-    Col,
+    Col, FormGroup, FormLabel,
 } from "react-bootstrap";
 import { MapContainer, Polyline, TileLayer, useMapEvents } from "react-leaflet";
 import { LatLng } from "leaflet";
@@ -97,11 +97,16 @@ export default function MapComponent({
     const [ratingPositive, setRatingPositive] = useState(0)
     const [ratingNegative, setRatingNegative] = useState(0)
 
+    const [gettingInterRoute, setGettingInterRoute] = useState(false)
+
+    const [routes, setRoutes] = useState([])
+
     useEffect(() => {
         navigator.geolocation.watchPosition((location) => {
             const { latitude, longitude } = location.coords;
             setUserPosition({ latitude, longitude });
         });
+        getRoutes();
     }, []);
 
     useEffect(() => {
@@ -317,41 +322,7 @@ export default function MapComponent({
             });
     };
 
-    const getRoute = async () => {
-        if (origin === "" || destination === "") {
-            window.alert("Please fill in both fields");
-            return;
-        }
-        if (odmap) {
-            setGettingRoute(true);
-        }
-        let url = URL_ROUTING;
-        if (
-            origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
-            destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
-        ) {
-            console.log("HERE1");
-            url += "&point=" + origin + "&point=" + destination;
-        } else if (
-            origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
-            !destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
-        ) {
-            console.log("HERE2");
-            let dest = await geoCode(URL_GEO + "&q=" + destination);
-            url += "&point=" + origin + "&point=" + dest;
-        } else if (
-            !origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/) &&
-            destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)
-        ) {
-            console.log("HERE3");
-            let ori = await geoCode(URL_GEO + "&q=" + origin);
-            url += "&point=" + ori + "&point=" + destination;
-        } else {
-            console.log("HERE4");
-            let ori = await geoCode(URL_GEO + "&q=" + origin);
-            let dest = await geoCode(URL_GEO + "&q=" + destination);
-            url += "&point=" + ori + "&point=" + dest;
-        }
+    const drawRoute = (url: string) => {
         if (url) {
             fetch(url)
                 .then((response) => response.json())
@@ -381,11 +352,123 @@ export default function MapComponent({
                     setDirections(directions);
                     // @ts-ignore
                     document.getElementById("ins-card").style.display = "block";
+                    // @ts-ignore
+                    document.getElementById("cancel-route-btn").style.display = "block";
                 })
                 .catch((error) => {
                     console.error("Error:", error);
                 });
         }
+    }
+
+    function getRoutes() {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`
+        };
+        const url = new URL(URL_API + "route/get");
+        return fetch(url.toString(), { headers })
+            .then(response => response.json())
+            .then(data => {
+                if(data.detail){
+                    return;
+                } else {
+                    setRoutes(data);
+                }
+            })
+            .catch(() => {
+                alert("Error getting routes")
+            })
+    }
+
+    function storeRoute(points: string[], names: string[]) {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`
+        };
+        const url = new URL(URL_API + "route/create");
+        let name = "";
+        for (let i = 0; i < names.length; i++) {
+            if (i === names.length - 1) {
+                name += names[i];
+            } else {
+                name += names[i] + "-";
+            }
+        }
+        let body = {
+            name: name,
+            points: points
+        }
+        return fetch(url.toString(), {
+            headers,
+            method: "POST",
+            body: JSON.stringify(body)
+        })
+            .then(response => response.json())
+            .then(data => {
+                getRoutes();
+                return true;
+            })
+            .catch(() => {
+                return false;
+            })
+    }
+
+    const getRoute = async () => {
+
+        let points = [];
+
+        if (origin === "" || destination === "") {
+            window.alert("Please fill in both fields");
+            return;
+        }
+        if (odmap) {
+            setGettingRoute(true);
+        }
+        setGettingInterRoute(true)
+        let url = URL_ROUTING;
+
+        let names = [];
+        names.push(origin);
+
+        if(origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)){
+            url += "&point=" + origin;
+            points.push(origin);
+        } else {
+            let ori = await geoCode(URL_GEO + "&q=" + origin);
+            url += "&point=" + ori;
+            points.push(ori);
+        }
+
+        for(let i = 0; i < numberOfIntermediates; i++){
+            let intermediate = (document.getElementById("intermediate-input-" + i) as HTMLInputElement).value;
+            names.push(intermediate);
+            if(intermediate.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)){
+                url += "&point=" + intermediate;
+                points.push(intermediate);
+            } else if (intermediate === ""){
+            }
+            else {
+                    let inter = await geoCode(URL_GEO + "&q=" + intermediate);
+                    url += "&point=" + inter;
+                    points.push(inter);
+            }
+        }
+
+        names.push(destination);
+
+        if(destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)){
+            url += "&point=" + destination;
+            points.push(destination);
+        } else {
+            let dest = await geoCode(URL_GEO + "&q=" + destination);
+            url += "&point=" + dest;
+            points.push(dest);
+        }
+
+        storeRoute(points, names);
+
+        drawRoute(url!);
     };
 
     const hidecard = () => {
@@ -403,9 +486,14 @@ export default function MapComponent({
     const cancelRoute = () => {
         setPoints([]);
         setGettingRoute(false);
+        setGettingInterRoute(false)
         setCurrentIndex(0);
         // @ts-ignore
         document.getElementById("ins-card").style.display = "none";
+        // @ts-ignore
+        document.getElementById("cancel-route-btn").style.display = "none";
+        // @ts-ignore
+        document.getElementById("card-ori-dest").style.display = "none";
     };
 
     const handleNext = () => {
@@ -568,11 +656,56 @@ export default function MapComponent({
         window.location.reload();
     };
 
+    const [numberOfIntermediates, setNumberOfIntermediates] = useState(0)
+    const [canCall, setCanCall] = useState(false)
+
+    let intermediates: any[];
+    intermediates = [];
+
+    const eliminateIntermediate = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        const id = event.currentTarget.id;
+        intermediates.splice(parseInt(id[id.length - 1]), 1);
+        setNumberOfIntermediates(numberOfIntermediates - 1);
+        setCanCall(true);
+    }
+
+    for(let i = 0; i < numberOfIntermediates; i++){
+        let string = "Intermediate " + (i+1);
+        intermediates.push(
+            <FormGroup id={"intermediate" + i}>
+                <FormLabel>{string}</FormLabel>
+                <Row style={{paddingLeft:"5%", marginRight:"5%"}}>
+                    <Form.Control
+                        style={{width:"82%", marginRight:"2%"}}
+                        id={"intermediate-input-" + i}
+                        type={"text"}
+                        placeholder={"Intermediate " + (i+1)}
+                        readOnly={false}/>
+                    <Button id={"intermediate-minus-btn-" + i} onClick={eliminateIntermediate} style={{width:"30px"}}>
+                        -
+                    </Button>
+                </Row>
+                <br />
+            </FormGroup>
+        )
+    }
+
+    useEffect(() => {
+        if (canCall && gettingInterRoute && origin !== "" && destination !== "") {
+            getRoute();
+        }
+        setCanCall(false);
+    }, [numberOfIntermediates]);
+
+    const addIntermediate = () => {
+        setNumberOfIntermediates(numberOfIntermediates + 1);
+    }
+
     return (
         <>
             {/* Sidebar */}
 
-            <Sidebar />
+            <Sidebar routes={routes} getRoutes={getRoutes} draw={drawRoute}/>
 
             {/* eventually change this to the main page, but for now fica aqui */}
 
@@ -616,6 +749,7 @@ export default function MapComponent({
             >
                 Route
             </Button>
+            <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{ zIndex:1, scale:"100%", bottom:"1%", left:"5%", position:"absolute", border:".1em solid black", display:"none"}}>Cancel</Button>
             <Card
                 id={"card-ori-dest"}
                 style={{
@@ -641,6 +775,7 @@ export default function MapComponent({
                             />
                         </Form.Group>
                         <br />
+                        {intermediates}
                         <Form.Group>
                             <Form.Label>Destination</Form.Label>
                             <Form.Control
@@ -653,6 +788,8 @@ export default function MapComponent({
                             />
                         </Form.Group>
                         <br />
+                        <Button id={"add-intermediate-btn"} onClick={addIntermediate} style={{width:"60%", marginLeft:"20%"}}>Add Intermediate</Button>
+                        <br />
                         <Form.Group className="mb-3">
                             <Form.Check
                                 id="mapcbox"
@@ -663,7 +800,6 @@ export default function MapComponent({
                         </Form.Group>
                         <Row>
                             <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%" }}>Get Route</Button>
-                            <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%", marginLeft: "20%" }}>Cancel</Button>
                         </Row>
                     </Form>
                 </Card.Body>
