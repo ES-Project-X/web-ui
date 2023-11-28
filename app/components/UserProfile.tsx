@@ -3,6 +3,7 @@ import { UserProps } from "../structs/user";
 import { Form, FloatingLabel } from "react-bootstrap";
 import { Button } from "react-bootstrap";
 import Cookies from "js-cookie";
+import Image from "next/image";
 
 const TOKEN = Cookies.get('COGNITO_TOKEN')
 const URL_API = process.env.DATABASE_API_URL;
@@ -178,7 +179,7 @@ const UserProfile = ({ user }: { user: UserProps }) => {
         maxWidth: "700px",
       }}>
         <div className="row justify-content-center">
-          <img
+          <Image
             src={avatar}
             alt={`${fname} ${lname}'s avatar`}
             style={{

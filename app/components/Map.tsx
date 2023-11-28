@@ -41,6 +41,7 @@ import POIsSidebar from "./POIsSidebar";
 import { Direction } from "../structs/direction";
 import RegisterUserModal from "./RegisterUserModal";
 import Cookies from 'js-cookie';
+import Image from "next/image";
 import "../globals.css";
 
 const API_KEY = process.env.PUBLIC_KEY_HERE;
@@ -960,14 +961,14 @@ export default function MapComponent({
                                             className="btn-circle"
                                         >
                                             {avatar === "" ? (
-                                                <img
+                                                <Image
                                                     src="https://i.imgur.com/8Km9tLL.png"
                                                     alt={"Default pfp"}
                                                     className="rounded-circle"
                                                     style={{ height: "100%" }}
                                                 />
                                             ) : (
-                                                <img
+                                                <Image
                                                     src={avatar}
                                                     alt={`${fname}'s profile`}
                                                     className="rounded-circle"

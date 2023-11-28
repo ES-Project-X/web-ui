@@ -1,4 +1,4 @@
-import { useState } from "react";
+import Image from "next/image";
 import { AiFillCloseCircle, AiFillDislike, AiFillLike } from "react-icons/ai";
 // import LineChart from "react-linechart";
 
@@ -135,7 +135,7 @@ const POIsSidebar = ({
               alignItems: "center",
             }}
           >
-            <img
+            <Image
               style={{ height: "100%", objectFit: "cover" }}
               className="w-fit rounded-xl"
               src={selectedPOI.picture_url}
@@ -241,7 +241,7 @@ const POIsSidebar = ({
             />
           </button>
         </div>
-        <img
+        <Image
           style={{ height: "160px", objectFit: "cover", margin: "auto" }}
           className="w-fit rounded-xl"
           src={selectedPOI.picture_url}
