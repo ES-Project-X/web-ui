@@ -580,10 +580,6 @@ export default function MapComponent({
   const [fakeNewsClicked, setFakeNewsClicked] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
-  const toggleDetails = () => {
-    setShowDetails(!showDetails);
-  };
-
   function rateStatusFunction(id: string, status: boolean) {
     const headers = {
       "Content-Type": "application/json",
@@ -1084,7 +1080,6 @@ export default function MapComponent({
                   fakeNewsClicked={fakeNewsClicked}
                   setFakeNewsClicked={setFakeNewsClicked}
                   showDetails={showDetails}
-                  toggleDetails={toggleDetails}
                   setShowDetails={setShowDetails}
                 />
               </Card.Body>
