@@ -6,6 +6,7 @@ const nextConfig = {
         URL_ROUTING: process.env.URL_ROUTING,
         COGNITO_LOGIN_URL: process.env.COGNITO_LOGIN_URL,
     },
+    output: "standalone"
 }
 
 // Configuration object tells the next-pwa plugin 
