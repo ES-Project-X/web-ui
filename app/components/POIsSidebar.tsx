@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { AiFillCloseCircle, AiFillDislike, AiFillLike } from "react-icons/ai";
 // import LineChart from "react-linechart";
 

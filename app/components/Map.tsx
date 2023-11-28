@@ -41,6 +41,7 @@ import POIsSidebar from "./POIsSidebar";
 import { Direction } from "../structs/direction";
 import RegisterUserModal from "./RegisterUserModal";
 import Cookies from "js-cookie";
+import "../globals.css";
 
 const API_KEY = process.env.PUBLIC_KEY_HERE;
 const URL_API = process.env.DATABASE_API_URL;
@@ -371,6 +372,9 @@ export default function MapComponent({
   const [loggedIn, setLoggedIn] = useState(false);
 
   function getRoutes() {
+    if (loggedIn === false) {
+      return;
+    }
     const headers = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${TOKEN}`,
@@ -930,33 +934,6 @@ export default function MapComponent({
           />
         )}
         {/*
-            </MapContainer>
-            <Button id={"ori-dst-btn"} onClick={createRoute} variant={"light"} style={{ zIndex: 1, scale: "100%", bottom: "6%", left: "0.5em", position: "absolute", border: ".1em solid black" }}>Route</Button>
-            <Card id={"card-ori-dest"} style={{ zIndex: 1, top: "1%", left: "5%", width: "15%", position: "absolute", display: "none" }}>
-                <Card.Body>
-                    <Form>
-                        <Form.Group>
-                            <Form.Label>Origin</Form.Label>
-                            <Form.Control id={"origin-input"} type={"text"} placeholder={"Origin"} onChange={updateOrigin} value={origin} readOnly={false} />
-                        </Form.Group>
-                        <br />
-                        <Form.Group>
-                            <Form.Label>Destination</Form.Label>
-                            <Form.Control id={"destination-input"} type={"text"} placeholder={"Destination"} onChange={updateDestination} value={destination} readOnly={false} />
-                        </Form.Group>
-                        <br />
-                        <Form.Group className="mb-3" >
-                            <Form.Check id="mapcbox" type="checkbox" onChange={getFromMap} label="Select in Map" />
-                        </Form.Group>
-                        <Form.Group>
-                            <Button id={"get-route-btn"} onClick={getRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%" }}>Get Route</Button>
-                            <Button id={"cancel-route-btn"} onClick={cancelRoute} variant={"light"} style={{ border: ".1em solid black", width: "40%", marginLeft: "20%" }}>Cancel</Button>
-                        </Form.Group>
-                    </Form>
-                </Card.Body>
-            </Card>
-            <Container className={"map-ui d-flex flex-column h-100"} fluid>
-                {/*
                     POPUP CARD
                 */}
         <Card
