@@ -1,7 +1,5 @@
 "use client";
-
 import "leaflet/dist/leaflet.css";
-
 import { useEffect, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import {
@@ -47,12 +45,8 @@ import { UserData } from "../structs/user";
 
 const API_KEY = process.env.PUBLIC_KEY_HERE;
 const URL_API = process.env.DATABASE_API_URL;
-const URL_GEO =
-	"https://geocode.search.hereapi.com/v1/geocode?apiKey=" +
-	API_KEY +
-	"&in=countryCode:PRT";
-const URL_REV =
-	"https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
+const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
+const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
 const URL_ROUTING = process.env.URL_ROUTING;
 const COGNITO_LOGIN_URL = process.env.COGNITO_LOGIN_URL;
 
@@ -139,7 +133,6 @@ export default function MapComponent({
 	function getUser() {
 
 		if (TOKEN === undefined) {
-			console.log("TOKEN undefined");
 			setLoggedIn(false);
 			return;
 		}
@@ -457,7 +450,7 @@ export default function MapComponent({
 		}
 	};
 
-	function storeRoute(points: string[], names: string[]) {
+	async function storeRoute(points: string[], names: string[]) {
 		const headers = {
 			"Content-Type": "application/json",
 			Authorization: `Bearer ${TOKEN}`,
@@ -603,7 +596,7 @@ export default function MapComponent({
 		)}`;
 	}
 
-	function rateExistenceFunction(id: string, existence: boolean) {
+	async function rateExistenceFunction(id: string, existence: boolean) {
 		const headers = {
 			"Content-Type": "application/json",
 			Authorization: `Bearer ${TOKEN}`,

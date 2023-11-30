@@ -4,7 +4,6 @@ import Image from 'next/image'
 import Cookies from 'js-cookie';
 import { useEffect } from "react";
 import { redirect } from 'next/navigation';
-import path from 'path';
 
 export default function Root() {
 
