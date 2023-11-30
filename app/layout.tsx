@@ -6,17 +6,27 @@ import {Inter} from 'next/font/google'
 const inter = Inter({subsets: ['latin']})
 
 export const metadata: Metadata = {
-    title: 'Project X',
+    title: 'Project-X',
     description: 'Community collaboration platform for bicycle users',
     generator: "Next.js",
     manifest: "/manifest.json",
-    keywords: ["nextjs", "nextjs13", "next13", "pwa", "next-pwa"],
+    keywords: ["nextjs", "nextjs13", "next13", "pwa", "next-pwa", "project-x"],
     themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#fff" }],
     authors: [
-      { name: "Rajesh Prajapati" },
-      {
-        name: "Rajesh Prajapati",
-        url: "https://www.linkedin.com/in/raazeshp96/",
+      { name: "Diogo Paiva",
+        url: "https://github.com/DiogoPaiva21"
+      },
+      { name: "Gonçalo Silva",
+        url: "https://github.com/GoncaloSilva25"
+      },
+      { name: "Guilherme Antunes",
+        url: "https://github.com/SysteM1922"
+      },
+      { name: "João Fonseca",
+        url: "https://github.com/joaompfonseca"
+      },
+      { name: "Pedro Rasinhas",
+        url: "https://github.com/r4sinhas"
       },
     ],
     viewport:

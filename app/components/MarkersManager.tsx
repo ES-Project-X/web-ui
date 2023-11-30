@@ -5,6 +5,8 @@ import { LatLng } from "leaflet";
 import { useState, useEffect } from "react";
 import CreatePOIModal from "./CreatePOIModal";
 import SavePOIModal from "./SavePOIModal";
+import { isMobile } from "react-device-detect";
+
 export default function MarkersManager({
     setOrigin,
     setDestination,
@@ -93,13 +95,15 @@ export default function MarkersManager({
                     setRedPosition(e.latlng);
                     setDestination(e.latlng.lat + "," + e.latlng.lng);
                 }
-            } else {
+            } else if (visibleSingleMarker && redPosition) {
                 if (isModalOpen || isPOIModalOpen) {
                     return;
                 }
-                setVisibleSingleMarker(true);
+                setRedPosition(null);
+                setVisibleSingleMarker(false);
+            } else {
                 setRedPosition(e.latlng);
-                setIsModalOpen(true);
+                setVisibleSingleMarker(true);
             }
         },
     });
@@ -149,9 +153,6 @@ export default function MarkersManager({
                     icon={RedMarker}
                     draggable={true}
                     eventHandlers={{
-                        dblclick: () => {
-                            setVisibleSingleMarker(false);
-                        },
                         dragend: (e) => {
                             setRedPosition(e.target.getLatLng());
                         },
