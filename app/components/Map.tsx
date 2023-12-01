@@ -15,7 +15,7 @@ import {
 	FormLabel,
 } from "react-bootstrap";
 import { MapContainer, Polyline, TileLayer } from "react-leaflet";
-import { LatLng, map } from "leaflet";
+import { LatLng } from "leaflet";
 import "leaflet-rotate";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -147,15 +147,17 @@ export default function MapComponent({
 	useEffect(() => {
 
 		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => { },
-				() => {
-					setLocation(false);
-				}
-			);
+			navigator.geolocation.getCurrentPosition(() => {
+				setLocation(true);
+			}, (error) => {
+				alert(error.code)
+				setLocation(false);
+				alert("Geolocation is turned off, please turn it on to use this feature.");
+			});
 		}
 		else {
 			setLocation(false);
+			alert("Geolocation is not supported by this browser.");
 		}
 
 		if (!TOKEN) {
@@ -707,7 +709,7 @@ export default function MapComponent({
 			>
 				{tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
 				{tileLayerURL !== undefined ? <Polyline positions={points} /> : null}
-				<LocateControl />
+				<LocateControl location={location} />
 				<MarkersManager
 					setOrigin={setOrigin}
 					setDestination={setDestination}
