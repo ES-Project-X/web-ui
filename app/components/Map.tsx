@@ -91,7 +91,7 @@ export default function MapComponent({
 	const [numberOfIntermediates, setNumberOfIntermediates] = useState(0);
 	const [canCall, setCanCall] = useState(false);
 
-	const [location, setLocation] = useState(1);
+	const [location, setLocation] = useState(false);
 
 	function getRoutes() {
 		const headers = {
@@ -146,16 +146,17 @@ export default function MapComponent({
 
 	useEffect(() => {
 
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(() => {
-				setLocation(0);
-			}, (error) => {
-				setLocation(error.code);
-			});
-		}
-		else {
-			setLocation(1);
-		}
+		navigator.permissions.query({ name: "geolocation" }).then((result) => {
+			if (result.state === "granted") {
+				setLocation(true);
+			}
+			else if (result.state === "prompt") {
+				setLocation(false);
+			}
+			else if (result.state === "denied") {
+				setLocation(false);
+			}
+		});
 
 		if (!TOKEN) {
 			setLoggedIn(false);
@@ -174,7 +175,7 @@ export default function MapComponent({
 	}, []);
 
 	useEffect(() => {
-		if (location !== 0) {
+		if (!location) {
 			// @ts-ignore
 			const bounds = mapRef.current?.getBounds();
 			// @ts-ignore
