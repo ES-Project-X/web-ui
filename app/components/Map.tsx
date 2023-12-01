@@ -121,26 +121,27 @@ export default function MapComponent({
 		};
 		const url = new URL(URL_API + "user");
 
-		const ret = fetch(url.toString(), { headers })
+		return fetch(url.toString(), { headers })
 			.then(async (res) => {
 				if (res.status === 400) {
 					setIsRModalOpen(true);
-					return false;
+					return undefined;
 				}
 				else if (res.status !== 200) {
-					return false;
+					return undefined;
 				}
-				const data: UserData = await res.json();
-				localStorage.setItem("user", JSON.stringify(data));
+				return res.json();
+			})
+			.then((data: UserData) => {
 				setAvatar(data.image_url);
 				setFname(data.first_name);
-				return true;
+				localStorage.setItem("user", JSON.stringify(data));
+				setLoggedIn(true);
+				getRoutes();
 			})
 			.catch((err) => {
 				console.log(err);
-				return false;
 			});
-		return ret;
 	};
 
 	useEffect(() => {
@@ -168,11 +169,7 @@ export default function MapComponent({
 			setFname(userLS.first_name);
 		}
 		else if (TOKEN) {
-			// @ts-ignore
-			if (getUser()) {
-				setLoggedIn(true);
-				getRoutes();
-			}
+			getUser();
 		}
 
 	}, []);
