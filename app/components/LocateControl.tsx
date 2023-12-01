@@ -16,7 +16,7 @@ export default function LocateControl( { location }: { location: number } ) {
                 if (location === 2) {
                     originalAlert("Please turn on location services to use this feature");
                 }
-                else if (location === 0) {
+                else if (location === 1) {
                     originalAlert("Please allow location access in your browser settings to use this feature");
                 }
             }

@@ -148,13 +148,13 @@ export default function MapComponent({
 
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(() => {
-				setLocation(1);
-			}, () => {
-				setLocation(2);
+				setLocation(0);
+			}, (error) => {
+				setLocation(error.code);
 			});
 		}
 		else {
-			setLocation(0);
+			setLocation(1);
 		}
 
 		if (!TOKEN) {
@@ -174,7 +174,7 @@ export default function MapComponent({
 	}, []);
 
 	useEffect(() => {
-		if (location !== 1) {
+		if (location !== 0) {
 			// @ts-ignore
 			const bounds = mapRef.current?.getBounds();
 			// @ts-ignore
