@@ -15,17 +15,15 @@ import {
 	FormLabel,
 } from "react-bootstrap";
 import { MapContainer, Polyline, TileLayer } from "react-leaflet";
-import { LatLng } from "leaflet";
+import { LatLng, map } from "leaflet";
 import "leaflet-rotate";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-
 import LocateControl from "./LocateControl";
 import MarkersManager from "./MarkersManager";
 import FilterBoardComponent from "./FilterBoard";
 import { BasicPOI, FilterType } from "../structs/poi";
 import { updateClusterGroup } from "./DisplayPOIs";
-
 import Sidebar from "./Sidebar";
 import GetClusters from "./GetClusters";
 import POIsSidebar from "./POIsSidebar";
@@ -93,6 +91,8 @@ export default function MapComponent({
 	const [numberOfIntermediates, setNumberOfIntermediates] = useState(0);
 	const [canCall, setCanCall] = useState(false);
 
+	const [location, setLocation] = useState(true);
+
 	function getRoutes() {
 		const headers = {
 			"Content-Type": "application/json",
@@ -145,6 +145,18 @@ export default function MapComponent({
 
 	useEffect(() => {
 
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(
+				(position) => { },
+				() => {
+					setLocation(false);
+				}
+			);
+		}
+		else {
+			setLocation(false);
+		}
+
 		if (!TOKEN) {
 			setLoggedIn(false);
 			localStorage.removeItem("user");
@@ -164,6 +176,16 @@ export default function MapComponent({
 		}
 
 	}, []);
+
+	useEffect(() => {
+		if (!location) {
+			// @ts-ignore
+			const bounds = mapRef.current?.getBounds();
+			// @ts-ignore
+			mapRef.current?.fireEvent("moveend", { target: { getBounds: () => bounds } });
+		}
+
+	}, [location]);
 
 	useEffect(() => {
 		if (gettingRoute) {
@@ -222,16 +244,7 @@ export default function MapComponent({
 					return;
 				}
 				const lat = data.items[0].position.lat;
-				// @ts-ignore
-				document.getElementById("lat-text").innerHTML = "Latitude: " + lat;
 				const lng = data.items[0].position.lng;
-				// @ts-ignore
-				document.getElementById("lng-txt").innerHTML = "Longitude: " + lng;
-				const address = data.items[0].address.label;
-				// @ts-ignore
-				document.getElementById("location-text").innerHTML = address;
-				// @ts-ignore
-				document.getElementById("card-info").style.display = "block";
 				// @ts-ignore
 				mapRef.current.flyTo(new LatLng(lat, lng), 15);
 			})

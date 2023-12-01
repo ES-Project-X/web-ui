@@ -1,4 +1,3 @@
-import React, {useEffect} from "react";
 import { slide as Menu } from "react-burger-menu";
 
 interface Route {
@@ -7,7 +6,9 @@ interface Route {
 }
 
 export default function Sidebar({
-    routes,draw}: {
+    routes,
+    draw
+}: {
     routes: Route[];
     draw(url:string): void;
 }) {

@@ -10,7 +10,9 @@ export default function LocateControl() {
     const lc = control.locate({
         clickBehavior: {inView: 'setView'},
         flyTo: true,
-        onLocationError: () => {}
+        locateOptions: {
+            enableHighAccuracy: true
+        },
     });
 
     useEffect(() => {
