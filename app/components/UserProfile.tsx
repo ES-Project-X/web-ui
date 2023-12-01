@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { FloatingLabel, Form } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
+import { UserData } from "../structs/user";
 
 const TOKEN = Cookies.get('COGNITO_TOKEN')
 const URL_API = process.env.DATABASE_API_URL;
@@ -111,24 +112,43 @@ const UserProfile = () => {
   };
 
   useEffect(() => {
-    try {
-      const userLS = JSON.parse(localStorage.getItem("user") || "");
-      if (userLS) {
-        setAvatar(userLS.image_url);
-        setFname(userLS.first_name);
-        setLname(userLS.last_name);
-        setUsername(userLS.username);
-        setEmail(userLS.email);
-        setFormEmail(userLS.email);
-        setFormUsername(userLS.username);
-        setTotal_xp(userLS.total_xp);
-        setAddedPoiCount(userLS.added_pois_count);
-        setReceivedRatingCount(userLS.received_ratings_count);
-        setGivenRatingCount(userLS.given_ratings_count);
-      }
-    } catch (err) {
-      redirect("/map");
+
+    if (!TOKEN) {
+      redirect('/login');
     }
+
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${TOKEN}`,
+    };
+    const url = new URL(URL_API + "user");
+
+    fetch(url.toString(), { headers })
+      .then(async (res) => {
+        if (res.status !== 200) {
+          redirect('/map');
+          return;
+        }
+        const user: UserData = await res.json();
+
+        if (user) {
+          setAvatar(user.image_url);
+          setFname(user.first_name);
+          setLname(user.last_name);
+          setUsername(user.username);
+          setEmail(user.email);
+          setFormEmail(user.email);
+          setFormUsername(user.username);
+          setTotal_xp(user.total_xp);
+          setAddedPoiCount(user.added_pois_count);
+          setReceivedRatingCount(user.received_ratings_count);
+          setGivenRatingCount(user.given_ratings_count);
+        }
+
+      })
+      .catch((err) => {
+        console.log(err);
+      });
 
   });
 
@@ -233,7 +253,7 @@ const UserProfile = () => {
                 <Form.Control
                   type="text"
                   placeholder="Username"
-                  value={formUsername}
+                  defaultValue={formUsername}
                   onChange={(e) => setFormUsername(e.target.value)}
                   readOnly={!isEditing}
                 />
@@ -244,7 +264,7 @@ const UserProfile = () => {
                 <Form.Control
                   type="text"
                   placeholder="Email"
-                  value={formEmail}
+                  defaultValue={formEmail}
                   onChange={(e) => setFormEmail(e.target.value)}
                   readOnly={!isEditing}
                 />
@@ -257,7 +277,6 @@ const UserProfile = () => {
                   placeholder="Password(Confirm Changes)"
                   defaultValue={password}
                   onChange={(e) => setFormPassword(e.target.value)}
-                  readOnly={!isEditing}
                 />
               </FloatingLabel>
             </div>)}

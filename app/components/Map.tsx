@@ -26,14 +26,6 @@ import FilterBoardComponent from "./FilterBoard";
 import { BasicPOI, FilterType } from "../structs/poi";
 import { updateClusterGroup } from "./DisplayPOIs";
 
-import RedMarker from "./icons/RedMarker";
-import {
-	BicycleParkingMarker,
-	BicycleShopMarker,
-	DrinkingWaterMarker,
-	ToiletsMarker,
-	BenchMarker,
-} from "./icons/TypeMarkers";
 import Sidebar from "./Sidebar";
 import GetClusters from "./GetClusters";
 import POIsSidebar from "./POIsSidebar";
@@ -42,13 +34,7 @@ import RegisterUserModal from "./RegisterUserModal";
 import Cookies from "js-cookie";
 import "../globals.css";
 import { UserData } from "../structs/user";
-
-const API_KEY = process.env.PUBLIC_KEY_HERE;
-const URL_API = process.env.DATABASE_API_URL;
-const URL_GEO = "https://geocode.search.hereapi.com/v1/geocode?apiKey=" + API_KEY + "&in=countryCode:PRT";
-const URL_REV = "https://revgeocode.search.hereapi.com/v1/revgeocode?apiKey=" + API_KEY;
-const URL_ROUTING = process.env.URL_ROUTING;
-const COGNITO_LOGIN_URL = process.env.COGNITO_LOGIN_URL;
+import { URL_API, URL_GEO, URL_REV, URL_ROUTING, COGNITO_LOGIN_URL } from "./constants";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -108,9 +94,6 @@ export default function MapComponent({
 	const [canCall, setCanCall] = useState(false);
 
 	function getRoutes() {
-		if (loggedIn === false) {
-			return;
-		}
 		const headers = {
 			"Content-Type": "application/json",
 			Authorization: `Bearer ${TOKEN}`,
@@ -132,67 +115,54 @@ export default function MapComponent({
 
 	function getUser() {
 
-		if (TOKEN === undefined) {
-			setLoggedIn(false);
-			return;
-		}
-
 		const headers = {
 			"Content-Type": "application/json",
 			Authorization: `Bearer ${TOKEN}`,
 		};
 		const url = new URL(URL_API + "user");
 
-		fetch(url.toString(), { headers })
+		const ret = fetch(url.toString(), { headers })
 			.then(async (res) => {
 				if (res.status === 400) {
 					setIsRModalOpen(true);
-					return;
+					return false;
 				}
 				else if (res.status !== 200) {
-					setLoggedIn(false);
-					return;
+					return false;
 				}
 				const data: UserData = await res.json();
 				localStorage.setItem("user", JSON.stringify(data));
 				setAvatar(data.image_url);
 				setFname(data.first_name);
-				setLoggedIn(true);
+				return true;
 			})
 			.catch((err) => {
 				console.log(err);
-				setLoggedIn(false);
+				return false;
 			});
-	};
-
-	function checkToken() {
-
-		if (TOKEN === undefined) {
-			return;
-		}
-
-		const headers = {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${TOKEN}`,
-		};
-		const url = new URL(URL_API + "auth/token_status");
-
-		fetch(url.toString(), { headers })
-			.then((res) => {
-				if (res.status === 200) {
-					return;
-				}
-				Cookies.remove("COGNITO_TOKEN");
-			})
-			.catch((err) => {
-				console.log(err);
-			});
+		return ret;
 	};
 
 	useEffect(() => {
-		checkToken();
-		getUser();
-		getRoutes();
+
+		if (!TOKEN) {
+			setLoggedIn(false);
+			localStorage.removeItem("user");
+		}
+		else if (localStorage.getItem("user")) {
+			setLoggedIn(true);
+			const userLS = JSON.parse(localStorage.getItem("user") || "");
+			setAvatar(userLS.image_url);
+			setFname(userLS.first_name);
+		}
+		else if (TOKEN) {
+			// @ts-ignore
+			if (getUser()) {
+				setLoggedIn(true);
+				getRoutes();
+			}
+		}
+
 	}, []);
 
 	useEffect(() => {
@@ -210,68 +180,12 @@ export default function MapComponent({
 		}
 	};
 
-	const getIcon = (poiType: string) => {
-		switch (poiType) {
-			case "bicycle-parking":
-				return BicycleParkingMarker;
-			case "bicycle-shop":
-				return BicycleShopMarker;
-			case "drinking-water":
-				return DrinkingWaterMarker;
-			case "toilets":
-				return ToiletsMarker;
-			case "bench":
-				return BenchMarker;
-			default:
-				return RedMarker;
-		}
-	};
-
-	const updateMarkers = (data: any) => {
-		const pois: BasicPOI[] = data.map((poi: any) => {
-			return {
-				id: poi.id,
-				name: poi.name,
-				type: poi.type,
-				latitude: poi.latitude,
-				longitude: poi.longitude,
-				icon: getIcon(poi.type),
-			};
-		});
-		if (pois.length > 0) {
-			let new_pois = markers;
-			pois.forEach((poi: BasicPOI) => {
-				new_pois.push(poi);
-			});
-			setMarkers(new_pois);
-			filterPOIs();
-		}
-	};
-
-	const fetchPOIs = (clusters: number[][]) => {
-		console.log("fetching pois");
-		const url = new URL(URL_API + "poi/cluster");
-		clusters.forEach((cluster: number[]) => {
-			url.searchParams.append("max_lat", cluster[0].toString());
-			url.searchParams.append("min_lat", cluster[1].toString());
-			url.searchParams.append("max_lng", cluster[2].toString());
-			url.searchParams.append("min_lng", cluster[3].toString());
-		});
-
-		fetch(url.toString())
-			.then((response) => response.json())
-			.then((data) => updateMarkers(data))
-			.catch((error) => console.log(error));
-
-		console.log("response:", url.toString());
-	};
-
 	function fetchPOIDetails(id: string) {
 		const headers = {
 			"Content-Type": "application/json",
 			Authorization: `Bearer ${TOKEN}`,
 		};
-		const url = new URL(URL_API + "poi/" + id);
+		const url = new URL(URL_API + "poi/id/" + id);
 		fetch(url.toString(), { headers })
 			.then((response) => response.json())
 			.then((data) => {
@@ -352,7 +266,6 @@ export default function MapComponent({
 
 	const getFromMap = () => {
 		if (odmap) {
-			console.log("odmap");
 			setodmap(false);
 			setCreatingRoute(false);
 			setGettingRoute(false);
@@ -371,7 +284,6 @@ export default function MapComponent({
 			// @ts-ignore
 			document.getElementById("ins-card").style.display = "none";
 		} else {
-			console.log("not odmap");
 			setodmap(true);
 			setCreatingRoute(true);
 			setGettingRoute(false);
@@ -416,7 +328,6 @@ export default function MapComponent({
 			fetch(url)
 				.then((response) => response.json())
 				.then((data) => {
-					console.log(data);
 					if (data.paths.length === 0) {
 						window.alert("No results");
 						return;
@@ -648,7 +559,6 @@ export default function MapComponent({
 			id: id,
 			status: status,
 		};
-		console.log("body:", body);
 		return fetch(url.toString(), {
 			headers,
 			method: "PUT",
@@ -686,7 +596,6 @@ export default function MapComponent({
 			Authorization: `Bearer ${TOKEN}`,
 		};
 		const url = new URL(URL_API + "auth/register");
-		console.log(userData);
 
 		fetch(url.toString(), {
 			headers,
@@ -761,7 +670,7 @@ export default function MapComponent({
 		<>
 			{/* Sidebar */}
 
-			<Sidebar routes={routes} getRoutes={getRoutes} draw={drawRoute} />
+			<Sidebar routes={routes} draw={drawRoute} />
 
 			{/* eventually change this to the main page, but for now fica aqui */}
 
@@ -794,7 +703,7 @@ export default function MapComponent({
 					setDestination={setDestination}
 					creatingRoute={creatingRoute}
 				/>
-				<GetClusters fetchFunction={fetchPOIs} />
+				<GetClusters markers={markers} setMarkers={setMarkers} filterPOIs={filterPOIs} />
 			</MapContainer>
 			<Button
 				id={"cancel-route-btn"}
