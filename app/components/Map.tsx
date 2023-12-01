@@ -91,7 +91,7 @@ export default function MapComponent({
 	const [numberOfIntermediates, setNumberOfIntermediates] = useState(0);
 	const [canCall, setCanCall] = useState(false);
 
-	const [location, setLocation] = useState(true);
+	const [location, setLocation] = useState(1);
 
 	function getRoutes() {
 		const headers = {
@@ -148,16 +148,13 @@ export default function MapComponent({
 
 		if (navigator.geolocation) {
 			navigator.geolocation.getCurrentPosition(() => {
-				setLocation(true);
-			}, (error) => {
-				alert(error.code)
-				setLocation(false);
-				alert("Geolocation is turned off, please turn it on to use this feature.");
+				setLocation(1);
+			}, () => {
+				setLocation(2);
 			});
 		}
 		else {
-			setLocation(false);
-			alert("Geolocation is not supported by this browser.");
+			setLocation(0);
 		}
 
 		if (!TOKEN) {
@@ -177,7 +174,7 @@ export default function MapComponent({
 	}, []);
 
 	useEffect(() => {
-		if (!location) {
+		if (location !== 1) {
 			// @ts-ignore
 			const bounds = mapRef.current?.getBounds();
 			// @ts-ignore
