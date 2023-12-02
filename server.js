@@ -9,8 +9,8 @@ const fs = require("fs");
 const hostname = 'localhost'
 const port = 3000
 const dev = process.env.NODE_ENV !== 'production'
-  
-const app = next({dev, hostname, port });
+
+const app = next({ dev, hostname, port });
 
 const sslOptions = {
     key: fs.readFileSync("./ssl/server.key"),
@@ -20,19 +20,11 @@ const sslOptions = {
 const handle = app.getRequestHandler()
 
 app.prepare().then(() => {
- const server = https.createServer(sslOptions, (req, res) => {
-
-    // custom api middleware
-    if (req.url.startsWith('/api')) {
-    
-      return handle(req, res);
-    } else {
-      // Handle Next.js routes
-      return handle(req, res);
-    }
- })
- server.listen(port, (err) => {
-   if (err) throw err
-   console.log('> Ready on https://localhost:' + port);
- })
+    const server = https.createServer(sslOptions, (req, res) => {
+        return handle(req, res);
+    })
+    server.listen(port, (err) => {
+        if (err) throw err
+        console.log('> Ready on https://localhost:' + port);
+    })
 })
