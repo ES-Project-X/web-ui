@@ -14,8 +14,10 @@ export default function Root() {
     if (Cookies.get('COGNITO_TOKEN')) {
       redirect('/map');
     }
-
-    Cookies.set('COGNITO_TOKEN', access_token || '');
+    if (access_token) {
+      const expirationDate = new Date(new Date().getTime() + 3600 * 1000);
+      Cookies.set('COGNITO_TOKEN', access_token, { secure: true, expires: expirationDate });
+    }
     redirect('/map');
   }, [])
 

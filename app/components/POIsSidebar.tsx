@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { AiFillCloseCircle, AiFillDislike, AiFillLike } from "react-icons/ai";
 // import LineChart from "react-linechart";
 
@@ -21,7 +20,6 @@ const POIsSidebar = ({
   setFakeNewsClicked,
   showDetails,
   setShowDetails,
-  toggleDetails,
 }: {
   selectedPOI: any;
   rateExistenceFunction: Function;
@@ -40,7 +38,6 @@ const POIsSidebar = ({
   setFakeNewsClicked: Function;
   showDetails: boolean;
   setShowDetails: Function;
-  toggleDetails: Function;
 }) => {
   if (!selectedPOI) return;
 
@@ -55,6 +52,10 @@ const POIsSidebar = ({
       ],
     },
   ];
+
+  const toggleDetails = () => {
+    setShowDetails(!showDetails);
+  };
 
   const hideCard = () => {
     document
@@ -206,7 +207,7 @@ const POIsSidebar = ({
             )}
           </div>
         </div>
-        <button className="show-details text-center" onClick={() => toggleDetails}>
+        <button className="show-details text-center" onClick={toggleDetails}>
           Show Details
         </button>
       </div>
@@ -320,7 +321,7 @@ const POIsSidebar = ({
         )}
       </div>
 
-      <button className="show-details" onClick={() => toggleDetails}>
+      <button className="show-details" onClick={toggleDetails}>
         Hide Details
       </button>
     </div>

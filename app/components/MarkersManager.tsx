@@ -1,10 +1,13 @@
 import { Marker, Popup, useMapEvents } from "react-leaflet";
-import RedMarker from "./icons/RedMarker";
-import GreenMarker from "./icons/GreenMarker";
+import RedMarker from "./markers/RedMarker";
+import GreenMarker from "./markers/GreenMarker";
 import { LatLng } from "leaflet";
 import { useState, useEffect } from "react";
 import CreatePOIModal from "./CreatePOIModal";
 import SavePOIModal from "./SavePOIModal";
+
+let clickCount = 0;
+
 export default function MarkersManager({
     setOrigin,
     setDestination,
@@ -83,24 +86,44 @@ export default function MarkersManager({
         }
     }, [isPOIModalOpen]);
 
+    function handleClick(e: any) {
+        if (creatingRoute) {
+            if (greenPosition === null) {
+                setGreenPosition(e.latlng);
+                setOrigin(e.latlng.lat + "," + e.latlng.lng);
+            } else {
+                setRedPosition(e.latlng);
+                setDestination(e.latlng.lat + "," + e.latlng.lng);
+            }
+        } else if (visibleSingleMarker && redPosition) {
+            if (isModalOpen || isPOIModalOpen) {
+                return;
+            }
+            setRedPosition(null);
+            setVisibleSingleMarker(false);
+        } else {
+            setRedPosition(e.latlng);
+            setVisibleSingleMarker(true);
+        }
+    }
+
     useMapEvents({
         click: (e) => {
-            if (creatingRoute) {
-                if (greenPosition === null) {
-                    setGreenPosition(e.latlng);
-                    setOrigin(e.latlng.lat + "," + e.latlng.lng);
-                } else {
-                    setRedPosition(e.latlng);
-                    setDestination(e.latlng.lat + "," + e.latlng.lng);
-                }
+            if (!creatingRoute && visibleSingleMarker) {
+                setRedPosition(null);
+                setVisibleSingleMarker(false);
             } else {
-                if (isModalOpen || isPOIModalOpen) {
-                    return;
-                }
-                setVisibleSingleMarker(true);
-                setRedPosition(e.latlng);
-                setIsModalOpen(true);
+                clickCount++;
+                setTimeout(() => {
+                    if (clickCount === 1) {
+                        handleClick(e);
+                        clickCount = 0;
+                    }
+                }, 200);
             }
+        },
+        dblclick: () => {
+            clickCount = 0;
         },
     });
 
@@ -149,9 +172,6 @@ export default function MarkersManager({
                     icon={RedMarker}
                     draggable={true}
                     eventHandlers={{
-                        dblclick: () => {
-                            setVisibleSingleMarker(false);
-                        },
                         dragend: (e) => {
                             setRedPosition(e.target.getLatLng());
                         },

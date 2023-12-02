@@ -13,6 +13,15 @@ const config: Config = {
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      keyframes: {
+        falling: {
+          '0%': { transform: 'translateY(-10%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        falling: 'falling 0.5s ease-in-out',
+      },
     },
   },
   plugins: [require("daisyui")],

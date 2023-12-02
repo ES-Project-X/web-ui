@@ -17,9 +17,8 @@ const defaultProps = {
 };
 
 // Helper function to render the SavePOIModal component with custom props
-const renderSavePOIModal = (props) => {
-  const mergedProps = { ...defaultProps, ...props };
-  return render(<SavePOIModal {...mergedProps} />);
+const renderSavePOIModal = () => {
+  return render(<SavePOIModal {...defaultProps} />);
 };
 
 describe("SavePOIModal", () => {

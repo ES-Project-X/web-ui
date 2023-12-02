@@ -7,15 +7,6 @@ describe('getClusters', () => {
     enableFetchMocks();
 
     beforeEach(() => {
-        global.navigator.geolocation = {
-            watchPosition: jest.fn()
-                .mockImplementationOnce((success) => Promise.resolve(success({
-                    coords: {
-                        latitude: 40.64427,
-                        longitude: -8.64554
-                    }
-                })))
-        }
         render(<MapComponent/>);
     });
 
