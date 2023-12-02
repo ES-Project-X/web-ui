@@ -119,7 +119,7 @@ export default function MarkersManager({
                         handleClick(e);
                         clickCount = 0;
                     }
-                }, 200);
+                }, 300);
             }
         },
         dblclick: () => {
