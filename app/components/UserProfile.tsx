@@ -7,7 +7,7 @@ import { UserData } from "../structs/user";
 const TOKEN = Cookies.get('COGNITO_TOKEN')
 const URL_API = process.env.DATABASE_API_URL;
 
-const UserProfile = () => {
+export default function UserProfile() {
 
   function redirect(path: string) {
     window.location.replace(path);
@@ -292,6 +292,4 @@ const UserProfile = () => {
       </div>
     </div>
   );
-};
-
-export default UserProfile;
+}

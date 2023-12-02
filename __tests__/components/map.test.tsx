@@ -22,8 +22,14 @@ describe("MapComponent", () => {
     }
 
     beforeEach(() => {
-        component = render(<MapComponent />).container
-    })
+        Object.defineProperty(navigator, 'permissions', {
+            value: {
+                query: () => Promise.resolve({ state: 'granted' })
+            },
+            writable: true
+        });
+        component = render(<MapComponent />).container;
+    });
 
     it("renders", () => {
         const mapContainer = findById("map-container")

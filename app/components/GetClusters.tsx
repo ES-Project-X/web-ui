@@ -3,14 +3,14 @@ import { useMapEvents } from "react-leaflet";
 import { useState } from "react";
 import { URL_API } from "./constants";
 import { BasicPOI } from "../structs/poi";
-import RedMarker from "./icons/RedMarker";
+import RedMarker from "./markers/RedMarker";
 import {
     BicycleParkingMarker,
     BicycleShopMarker,
     DrinkingWaterMarker,
     ToiletsMarker,
     BenchMarker,
-} from "./icons/TypeMarkers";
+} from "./markers/TypeMarkers";
 import { LeafletEvent } from "leaflet";
 
 export default function GetClusters({

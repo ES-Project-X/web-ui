@@ -91,8 +91,6 @@ export default function MapComponent({
 	const [numberOfIntermediates, setNumberOfIntermediates] = useState(0);
 	const [canCall, setCanCall] = useState(false);
 
-	const [location, setLocation] = useState(false);
-
 	function getRoutes() {
 		const headers = {
 			"Content-Type": "application/json",
@@ -147,14 +145,14 @@ export default function MapComponent({
 	useEffect(() => {
 
 		navigator.permissions.query({ name: "geolocation" }).then((result) => {
-			if (result.state === "granted") {
-				setLocation(true);
+			if (result.state === "denied") {
+				// @ts-ignore
+				const bounds = mapRef.current?.getBounds();
+				// @ts-ignore
+				mapRef.current?.fireEvent("moveend", { target: { getBounds: () => bounds } });
 			}
-			else if (result.state === "prompt") {
-				setLocation(false);
-			}
-			else if (result.state === "denied") {
-				setLocation(false);
+			else {
+				console.log("geolocation allowed");
 			}
 		});
 
@@ -173,16 +171,6 @@ export default function MapComponent({
 		}
 
 	}, []);
-
-	useEffect(() => {
-		if (!location) {
-			// @ts-ignore
-			const bounds = mapRef.current?.getBounds();
-			// @ts-ignore
-			mapRef.current?.fireEvent("moveend", { target: { getBounds: () => bounds } });
-		}
-
-	}, [location]);
 
 	useEffect(() => {
 		if (gettingRoute) {
@@ -707,7 +695,7 @@ export default function MapComponent({
 			>
 				{tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
 				{tileLayerURL !== undefined ? <Polyline positions={points} /> : null}
-				<LocateControl location={location} />
+				<LocateControl />
 				<MarkersManager
 					setOrigin={setOrigin}
 					setDestination={setDestination}

@@ -4,7 +4,7 @@ import "leaflet.locatecontrol";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
 import { control } from "leaflet";
 
-export default function LocateControl( { location }: { location: boolean } ) {
+export default function LocateControl() {
 
     const map = useMap();
     const [locSetup, setLocSetup] = useState(false);
@@ -13,12 +13,7 @@ export default function LocateControl( { location }: { location: boolean } ) {
     window.alert = function (message) {
         if (message === "Geolocation error: User denied Geolocation.") {
             if (locSetup) {
-                if (location) {
-                    originalAlert("Please turn on location services to use this feature");
-                }
-                else {
-                    originalAlert("Please allow location access in your browser settings to use this feature");
-                }
+                originalAlert("Please allow location access in your browser settings to use this feature");
             }
         }
         else {
