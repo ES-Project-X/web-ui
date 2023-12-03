@@ -151,9 +151,6 @@ export default function MapComponent({
 				// @ts-ignore
 				mapRef.current?.fireEvent("moveend", { target: { getBounds: () => bounds } });
 			}
-			else {
-				console.log("geolocation allowed");
-			}
 		});
 
 		if (!TOKEN) {
