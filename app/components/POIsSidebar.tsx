@@ -61,6 +61,7 @@ const POIsSidebar = ({
     }
 
     useEffect(() => {
+        if (isMobile !== true) return;
         const position = getPosition();
         if (position) {
             const distance = getDistanceFrom(
