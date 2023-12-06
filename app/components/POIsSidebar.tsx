@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 // import LineChart from "react-linechart";
 
-// @ts-ignore
 const POIsSidebar = ({
     selectedPOI,
     rateExistenceFunction,
@@ -43,9 +42,8 @@ const POIsSidebar = ({
     showDetails: boolean;
     setShowDetails: Function;
 }) => {
-    if (!selectedPOI) return;
 
-    const [closeEnough, setCloseEnough] = useState<boolean | undefined>(undefined);
+    const [closeEnough, setCloseEnough] = useState(false);
 
     function getPosition() {
         navigator.geolocation.getCurrentPosition((position) => {
@@ -61,7 +59,9 @@ const POIsSidebar = ({
     }
 
     useEffect(() => {
-        if (isMobile !== true) return;
+        if (isMobile !== true){
+            return;
+        }
         const position = getPosition();
         if (position) {
             const distance = getDistanceFrom(

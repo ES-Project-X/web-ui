@@ -32,8 +32,8 @@ import RegisterUserModal from "./RegisterUserModal";
 import Cookies from "js-cookie";
 import "../globals.css";
 import { UserData } from "../structs/user";
+import { POI } from "../structs/poi";
 import { URL_API, URL_GEO, URL_REV, URL_ROUTING, COGNITO_LOGIN_URL } from "../utils/constants";
-import L from "leaflet";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -51,8 +51,15 @@ export default function MapComponent({
 	const [odmap, setodmap] = useState(false);
 
 	const [markers, setMarkers] = useState<BasicPOI[]>([]);
-	const [selectedPOI, setSelectedPOI] = useState(null);
-
+	const [selectedPOI, setSelectedPOI] = useState({
+		id: "",
+		name: "",
+		type: "",
+		latitude: 0,
+		longitude: 0,
+		rating_positive: 0,
+		rating_negative: 0,
+	} as POI);
 	const [filterName, setFilterName] = useState<string>("");
 	const [filterTypes, setFilterTypes] = useState<FilterType[]>([
 		{ label: "Bicycle Parking", value: "bicycle-parking", selected: true },
@@ -923,7 +930,6 @@ export default function MapComponent({
 						<Card id={"poi-sidebar"} style={{ display: "none" }}>
 							<Card.Body>
 								<POIsSidebar
-									// @ts-ignore
 									selectedPOI={selectedPOI}
 									rateExistenceFunction={rateExistenceFunction}
 									rateStatusFunction={rateStatusFunction}
