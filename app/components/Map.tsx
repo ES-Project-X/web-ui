@@ -34,6 +34,7 @@ import "../globals.css";
 import { UserData } from "../structs/user";
 import { POI } from "../structs/poi";
 import { URL_API, URL_GEO, URL_REV, URL_ROUTING, COGNITO_LOGIN_URL } from "../utils/constants";
+import { convertMsToTime } from "../utils/time";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -487,88 +488,6 @@ export default function MapComponent({
 		setCurrentIndex(currentIndex - 1);
 	};
 
-	function padTo2Digits(num: number) {
-		return num.toString().padStart(2, "0");
-	}
-
-	function convertMsToTime(milliseconds: number) {
-		let seconds = Math.floor(milliseconds / 1000);
-		let minutes = Math.floor(seconds / 60);
-		let hours = Math.floor(minutes / 60);
-
-		seconds = seconds % 60;
-		minutes = minutes % 60;
-
-		// 👇️ If you don't want to roll hours over, e.g. 24 to 00
-		// 👇️ comment (or remove) the line below
-		// commenting next line gets you `24:00:00` instead of `00:00:00`
-		// or `36:15:31` instead of `12:15:31`, etc.
-		hours = hours % 24;
-
-		return `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(
-			seconds
-		)}`;
-	}
-
-	async function rateExistenceFunction(id: string, existence: boolean) {
-		const headers = {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${TOKEN}`,
-		};
-		const url = new URL(URL_API + "poi/exists");
-		let body = {
-			id: id,
-			rating: existence,
-		};
-		return fetch(url.toString(), {
-			headers,
-			method: "PUT",
-			body: JSON.stringify(body),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data.time === 0) {
-					return true;
-				} else {
-					// covert seconds in 00h00m00s
-					let seconds = data.time;
-					let minutes = Math.floor(seconds / 60);
-					let hours = Math.floor(minutes / 60);
-					seconds = seconds % 60;
-					minutes = minutes % 60;
-					let time = `${padTo2Digits(hours)}h${padTo2Digits(
-						minutes
-					)}m${padTo2Digits(seconds)}s`;
-					window.alert(
-						"You have already rated this POI, please wait " +
-						time +
-						" to rate again"
-					);
-					return false;
-				}
-			})
-			.catch(() => {
-				return false;
-			});
-	}
-
-	function rateStatusFunction(id: string, status: boolean) {
-		const headers = {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${TOKEN}`,
-		};
-		const url = new URL(URL_API + "poi/status");
-		let body = {
-			id: id,
-			status: status,
-		};
-		return fetch(url.toString(), {
-			headers,
-			method: "PUT",
-			body: JSON.stringify(body),
-		});
-	}
-
 	/* Fetch the user details by username */
 	// const res = await fetch(`.../${params.user}`)
 	// const data: user = await res.json()
@@ -931,8 +850,6 @@ export default function MapComponent({
 							<Card.Body>
 								<POIsSidebar
 									selectedPOI={selectedPOI}
-									rateExistenceFunction={rateExistenceFunction}
-									rateStatusFunction={rateStatusFunction}
 									ratingPositive={ratingPositive}
 									setRatingPositive={setRatingPositive}
 									ratingNegative={ratingNegative}

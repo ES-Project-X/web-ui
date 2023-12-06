@@ -3,12 +3,15 @@ import { getDistanceFrom } from "../utils/getDistanceFrom";
 import { POI } from "../structs/poi";
 import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
+import Cookies from "js-cookie";
+import { URL_API } from "../utils/constants";
+import { padTo2Digits } from "../utils/time";
 // import LineChart from "react-linechart";
+
+const TOKEN = Cookies.get("COGNITO_TOKEN");
 
 const POIsSidebar = ({
     selectedPOI,
-    rateExistenceFunction,
-    rateStatusFunction,
     ratingPositive,
     setRatingPositive,
     ratingNegative,
@@ -25,12 +28,10 @@ const POIsSidebar = ({
     setShowDetails,
 }: {
     selectedPOI: POI;
-    rateExistenceFunction: Function;
     ratingPositive: number;
     setRatingPositive: Function;
     ratingNegative: number;
     setRatingNegative: Function;
-    rateStatusFunction: Function;
     ratingPositiveStat: number;
     setRatingPositiveStat: Function;
     ratingNegativeStat: number;
@@ -48,16 +49,16 @@ const POIsSidebar = ({
 
     function getPosition() {
         navigator.geolocation.getCurrentPosition((position) => {
-            setPosition({lat: position.coords.latitude, lon: position.coords.longitude});
+            setPosition({ lat: position.coords.latitude, lon: position.coords.longitude });
         }, (error) => {
             console.log(error);
         },
-        { enableHighAccuracy: true, });
+            { enableHighAccuracy: true, });
         return null;
     }
 
     useEffect(() => {
-        if (isMobile){
+        if (isMobile) {
             getPosition();
         }
     }, [selectedPOI]);
@@ -93,6 +94,69 @@ const POIsSidebar = ({
         }
         return true;
     }
+
+    async function rateExistenceFunction(id: string, existence: boolean) {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+        };
+        const url = new URL(URL_API + "poi/exists");
+        let body = {
+            id: id,
+            rating: existence,
+        };
+        return fetch(url.toString(), {
+            headers,
+            method: "PUT",
+            body: JSON.stringify(body),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.time === -1) {
+                    window.alert("You cannot rate a POI that you created");
+                    return false;
+                }
+                else if (data.time === 0) {
+                    return true;
+                } else {
+                    // covert seconds in 00h00m00s
+                    let seconds = data.time;
+                    let minutes = Math.floor(seconds / 60);
+                    let hours = Math.floor(minutes / 60);
+                    seconds = seconds % 60;
+                    minutes = minutes % 60;
+                    let time = `${padTo2Digits(hours)}h${padTo2Digits(
+                        minutes
+                    )}m${padTo2Digits(seconds)}s`;
+                    window.alert(
+                        "You have already rated this POI, please wait " +
+                        time +
+                        " to rate again"
+                    );
+                    return false;
+                }
+            })
+            .catch(() => {
+                return false;
+            });
+    }
+
+	function rateStatusFunction(id: string, status: boolean) {
+		const headers = {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${TOKEN}`,
+		};
+		const url = new URL(URL_API + "poi/status");
+		let body = {
+			id: id,
+			status: status,
+		};
+		return fetch(url.toString(), {
+			headers,
+			method: "PUT",
+			body: JSON.stringify(body),
+		});
+	}
 
     const toggleDetails = () => {
         setShowDetails(!showDetails);
