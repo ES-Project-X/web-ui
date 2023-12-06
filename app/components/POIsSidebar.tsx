@@ -44,10 +44,11 @@ const POIsSidebar = ({
 }) => {
 
     const [closeEnough, setCloseEnough] = useState(false);
+    const [position, setPosition] = useState(null) as any;
 
     function getPosition() {
         navigator.geolocation.getCurrentPosition((position) => {
-            return {lat: position.coords.latitude, lon: position.coords.longitude};
+            setPosition({lat: position.coords.latitude, lon: position.coords.longitude});
         }, (error) => {
             console.log(error);
         },
@@ -56,10 +57,12 @@ const POIsSidebar = ({
     }
 
     useEffect(() => {
-        if (isMobile !== true){
-            return;
+        if (isMobile){
+            getPosition();
         }
-        const position = getPosition();
+    }, [selectedPOI]);
+
+    useEffect(() => {
         if (position) {
             const distance = getDistanceFrom(
                 {
@@ -73,7 +76,7 @@ const POIsSidebar = ({
                 setCloseEnough(false);
             }
         }
-    }, [selectedPOI]);
+    }, [position]);
 
     function checkIfCloseEnough() {
         if (isMobile !== true) {

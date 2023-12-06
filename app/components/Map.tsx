@@ -913,6 +913,7 @@ export default function MapComponent({
                     MIDDLE PART OF THE UI
                 */}
 				<Row className={"flex-grow-1"}>
+					{/*
 					<Col xs={"auto"} className={"flex-grow-1"}></Col>
 					<Col xs={"auto"} className={"d-flex align-items-center"}>
 						<Card id={"filter-board"}>
@@ -926,6 +927,7 @@ export default function MapComponent({
 							</Card.Body>
 						</Card>
 					</Col>
+			*/}
 					<Col xs={"auto"} className={"d-flex align-items-center"}>
 						<Card id={"poi-sidebar"} style={{ display: "none" }}>
 							<Card.Body>
