@@ -32,7 +32,8 @@ import RegisterUserModal from "./RegisterUserModal";
 import Cookies from "js-cookie";
 import "../globals.css";
 import { UserData } from "../structs/user";
-import { URL_API, URL_GEO, URL_REV, URL_ROUTING, COGNITO_LOGIN_URL } from "./constants";
+import { URL_API, URL_GEO, URL_REV, URL_ROUTING, COGNITO_LOGIN_URL } from "../utils/constants";
+import L from "leaflet";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -922,6 +923,7 @@ export default function MapComponent({
 						<Card id={"poi-sidebar"} style={{ display: "none" }}>
 							<Card.Body>
 								<POIsSidebar
+									// @ts-ignore
 									selectedPOI={selectedPOI}
 									rateExistenceFunction={rateExistenceFunction}
 									rateStatusFunction={rateStatusFunction}
