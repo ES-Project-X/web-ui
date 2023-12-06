@@ -47,14 +47,11 @@ const POIsSidebar = ({
 
     function getPosition() {
         navigator.geolocation.getCurrentPosition((position) => {
-            alert(position.coords.latitude + " " + position.coords.longitude);
             return {lat: position.coords.latitude, lon: position.coords.longitude};
         }, (error) => {
             console.log(error);
         },
-            {
-                enableHighAccuracy: true,
-            });
+        { enableHighAccuracy: true, });
         return null;
     }
 
