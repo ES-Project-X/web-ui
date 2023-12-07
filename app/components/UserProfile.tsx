@@ -161,7 +161,7 @@ export default function UserProfile() {
   }
 
   const handleUpload = () => {
-
+    console.log("uploading");
   };
 
   return (
@@ -203,10 +203,10 @@ export default function UserProfile() {
                 <img
                   src={avatar}
                   alt={`${fname} ${lname}'s avatar`}
-                  className="group-hover:opacity-50 w-48 h-48 object-cover rounded-full flex justify-center items-center"
+                  className="group-hover:opacity-50 w-48 h-48 object-cover rounded-full flex justify-center items-center z-20"
                 />
                 <button
-                  className="absolute flex justify-center items-center opacity-0 group-hover:opacity-100  w-48 h-48 "
+                  className="absolute flex justify-center items-center w-48 h-48  group-hover:text-white group-hover:z-30"                  
                   onClick={() => handleUpload()}
                 >
                   Change Profile Picture
@@ -218,88 +218,88 @@ export default function UserProfile() {
             </h1>
           </div>
           <div className="row mt-3 mb-4">
-            <div className="col-lg-3 col-md-6 mb-3">
-              <div className="card text-white bg-primary h-100" >
-                <div className="card-header" style={headerHeight}>Total XP</div>
-                <div className="card-body" style={centerText}>
-                  <h5 className="card-title">{total_xp}</h5>
+                <div className="col-lg-3 col-md-6 mb-3">
+                  <div className="card text-white bg-primary h-100" >
+                    <div className="card-header" style={headerHeight}>Total XP</div>
+                    <div className="card-body" style={centerText}>
+                      <h5 className="card-title">{total_xp}</h5>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-lg-3 col-md-6 mb-3">
+                  <div className="card text-white bg-success h-100">
+                    <div className="card-header" style={headerHeight}>Added POIs</div>
+                    <div className="card-body" style={centerText}>
+                      <h5 className="card-title">{added_pois_count}</h5>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-lg-3 col-md-6 mb-3">
+                  <div className="card text-white bg-info h-100">
+                    <div className="card-header" style={headerHeight}>Received Ratings</div>
+                    <div className="card-body" style={centerText}>
+                      <h5 className="card-title" >{received_ratings_count}</h5>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-lg-3 col-md-6 mb-3" >
+                  <div className="card text-white bg-warning h-100">
+                    <div className="card-header" style={headerHeight}>Given Ratings</div>
+                    <div className="card-body" style={centerText}>
+                      <h5 className="card-title">{given_ratings_count}</h5>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="col-lg-3 col-md-6 mb-3">
-              <div className="card text-white bg-success h-100">
-                <div className="card-header" style={headerHeight}>Added POIs</div>
-                <div className="card-body" style={centerText}>
-                  <h5 className="card-title">{added_pois_count}</h5>
+              <div className="row justify-content-center">
+                {!isEditing && (
+                  <button className="btn btn-secondary my-3 w-50" onClick={() => setIsEditing(!isEditing)}>
+                    Modify Profile
+                  </button>
+                )}</div>
+              <div className="col-md-8 justify-content-center">
+                <div className="mb-3">
+                  <FloatingLabel controlId="floatingInput1" label="Username">
+                    <Form.Control
+                      type="text"
+                      placeholder="Username"
+                      defaultValue={formUsername}
+                      onChange={(e) => setFormUsername(e.target.value)}
+                      readOnly={!isEditing}
+                    />
+                  </FloatingLabel>
                 </div>
+                <div className="mb-3">
+                  <FloatingLabel controlId="floatingInput2" label="Email">
+                    <Form.Control
+                      type="text"
+                      placeholder="Email"
+                      defaultValue={formEmail}
+                      onChange={(e) => setFormEmail(e.target.value)}
+                      readOnly={!isEditing}
+                    />
+                  </FloatingLabel>
+                </div>
+                {isEditing && (<div className="mb-3">
+                  <FloatingLabel controlId="floatingInput3" label="Password(Confirm Changes)">
+                    <Form.Control
+                      type="password"
+                      placeholder="Password(Confirm Changes)"
+                      defaultValue={password}
+                      onChange={(e) => setFormPassword(e.target.value)}
+                    />
+                  </FloatingLabel>
+                </div>)}
+              </div>
+              <div className="row justify-content-center">
+                {isEditing && (
+                  <button className="btn btn-secondary my-3 w-50" onClick={() => updateProfile()}>
+                    Save Profile
+                  </button>
+                )}
               </div>
             </div>
-            <div className="col-lg-3 col-md-6 mb-3">
-              <div className="card text-white bg-info h-100">
-                <div className="card-header" style={headerHeight}>Received Ratings</div>
-                <div className="card-body" style={centerText}>
-                  <h5 className="card-title" >{received_ratings_count}</h5>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6 mb-3" >
-              <div className="card text-white bg-warning h-100">
-                <div className="card-header" style={headerHeight}>Given Ratings</div>
-                <div className="card-body" style={centerText}>
-                  <h5 className="card-title">{given_ratings_count}</h5>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="row justify-content-center">
-            {!isEditing && (
-              <button className="btn btn-secondary my-3 w-50" onClick={() => setIsEditing(!isEditing)}>
-                Modify Profile
-              </button>
-            )}</div>
-          <div className="col-md-8 justify-content-center">
-            <div className="mb-3">
-              <FloatingLabel controlId="floatingInput1" label="Username">
-                <Form.Control
-                  type="text"
-                  placeholder="Username"
-                  defaultValue={formUsername}
-                  onChange={(e) => setFormUsername(e.target.value)}
-                  readOnly={!isEditing}
-                />
-              </FloatingLabel>
-            </div>
-            <div className="mb-3">
-              <FloatingLabel controlId="floatingInput2" label="Email">
-                <Form.Control
-                  type="text"
-                  placeholder="Email"
-                  defaultValue={formEmail}
-                  onChange={(e) => setFormEmail(e.target.value)}
-                  readOnly={!isEditing}
-                />
-              </FloatingLabel>
-            </div>
-            {isEditing && (<div className="mb-3">
-              <FloatingLabel controlId="floatingInput3" label="Password(Confirm Changes)">
-                <Form.Control
-                  type="password"
-                  placeholder="Password(Confirm Changes)"
-                  defaultValue={password}
-                  onChange={(e) => setFormPassword(e.target.value)}
-                />
-              </FloatingLabel>
-            </div>)}
-          </div>
-          <div className="row justify-content-center">
-            {isEditing && (
-              <button className="btn btn-secondary my-3 w-50" onClick={() => updateProfile()}>
-                Save Profile
-              </button>
-            )}
           </div>
         </div>
-      </div>
-    </div>
-  );
+        );
 }
