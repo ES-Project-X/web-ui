@@ -49,6 +49,8 @@ export default function UserProfile() {
   const [formEmail, setFormEmail] = useState("");
   const [formPassword, setFormPassword] = useState("");
 
+  const [newAvatar, setNewAvatar] = useState(false);
+
   //create dictionary with all the user info that is changed
   //if the user doesnt change anything, the value is null
   //if the user changes something, the value is the new value
@@ -158,6 +160,10 @@ export default function UserProfile() {
     redirect('/map');
   }
 
+  const handleUpload = () => {
+
+  };
+
   return (
     <div className="map-ui w-screen">
       <div className="mt-2 flex justify-between">
@@ -192,17 +198,21 @@ export default function UserProfile() {
       <div className="row justify-content-center mt-5">
         <div className="row justify-content-center align-items-center text-center" style={{ maxWidth: "700px" }}>
           <div className="row justify-content-center">
-            <img
-              src={avatar}
-              alt={`${fname} ${lname}'s avatar`}
-              style={{
-                padding: "0px",
-                width: "200px",
-                height: "200px",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
-            />
+            <div className="relative flex justify-center items-center">
+              <div className="group flex justify-center items-center">
+                <img
+                  src={avatar}
+                  alt={`${fname} ${lname}'s avatar`}
+                  className="group-hover:opacity-50 w-48 h-48 object-cover rounded-full flex justify-center items-center"
+                />
+                <button
+                  className="absolute flex justify-center items-center opacity-0 group-hover:opacity-100  w-48 h-48 "
+                  onClick={() => handleUpload()}
+                >
+                  Change Profile Picture
+                </button>
+              </div>
+            </div>
             <h1 style={nameStyle}>
               {fname} {lname}
             </h1>
