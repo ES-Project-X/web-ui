@@ -9,8 +9,6 @@ import {
 	Card,
 	Row,
 	CloseButton,
-	Container,
-	Col,
 	FormGroup,
 	FormLabel,
 } from "react-bootstrap";
@@ -88,7 +86,7 @@ export default function MapComponent({
 	const [gettingInterRoute, setGettingInterRoute] = useState(false);
 
 	const [routes, setRoutes] = useState([]);
-	const [loggedIn, setLoggedIn] = useState(false);
+	const [loggedIn, setLoggedIn] = useState<boolean>(false);
 	const [avatar, setAvatar] = useState("");
 	const [fname, setFname] = useState("");
 	const [isRModalOpen, setIsRModalOpen] = useState(false);
@@ -194,10 +192,15 @@ export default function MapComponent({
 	};
 
 	function fetchPOIDetails(id: string) {
-		const headers = {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${TOKEN}`,
-		};
+		// send Token if Token is defined
+		console.log(TOKEN);
+		let headers = {};
+		if (TOKEN !== undefined && TOKEN !== null) {
+			headers = {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${TOKEN}`,
+			};
+		}
 		const url = new URL(URL_API + "poi/id/" + id);
 		fetch(url.toString(), { headers })
 			.then((response) => response.json())
@@ -752,7 +755,7 @@ export default function MapComponent({
 					</Card.Body>
 				</Card>
 			)}
-			<Container className={"map-ui d-flex flex-column w-full h-100"} fluid>
+			<div className={"map-ui flex-col w-full"}>
 				{isRModalOpen && (
 					<RegisterUserModal
 						onClose={closeModal}
@@ -783,137 +786,135 @@ export default function MapComponent({
 						<Row id={"lng-txt"}></Row>
 					</Card.Body>
 				</Card>
-				{/*
-                    UPPER PART OF THE UI
-                */}
-				<div>
-					<div className={"pt-2 mt-3 w-48 sm:w-96 mx-auto"}>
-						<Form>
-							<Form.Group controlId={"search-bar"}>
-								<Form.Control
-									type={"text"}
-									placeholder={"Search"}
-									onKeyDown={handleKeyDown}
-								/>
-							</Form.Group>
-						</Form>
-					</div>
-					<div className="absolute top-5 right-2">
-						{loggedIn ? (
-							<a href={`/profile`}>
-								<Button
-									style={{
-										backgroundColor: "transparent",
-										border: "none",
-										padding: "0",
-									}}
-									className="btn-circle"
-								>
-									<img
-										src={avatar}
-										alt={`${fname}'s profile`}
-										className="rounded-circle"
-										style={{ height: "100%", objectFit: "cover" }}
+				<div className="grid grid-row-3 h-screen">
+					{/*
+                    	UPPER PART OF THE UI
+                	*/}
+					<div>
+						<div className={"pt-2 mt-3 w-48 sm:w-96 mx-auto"}>
+							<Form>
+								<Form.Group controlId={"search-bar"}>
+									<Form.Control
+										type={"text"}
+										placeholder={"Search"}
+										onKeyDown={handleKeyDown}
 									/>
-								</Button>
-							</a>
-						) : (
-							<a
-								href={COGNITO_LOGIN_URL}
-								className="btn-circle-link"
-								target="_self"
+								</Form.Group>
+							</Form>
+						</div>
+						<div className="absolute top-5 right-2">
+							{loggedIn ? (
+								<a href={`/profile`}>
+									<Button
+										style={{
+											backgroundColor: "transparent",
+											border: "none",
+											padding: "0",
+										}}
+										className="btn-circle"
+									>
+										<img
+											src={avatar}
+											alt={`${fname}'s profile`}
+											className="rounded-circle"
+											style={{ height: "100%", objectFit: "cover" }}
+										/>
+									</Button>
+								</a>
+							) : (
+								<a
+									href={COGNITO_LOGIN_URL}
+									className="btn-circle-link"
+									target="_self"
+								>
+									<button className="btn">Login</button>
+								</a>
+							)}
+						</div>
+					</div>
+					{/*
+                    	MIDDLE PART OF THE UI
+                	*/}
+					<div>
+						<div className="absolute right-2">
+							<FilterBoardComponent
+								filterPOIs={filterPOIs}
+								setFilterName={setFilterName}
+								setFilterTypes={setFilterTypes}
+								types={filterTypes}
+							/>
+						</div>
+						<div>
+							<Card id={"poi-sidebar"} style={{ display: "none" }}>
+								<Card.Body>
+									<POIsSidebar
+										isLoggedIn={loggedIn}
+										selectedPOI={selectedPOI}
+										ratingPositive={ratingPositive}
+										setRatingPositive={setRatingPositive}
+										ratingNegative={ratingNegative}
+										setRatingNegative={setRatingNegative}
+										ratingPositiveStat={ratingPositiveStat}
+										setRatingPositiveStat={setRatingPositiveStat}
+										ratingNegativeStat={ratingNegativeStat}
+										setRatingNegativeStat={setRatingNegativeStat}
+										existsClicked={existsClicked}
+										setExistsClicked={setExistsClicked}
+										fakeNewsClicked={fakeNewsClicked}
+										setFakeNewsClicked={setFakeNewsClicked}
+										showDetails={showDetails}
+										setShowDetails={setShowDetails}
+									/>
+								</Card.Body>
+							</Card>
+						</div>
+					</div>
+					{/*
+                    	LOWER PART OF THE UI
+                	*/}
+					<div>
+						<div className={"absolute left-2 bottom-2"}>
+							<Button
+								id={"ori-dst-btn"}
+								onClick={createRoute}
+								variant={"light"}
+								style={{
+									zIndex: 1,
+									scale: "100%",
+									bottom: "1%",
+									left: "0.5em",
+									position: "absolute",
+									border: ".1em solid black",
+								}}
 							>
-								<button className="btn">Login</button>
-							</a>
-						)}
+								Route
+							</Button>
+						</div>
+						<div className={"absolute right-2 bottom-2"}>
+							{isMobile ? null :
+								(
+									<ButtonGroup>
+										<Button
+											id={"map-rotate-left-btn"}
+											variant={"light"}
+											onClick={() => addToBearing(-10)}
+										>
+											Rotate Left
+										</Button>
+										<Button
+											id={"map-rotate-right-btn"}
+											variant={"light"}
+											onClick={() => addToBearing(10)}
+										>
+											Rotate Right
+										</Button>
+									</ButtonGroup>
+								)
+							}
+						</div>
 					</div>
 				</div>
-				{/*
-                    MIDDLE PART OF THE UI
-                */}
-				<Row className={"flex-grow-1"}>
-					<Col xs={"auto"} className={"flex-grow-1"}></Col>
-					<Col xs={"auto"} className={"d-flex align-items-center"}>
-						<Card id={"filter-board"}>
-							<Card.Body>
-								<FilterBoardComponent
-									filterPOIs={filterPOIs}
-									setFilterName={setFilterName}
-									setFilterTypes={setFilterTypes}
-									types={filterTypes}
-								/>
-							</Card.Body>
-						</Card>
-					</Col>
-					<Col xs={"auto"} className={"d-flex align-items-center"}>
-						<Card id={"poi-sidebar"} style={{ display: "none" }}>
-							<Card.Body>
-								<POIsSidebar
-									selectedPOI={selectedPOI}
-									ratingPositive={ratingPositive}
-									setRatingPositive={setRatingPositive}
-									ratingNegative={ratingNegative}
-									setRatingNegative={setRatingNegative}
-									ratingPositiveStat={ratingPositiveStat}
-									setRatingPositiveStat={setRatingPositiveStat}
-									ratingNegativeStat={ratingNegativeStat}
-									setRatingNegativeStat={setRatingNegativeStat}
-									existsClicked={existsClicked}
-									setExistsClicked={setExistsClicked}
-									fakeNewsClicked={fakeNewsClicked}
-									setFakeNewsClicked={setFakeNewsClicked}
-									showDetails={showDetails}
-									setShowDetails={setShowDetails}
-								/>
-							</Card.Body>
-						</Card>
-					</Col>
-				</Row>
-				{/*
-                    LOWER PART OF THE UI
-                */}
-				<Row className={"pb-2"}>
-					<Col xs={"auto"} className={"mx-auto"}>
-						<Button
-							id={"ori-dst-btn"}
-							onClick={createRoute}
-							variant={"light"}
-							style={{
-								zIndex: 1,
-								scale: "100%",
-								bottom: "1%",
-								left: "0.5em",
-								position: "absolute",
-								border: ".1em solid black",
-							}}
-						>
-							Route
-						</Button>
-					</Col>
-					{isMobile ? null :
-						(
-							<Col xs={"auto"} className={"d-flex align-items-end"}>
-								<ButtonGroup>
-									<Button
-										id={"map-rotate-left-btn"}
-										variant={"light"}
-										onClick={() => addToBearing(-10)}
-									>
-										Rotate Left
-									</Button>
-									<Button
-										id={"map-rotate-right-btn"}
-										variant={"light"}
-										onClick={() => addToBearing(10)}
-									>
-										Rotate Right
-									</Button>
-								</ButtonGroup>
-							</Col>
-						)
-					}
-				</Row>
-			</Container>
+			</div>
 		</>
 	);
 }

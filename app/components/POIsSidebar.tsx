@@ -11,6 +11,7 @@ import { padTo2Digits } from "../utils/time";
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
 const POIsSidebar = ({
+    isLoggedIn,
     selectedPOI,
     ratingPositive,
     setRatingPositive,
@@ -27,6 +28,7 @@ const POIsSidebar = ({
     showDetails,
     setShowDetails,
 }: {
+    isLoggedIn: boolean;
     selectedPOI: POI;
     ratingPositive: number;
     setRatingPositive: Function;
@@ -79,7 +81,11 @@ const POIsSidebar = ({
         }
     }, [position]);
 
-    function checkIfCloseEnough() {
+    function checkIfCanRate() {
+        if (isLoggedIn === false) {
+            alert("You must be logged in to rate a POI");
+            return false;
+        }
         if (isMobile !== true) {
             alert("You must be using a mobile device to rate a POI");
             return false;
@@ -170,7 +176,7 @@ const POIsSidebar = ({
     };
 
     async function handleClick(rate: boolean) {
-        if (!checkIfCloseEnough()) {
+        if (!checkIfCanRate()) {
             return;
         }
         if (selectedPOI.rate === null) {
@@ -201,7 +207,7 @@ const POIsSidebar = ({
     }
 
     async function handleClickStatus(sx: boolean) {
-        if (!checkIfCloseEnough()) {
+        if (!checkIfCanRate()) {
             return;
         }
         if (selectedPOI.rate === true && selectedPOI.status === false) {
