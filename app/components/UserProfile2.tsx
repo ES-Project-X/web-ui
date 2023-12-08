@@ -362,13 +362,13 @@ export default function UserProfile() {
         <div className="flex justify-center mt-4">
           {!isEditing && (
             <button
-            className="bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
-            onClick={() => {
-              logout();
-            }}
-          >
-            Logout
-          </button>
+              className="bg-red-500 border-red-500 text-white py-2 px-4 rounded h-10"
+              onClick={() => {
+                logout();
+              }}
+            >
+              Logout
+            </button>
           )}
         </div>
       </main>
