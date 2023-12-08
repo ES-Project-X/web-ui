@@ -3,12 +3,8 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import {
-	Button,
-	ButtonGroup,
 	Form,
 	Card,
-	Row,
-	CloseButton,
 	FormGroup,
 	FormLabel,
 } from "react-bootstrap";
@@ -559,7 +555,7 @@ export default function MapComponent({
 		intermediates.push(
 			<FormGroup id={"intermediate" + i}>
 				<FormLabel>{string}</FormLabel>
-				<Row style={{ paddingLeft: "5%", marginRight: "5%" }}>
+				<div className="pl-5 mr-5">
 					<Form.Control
 						style={{ width: "82%", marginRight: "2%" }}
 						id={"intermediate-input-" + i}
@@ -567,14 +563,14 @@ export default function MapComponent({
 						placeholder={"Intermediate " + (i + 1)}
 						readOnly={false}
 					/>
-					<Button
+					<button
 						id={"intermediate-minus-btn-" + i}
 						onClick={eliminateIntermediate}
-						style={{ width: "30px" }}
+						className="btn"
 					>
 						-
-					</Button>
-				</Row>
+					</button>
+				</div>
 				<br />
 			</FormGroup>
 		);
@@ -630,22 +626,15 @@ export default function MapComponent({
 				/>
 				<GetClusters markers={markers} setMarkers={setMarkers} filterPOIs={filterPOIs} />
 			</MapContainer>
-			<Button
+			{/*
+			<button
 				id={"cancel-route-btn"}
 				onClick={cancelRoute}
-				variant={"light"}
-				style={{
-					zIndex: 1,
-					scale: "100%",
-					bottom: "1%",
-					left: "5%",
-					position: "absolute",
-					border: ".1em solid black",
-					display: "none",
-				}}
+				className="btn"
 			>
 				Cancel
-			</Button>
+			</button>
+			*/}
 			<Card
 				id={"card-ori-dest"}
 				style={{
@@ -684,13 +673,13 @@ export default function MapComponent({
 							/>
 						</Form.Group>
 						<br />
-						<Button
+						<button
 							id={"add-intermediate-btn"}
 							onClick={addIntermediate}
-							style={{ width: "60%", marginLeft: "20%" }}
+							className="btn"
 						>
 							Add Intermediate
-						</Button>
+						</button>
 						<br />
 						<Form.Group className="mb-3">
 							<Form.Check
@@ -700,16 +689,15 @@ export default function MapComponent({
 								label="Select in Map"
 							/>
 						</Form.Group>
-						<Row>
-							<Button
+						<div>
+							<button
 								id={"get-route-btn"}
 								onClick={getRoute}
-								variant={"light"}
-								style={{ border: ".1em solid black", width: "40%" }}
+								className="btn"
 							>
 								Get Route
-							</Button>
-						</Row>
+							</button>
+						</div>
 					</Form>
 				</Card.Body>
 			</Card>
@@ -730,28 +718,20 @@ export default function MapComponent({
 							Distance: {directions[currentIndex].distance} meters <br />
 							Time: {convertMsToTime(directions[currentIndex].duration)}
 						</Card.Text>
-						<Button
+						<button
 							id={"next-ins-btn"}
-							variant="primary"
 							onClick={handleNext}
-							disabled={currentIndex >= directions.length - 1}
-							style={{ border: ".1em solid black", width: "40%" }}
+							className="btn"
 						>
 							Next
-						</Button>
-						<Button
+						</button>
+						<button
 							id={"before-ins-btn"}
-							variant="primary"
 							onClick={handleBefore}
-							disabled={currentIndex == 0}
-							style={{
-								border: ".1em solid black",
-								width: "40%",
-								marginLeft: "20%",
-							}}
+							className="btn"
 						>
 							Before
-						</Button>
+						</button>
 					</Card.Body>
 				</Card>
 			)}
@@ -777,20 +757,17 @@ export default function MapComponent({
 						display: "none",
 					}}
 				>
-					<Card.Header>
-						<CloseButton id={"card-btn"} onClick={hidecard} />
-					</Card.Header>
 					<Card.Body>
-						<Row id={"location-text"}></Row>
-						<Row id={"lat-text"}></Row>
-						<Row id={"lng-txt"}></Row>
+						<div id={"location-text"}></div>
+						<div id={"lat-text"}></div>
+						<div id={"lng-txt"}></div>
 					</Card.Body>
 				</Card>
 				{/*
                     	UPPER PART OF THE UI
                 	*/}
 				<div className="flex pt-2">
-					<div className={"w-48 sm:w-96 mx-auto"}>
+					<div className={"w-48 sm:w-96 mx-auto pt-1"}>
 						<Form>
 							<Form.Group controlId={"search-bar"}>
 								<Form.Control
@@ -804,7 +781,7 @@ export default function MapComponent({
 					<div className="absolute right-2">
 						{loggedIn ? (
 							<a href={`/profile`}>
-								<Button
+								<button
 									style={{
 										backgroundColor: "transparent",
 										border: "none",
@@ -818,7 +795,7 @@ export default function MapComponent({
 										className="rounded-circle"
 										style={{ height: "100%", objectFit: "cover" }}
 									/>
-								</Button>
+								</button>
 							</a>
 						) : (
 							<a
@@ -834,7 +811,7 @@ export default function MapComponent({
 				{/*
                     	MIDDLE PART OF THE UI
                 	*/}
-				<div className={"flex-grow flex items-center h-screen"}>
+				<div className={"flex items-center h-screen"}>
 					<div className="ml-auto">
 						<FilterBoardComponent
 							filterPOIs={filterPOIs}
@@ -871,43 +848,36 @@ export default function MapComponent({
 				{/*
                     	LOWER PART OF THE UI
                 	*/}
-				<div className="flex pb-2">
-					<div className="mr-auto pl-2">
-						<Button
+				<div className="pb-2 flex">
+					<div className="mr-auto pl-2 flex">
+						<button
 							id={"ori-dst-btn"}
 							onClick={createRoute}
-							variant={"light"}
-							style={{
-								zIndex: 1,
-								scale: "100%",
-								bottom: "1%",
-								left: "0.5em",
-								position: "absolute",
-								border: ".1em solid black",
-							}}
+							className="btn py-3 px-3 border rounded-xl shadow"
 						>
 							Route
-						</Button>
+						</button>
 					</div>
-					<div className={"ml-auto pr-2"}>
+					<div className={"flex ml-auto pr-2"}>
 						{isMobile ? null :
 							(
-								<ButtonGroup>
-									<Button
+								// preciso arranjar os cantos
+								<>
+									<button
 										id={"map-rotate-left-btn"}
-										variant={"light"}
 										onClick={() => addToBearing(-10)}
+										className="btn py-3 px-3 border rounded-l-xl shadow"
 									>
 										Rotate Left
-									</Button>
-									<Button
+									</button>
+									<button
 										id={"map-rotate-right-btn"}
-										variant={"light"}
 										onClick={() => addToBearing(10)}
+										className="btn py-3 px-3 border shadow"
 									>
 										Rotate Right
-									</Button>
-								</ButtonGroup>
+									</button>
+								</>
 							)
 						}
 					</div>

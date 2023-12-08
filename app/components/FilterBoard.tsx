@@ -31,27 +31,23 @@ export default function FilterBoardComponent(
         <div className="flex">
             <button onClick={toggleOpen} className="z-10">
                 {open ?
-                    <div>
-                        <div className={"py-3 rounded-s-lg border border-gray-200 shadow dark:bg-gray-800 dark:border-gray-700"}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                            </svg>
-                        </div>
+                    <div className={"py-3 rounded-s-lg border border-gray-200 shadow bg-primary dark:border-gray-700"}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
                     </div>
                     :
-                    <div className="">
-                        <div className={"py-3 rounded-s-lg border border-gray-200 shadow dark:bg-gray-800 dark:border-gray-700"}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                            </svg>
-                        </div>
+                    <div className={"py-3 rounded-s-lg border border-gray-200 shadow bg-primary dark:border-gray-700"}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
                     </div>
                 }
             </button>
 
             {open &&
                 <div className="pr-2">
-                    <div className={"p-3 border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 z-20"}>
+                    <div className={"p-3 border border-gray-200 rounded-lg shadow bg-primary dark:border-gray-700 z-20"}>
                         <Form>
                             <Form.Group className="mb-3">
                                 <Form.Label>POI Name</Form.Label>
