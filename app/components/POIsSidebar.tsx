@@ -1,337 +1,443 @@
 import { AiFillCloseCircle, AiFillDislike, AiFillLike } from "react-icons/ai";
+import { getDistanceFrom } from "../utils/getDistanceFrom";
+import { POI } from "../structs/poi";
+import { useEffect, useState } from "react";
+import { isMobile } from "react-device-detect";
+import Cookies from "js-cookie";
+import { URL_API } from "../utils/constants";
+import { padTo2Digits } from "../utils/time";
 // import LineChart from "react-linechart";
 
-// @ts-ignore
+const TOKEN = Cookies.get("COGNITO_TOKEN");
+
 const POIsSidebar = ({
-  selectedPOI,
-  rateExistenceFunction,
-  rateStatusFunction,
-  ratingPositive,
-  setRatingPositive,
-  ratingNegative,
-  setRatingNegative,
-  ratingPositiveStat,
-  setRatingPositiveStat,
-  ratingNegativeStat,
-  setRatingNegativeStat,
-  existsClicked,
-  setExistsClicked,
-  fakeNewsClicked,
-  setFakeNewsClicked,
-  showDetails,
-  setShowDetails,
+    selectedPOI,
+    ratingPositive,
+    setRatingPositive,
+    ratingNegative,
+    setRatingNegative,
+    ratingPositiveStat,
+    setRatingPositiveStat,
+    ratingNegativeStat,
+    setRatingNegativeStat,
+    existsClicked,
+    setExistsClicked,
+    fakeNewsClicked,
+    setFakeNewsClicked,
+    showDetails,
+    setShowDetails,
 }: {
-  selectedPOI: any;
-  rateExistenceFunction: Function;
-  ratingPositive: number;
-  setRatingPositive: Function;
-  ratingNegative: number;
-  setRatingNegative: Function;
-  rateStatusFunction: Function;
-  ratingPositiveStat: number;
-  setRatingPositiveStat: Function;
-  ratingNegativeStat: number;
-  setRatingNegativeStat: Function;
-  existsClicked: boolean;
-  setExistsClicked: Function;
-  fakeNewsClicked: boolean;
-  setFakeNewsClicked: Function;
-  showDetails: boolean;
-  setShowDetails: Function;
+    selectedPOI: POI;
+    ratingPositive: number;
+    setRatingPositive: Function;
+    ratingNegative: number;
+    setRatingNegative: Function;
+    ratingPositiveStat: number;
+    setRatingPositiveStat: Function;
+    ratingNegativeStat: number;
+    setRatingNegativeStat: Function;
+    existsClicked: boolean;
+    setExistsClicked: Function;
+    fakeNewsClicked: boolean;
+    setFakeNewsClicked: Function;
+    showDetails: boolean;
+    setShowDetails: Function;
 }) => {
-  if (!selectedPOI) return;
 
-  // mock data for graph
-  const data = [
-    {
-      color: "steelblue",
-      points: [
-        { x: 1, y: 2 },
-        { x: 3, y: 5 },
-        { x: 7, y: -3 },
-      ],
-    },
-  ];
+    const [closeEnough, setCloseEnough] = useState(false);
+    const [position, setPosition] = useState(null) as any;
 
-  const toggleDetails = () => {
-    setShowDetails(!showDetails);
-  };
+    function getPosition() {
+        navigator.geolocation.getCurrentPosition((position) => {
+            setPosition({ lat: position.coords.latitude, lon: position.coords.longitude });
+        }, (error) => {
+            console.log(error);
+        },
+            { enableHighAccuracy: true, });
+        return null;
+    }
 
-  const hideCard = () => {
-    document
-      .getElementById("poi-sidebar")
-      ?.style.setProperty("display", "none");
-    setShowDetails(false);
-  };
-
-  async function handleClick(rate: boolean) {
-    if (selectedPOI.rate === null) {
-      rateExistenceFunction(selectedPOI.id, rate);
-      if (rate) {
-        setRatingPositive(ratingPositive + 1);
-      } else {
-        setRatingNegative(ratingNegative + 1);
-      }
-      selectedPOI.rate = rate;
-    } else {
-      if (rate !== selectedPOI.rate) {
-        if (await rateExistenceFunction(selectedPOI.id, rate)) {
-          if (rate) {
-            setRatingPositive(ratingPositive + 1);
-            setRatingNegative(ratingNegative - 1);
-          } else {
-            setRatingNegative(ratingNegative + 1);
-            setRatingPositive(ratingPositive - 1);
-          }
-          selectedPOI.rate = rate;
-          alert("You have successfully rated this POI!");
+    useEffect(() => {
+        if (isMobile) {
+            getPosition();
         }
-      } else {
-        alert("You new rate is the same as the previous one");
-      }
+    }, [selectedPOI]);
+
+    useEffect(() => {
+        if (position) {
+            const distance = getDistanceFrom(
+                {
+                    currentLocation: position,
+                    point: selectedPOI,
+                }
+            );
+            if (distance < 50) {
+                setCloseEnough(true);
+            } else {
+                setCloseEnough(false);
+            }
+        }
+    }, [position]);
+
+    function checkIfCloseEnough() {
+        if (isMobile !== true) {
+            alert("You must be using a mobile device to rate a POI");
+            return false;
+        }
+        if (closeEnough === undefined) {
+            alert("You must allow the browser to access your location");
+            return false;
+        }
+        if (!closeEnough) {
+            alert("You must be close enough to the POI to rate it");
+            return false;
+        }
+        return true;
     }
-  }
 
-
-  async function handleClickStatus(sx: boolean) {
-    console.log("status: ", sx);
-    console.log("selectedPOI: ", selectedPOI);
-    if (selectedPOI.rate === true && selectedPOI.status === false) {
-      if (sx) {
-        setRatingPositiveStat(ratingPositiveStat + 1);
-        setExistsClicked(true);
-      } else {
-        setRatingNegativeStat(ratingNegativeStat - 1);
-        setFakeNewsClicked(true);
-      }
-      await rateStatusFunction(selectedPOI.id, sx);
-      selectedPOI.status = true;
-      alert("You have successfully rated this POI!");
-    } else if (selectedPOI.rate === true && selectedPOI.status === true) {
-      alert("You have already rated this POI! Try again tomorrow.");
-    } else {
-      alert("You must rate its existence first!");
+    async function rateExistenceFunction(id: string, existence: boolean) {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+        };
+        const url = new URL(URL_API + "poi/exists");
+        let body = {
+            id: id,
+            rating: existence,
+        };
+        return fetch(url.toString(), {
+            headers,
+            method: "PUT",
+            body: JSON.stringify(body),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.time === -1) {
+                    window.alert("You cannot rate a POI that you created");
+                    return false;
+                }
+                else if (data.time === 0) {
+                    return true;
+                } else {
+                    // covert seconds in 00h00m00s
+                    let seconds = data.time;
+                    let minutes = Math.floor(seconds / 60);
+                    let hours = Math.floor(minutes / 60);
+                    seconds = seconds % 60;
+                    minutes = minutes % 60;
+                    let time = `${padTo2Digits(hours)}h${padTo2Digits(
+                        minutes
+                    )}m${padTo2Digits(seconds)}s`;
+                    window.alert(
+                        "You have already rated this POI, please wait " +
+                        time +
+                        " to rate again"
+                    );
+                    return false;
+                }
+            })
+            .catch(() => {
+                return false;
+            });
     }
-  }
 
-  const displayMainContent = (
-    <div className="main-content text-center">
-      <div className="sidebar-body">
-        <div className="sidebar-body-item">
-          <div className={"flex justify-end pb-2"}>
-            <button className="close-button" data-testid="close-button">
-              <AiFillCloseCircle
-                onClick={() => {
-                  hideCard();
-                }}
-              />
-            </button>
-          </div>
-          <div
-            style={{
-              width: "250px",
-              height: "250px",
-              overflow: "cover",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <img
-              style={{ height: "100%", objectFit: "cover" }}
-              className="w-fit rounded-xl"
-              src={selectedPOI.picture_url}
-              alt="poi_image"
-            />
-          </div>
-          <h2 className="mt-4">{selectedPOI.name}</h2>
-          <h5>{selectedPOI.type}</h5>
-          <p className="mt-8">{selectedPOI.description}</p>
-          <div className="flex flex-row gap-3">
-            {selectedPOI.rate ? (
-              <>
-                <button
-                  style={{ borderWidth: "2px", borderStyle: "solid" }}
-                  className={
-                    "bg-white border-green-600 p-3 rounded flex flex-row items-center grow justify-center"
-                  }
-                  onClick={() => {
-                    handleClick(true);
-                  }}
-                >
-                  <AiFillLike color="green" />
-                  <span className="text-green-600 ml-3">{ratingPositive}</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  style={{ borderWidth: "2px", borderStyle: "solid" }}
-                  className={
-                    "bg-green-600 p-3 rounded flex flex-row items-center grow justify-center"
-                  }
-                  onClick={() => {
-                    handleClick(true);
-                  }}
-                >
-                  <AiFillLike color="white" />
-                  <span className="text-white ml-3">{ratingPositive}</span>
-                </button>
-              </>
-            )}
-            {selectedPOI.rate === false ? (
-              <>
-                <button
-                  style={{ borderWidth: "2px", borderStyle: "solid" }}
-                  className="bg-white border-red-600 p-3 rounded flex flex-row items-center grow justify-center"
-                  onClick={() => {
-                    handleClick(false);
-                  }}
-                >
-                  <AiFillDislike color="red" />
-                  <span className="text-red-600 ml-3">{ratingNegative}</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  style={{ borderWidth: "2px", borderStyle: "solid" }}
-                  className="bg-red-600 p-3 rounded flex flex-row items-center grow justify-center"
-                  onClick={() => {
-                    handleClick(false);
-                  }}
-                >
-                  <AiFillDislike color="white" />
-                  <span className="text-white ml-3">{ratingNegative}</span>
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-        <button className="show-details text-center" onClick={toggleDetails}>
-          Show Details
-        </button>
-      </div>
-    </div>
-  );
+	function rateStatusFunction(id: string, status: boolean) {
+		const headers = {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${TOKEN}`,
+		};
+		const url = new URL(URL_API + "poi/status");
+		let body = {
+			id: id,
+			status: status,
+		};
+		return fetch(url.toString(), {
+			headers,
+			method: "PUT",
+			body: JSON.stringify(body),
+		});
+	}
 
-  const buttonStyleExists = existsClicked
-    ? {
-        flex: 1,
-        backgroundColor: "white",
-        border: "2px solid green",
-      }
-    : { flex: 1 };
-  const buttonStyleFakeNews = fakeNewsClicked
-    ? {
-        flex: 1,
-        backgroundColor: "white",
-        border: "2px solid red",
-      }
-    : { flex: 1 };
+    const toggleDetails = () => {
+        setShowDetails(!showDetails);
+    };
 
-  const displayDetails = (
-    <div className="additional-details text-center">
-      {/* Display detailed view */}
-      <div className="detailed-view">
-        <div className={"flex justify-end pb-2"}>
-          <button className="close-button" data-testid="close-button">
-            <AiFillCloseCircle
-              onClick={() => {
-                hideCard();
-              }}
-            />
-          </button>
-        </div>
-        <img
-          style={{ height: "160px", objectFit: "cover", margin: "auto" }}
-          className="w-fit rounded-xl"
-          src={selectedPOI.picture_url}
-          alt="poi_image"
-        />
-        <h2>{selectedPOI.name}</h2>
-        <p>{selectedPOI.description}</p>
+    const hideCard = () => {
+        document
+            .getElementById("poi-sidebar")
+            ?.style.setProperty("display", "none");
+        setShowDetails(false);
+    };
 
-        {/* Graph */}
-        {/* Add your graph component here */}
-        <div className="graph">
-          {" "}
-          {/* Added padding top */}
-          <div style={{ maxHeight: "250px", maxWidth: "400px" }}>
-            <div className="App">
-              {/* <LineChart width={400} height={210} data={data} /> */}
-              <p> Graph goes here </p>
+    async function handleClick(rate: boolean) {
+        if (!checkIfCloseEnough()) {
+            return;
+        }
+        if (selectedPOI.rate === null) {
+            rateExistenceFunction(selectedPOI.id, rate);
+            if (rate) {
+                setRatingPositive(ratingPositive + 1);
+            } else {
+                setRatingNegative(ratingNegative + 1);
+            }
+            selectedPOI.rate = rate;
+        } else {
+            if (rate !== selectedPOI.rate) {
+                if (await rateExistenceFunction(selectedPOI.id, rate)) {
+                    if (rate) {
+                        setRatingPositive(ratingPositive + 1);
+                        setRatingNegative(ratingNegative - 1);
+                    } else {
+                        setRatingNegative(ratingNegative + 1);
+                        setRatingPositive(ratingPositive - 1);
+                    }
+                    selectedPOI.rate = rate;
+                    alert("You have successfully rated this POI!");
+                }
+            } else {
+                alert("You new rate is the same as the previous one");
+            }
+        }
+    }
+
+    async function handleClickStatus(sx: boolean) {
+        if (!checkIfCloseEnough()) {
+            return;
+        }
+        if (selectedPOI.rate === true && selectedPOI.status === false) {
+            if (sx) {
+                setRatingPositiveStat(ratingPositiveStat + 1);
+                setExistsClicked(true);
+            } else {
+                setRatingNegativeStat(ratingNegativeStat - 1);
+                setFakeNewsClicked(true);
+            }
+            await rateStatusFunction(selectedPOI.id, sx);
+            selectedPOI.status = true;
+            alert("You have successfully rated this POI!");
+        } else if (selectedPOI.rate === true && selectedPOI.status === true) {
+            alert("You have already rated this POI! Try again tomorrow.");
+        } else {
+            alert("You must rate its existence first!");
+        }
+    }
+
+    const displayMainContent = (
+        <div className="main-content text-center">
+            <div className="sidebar-body">
+                <div className="sidebar-body-item">
+                    <div className={"flex justify-end pb-2"}>
+                        <button className="close-button" data-testid="close-button">
+                            <AiFillCloseCircle
+                                onClick={() => {
+                                    hideCard();
+                                }}
+                            />
+                        </button>
+                    </div>
+                    <div
+                        style={{
+                            width: "250px",
+                            height: "250px",
+                            overflow: "cover",
+                            display: "flex",
+                            alignItems: "center",
+                        }}
+                    >
+                        <img
+                            style={{ height: "100%", objectFit: "cover" }}
+                            className="w-fit rounded-xl"
+                            src={selectedPOI.picture_url}
+                            alt="poi_image"
+                        />
+                    </div>
+                    <h2 className="mt-4">{selectedPOI.name}</h2>
+                    <h5>{selectedPOI.type}</h5>
+                    <p className="mt-8">{selectedPOI.description}</p>
+                    <div className="flex flex-row gap-3">
+                        {selectedPOI.rate ? (
+                            <>
+                                <button
+                                    style={{ borderWidth: "2px", borderStyle: "solid" }}
+                                    className={
+                                        "bg-white border-green-600 p-3 rounded flex flex-row items-center grow justify-center"
+                                    }
+                                    onClick={() => {
+                                        handleClick(true);
+                                    }}
+                                >
+                                    <AiFillLike color="green" />
+                                    <span className="text-green-600 ml-3">{ratingPositive}</span>
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    style={{ borderWidth: "2px", borderStyle: "solid" }}
+                                    className={
+                                        "bg-green-600 p-3 rounded flex flex-row items-center grow justify-center"
+                                    }
+                                    onClick={() => {
+                                        handleClick(true);
+                                    }}
+                                >
+                                    <AiFillLike color="white" />
+                                    <span className="text-white ml-3">{ratingPositive}</span>
+                                </button>
+                            </>
+                        )}
+                        {selectedPOI.rate === false ? (
+                            <>
+                                <button
+                                    style={{ borderWidth: "2px", borderStyle: "solid" }}
+                                    className="bg-white border-red-600 p-3 rounded flex flex-row items-center grow justify-center"
+                                    onClick={() => {
+                                        handleClick(false);
+                                    }}
+                                >
+                                    <AiFillDislike color="red" />
+                                    <span className="text-red-600 ml-3">{ratingNegative}</span>
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    style={{ borderWidth: "2px", borderStyle: "solid" }}
+                                    className="bg-red-600 p-3 rounded flex flex-row items-center grow justify-center"
+                                    onClick={() => {
+                                        handleClick(false);
+                                    }}
+                                >
+                                    <AiFillDislike color="white" />
+                                    <span className="text-white ml-3">{ratingNegative}</span>
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+                <button className="show-details text-center" onClick={toggleDetails}>
+                    Show Details
+                </button>
             </div>
-          </div>
         </div>
+    );
 
-        {selectedPOI.rate ? (
-          (console.log("selectedPOI.rate: ", selectedPOI.rate),
-          console.log("selectedPOI.status: ", selectedPOI.status),
-          (
-            <>
-              <div
-                className="rate-status-buttons"
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  justifyContent: "center",
-                  paddingTop: "20px",
-                }}
-              >
-                {selectedPOI.status ? (
-                  <p>
+    const buttonStyleExists = existsClicked
+        ? {
+            flex: 1,
+            backgroundColor: "white",
+            border: "2px solid green",
+        }
+        : { flex: 1 };
+    const buttonStyleFakeNews = fakeNewsClicked
+        ? {
+            flex: 1,
+            backgroundColor: "white",
+            border: "2px solid red",
+        }
+        : { flex: 1 };
+
+    const displayDetails = (
+        <div className="additional-details text-center">
+            {/* Display detailed view */}
+            <div className="detailed-view">
+                <div className={"flex justify-end pb-2"}>
+                    <button className="close-button" data-testid="close-button">
+                        <AiFillCloseCircle
+                            onClick={() => {
+                                hideCard();
+                            }}
+                        />
+                    </button>
+                </div>
+                <img
+                    style={{ height: "160px", objectFit: "cover", margin: "auto" }}
+                    className="w-fit rounded-xl"
+                    src={selectedPOI.picture_url}
+                    alt="poi_image"
+                />
+                <h2>{selectedPOI.name}</h2>
+                <p>{selectedPOI.description}</p>
+
+                {/* Graph */}
+                {/* Add your graph component here */}
+                <div className="graph">
                     {" "}
-                    You have already rated this POI! Try again in the next day.{" "}
-                  </p>
+                    {/* Added padding top */}
+                    <div style={{ maxHeight: "250px", maxWidth: "400px" }}>
+                        <div className="App">
+                            {/* <LineChart width={400} height={210} data={data} /> */}
+                            <p> Graph goes here </p>
+                        </div>
+                    </div>
+                </div>
+
+                {selectedPOI.rate ? (
+                    (
+                        <>
+                            <div
+                                className="rate-status-buttons"
+                                style={{
+                                    display: "flex",
+                                    gap: "10px",
+                                    justifyContent: "center",
+                                    paddingTop: "20px",
+                                }}
+                            >
+                                {selectedPOI.status ? (
+                                    <p>
+                                        {" "}
+                                        You have already rated this POI! Try again in the next day.{" "}
+                                    </p>
+                                ) : (
+                                    <>
+                                        <button
+                                            className="btn btn-success"
+                                            style={buttonStyleExists}
+                                            onClick={() => handleClickStatus(true)}
+                                        >
+                                            Exists
+                                        </button>
+                                        <button
+                                            className="btn btn-error"
+                                            style={buttonStyleFakeNews}
+                                            onClick={() => handleClickStatus(false)}
+                                        >
+                                            FakeNews
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </>
+                    )
                 ) : (
-                  <>
-                    <button
-                      className="btn btn-success"
-                      style={buttonStyleExists}
-                      onClick={() => handleClickStatus(true)}
-                    >
-                      Exists
-                    </button>
-                    <button
-                      className="btn btn-error"
-                      style={buttonStyleFakeNews}
-                      onClick={() => handleClickStatus(false)}
-                    >
-                      FakeNews
-                    </button>
-                  </>
+                    <>
+                        <div
+                            className="rate-status-buttons"
+                            style={{
+                                display: "flex",
+                                gap: "10px",
+                                justifyContent: "center",
+                                paddingTop: "20px",
+                            }}
+                        >
+                            <p> Must rate its existence first! </p>
+                        </div>
+                    </>
                 )}
-              </div>
-            </>
-          ))
-        ) : (
-          <>
-            <div
-              className="rate-status-buttons"
-              style={{
-                display: "flex",
-                gap: "10px",
-                justifyContent: "center",
-                paddingTop: "20px",
-              }}
-            >
-              <p> Must rate its existence first! </p>
             </div>
-          </>
-        )}
-      </div>
 
-      <button className="show-details" onClick={toggleDetails}>
-        Hide Details
-      </button>
-    </div>
-  );
+            <button className="show-details" onClick={toggleDetails}>
+                Hide Details
+            </button>
+        </div>
+    );
 
-  return (
-    <div className="sidebar" data-testid="poi-sidebar" id="poi-sidebar">
-      {showDetails ? displayDetails : displayMainContent}
-    </div>
-  );
+    return (
+        <div className="sidebar" data-testid="poi-sidebar" id="poi-sidebar">
+            {showDetails ? displayDetails : displayMainContent}
+        </div>
+    );
 };
 
 export default POIsSidebar;

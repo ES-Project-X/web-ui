@@ -2,7 +2,7 @@ import { useMap } from "react-leaflet";
 import { useEffect, useState } from "react";
 import "leaflet.locatecontrol";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
-import { control } from "leaflet";
+import { control, layerGroup } from "leaflet";
 
 export default function LocateControl() {
 
@@ -25,7 +25,7 @@ export default function LocateControl() {
         clickBehavior: { inView: "setView" },
         flyTo: true,
         locateOptions: {
-            enableHighAccuracy: true,
+            enableHighAccuracy: true, // might take longer, but more accurate
             watch: true,
         },
     });
