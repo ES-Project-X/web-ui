@@ -49,7 +49,7 @@ export default function UserProfile() {
   const [formEmail, setFormEmail] = useState("");
   const [formPassword, setFormPassword] = useState("");
 
-  const [newAvatar, setNewAvatar] = useState(null);
+  const [image, setImage] = useState<File | null>(null);
 
   //create dictionary with all the user info that is changed
   //if the user doesnt change anything, the value is null
@@ -155,8 +155,8 @@ export default function UserProfile() {
   });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    setNewAvatar(newAvatar || null);
+    const selectedImage = e.target.files?.[0];
+    setImage(selectedImage || null);
   };
 
   function logout() {
