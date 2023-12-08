@@ -211,10 +211,10 @@ export default function UserProfile() {
             <button
               className="bg-white text-black py-2 px-4 rounded h-10"
               onClick={() => {
-                logout();
+                console.log("routes btn");
               }}
             >
-              Logout
+              Routes
             </button>
           </div>
         </div>
@@ -273,34 +273,36 @@ export default function UserProfile() {
       <main className="container mx-auto py-8">
         <div className="flex justify-center">
           {!isEditing ? (
-            <details className="dropdown bg-white rounded-lg shadow-md p-8 justify-center text-center ">
-              <summary className="text-2xl font-semibold text-center m-2 btn justify-center">
-                User Statistics <FontAwesomeIcon icon={faList} />
-              </summary>
-              {/* User Info */}
-              <div className="flex flex-col w-full">
-                <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative pt-3">
-                  <p>
-                    <FontAwesomeIcon icon="map-marker-alt" /> Total Added POIs:{" "}
-                    {added_pois_count}
-                  </p>
+            <>
+              <details className="dropdown bg-white rounded-lg shadow-md p-8 justify-center text-center ">
+                <summary className="text-2xl font-semibold text-center m-2 btn justify-center">
+                  User Statistics <FontAwesomeIcon icon={faList} />
+                </summary>
+                {/* User Info */}
+                <div className="flex flex-col w-full">
+                  <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative pt-3">
+                    <p>
+                      <FontAwesomeIcon icon="map-marker-alt" /> Total Added
+                      POIs: {added_pois_count}
+                    </p>
+                  </div>
+                  <div className="divider"></div>
+                  <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative">
+                    <p>
+                      <FontAwesomeIcon icon="star" /> Total Received Ratings:{" "}
+                      {received_ratings_count}
+                    </p>
+                  </div>
+                  <div className="divider"></div>
+                  <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative">
+                    <p>
+                      <FontAwesomeIcon icon="star-half-alt" /> Total Given
+                      Ratings: {given_ratings_count}
+                    </p>
+                  </div>
                 </div>
-                <div className="divider"></div>
-                <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative">
-                  <p>
-                    <FontAwesomeIcon icon="star" /> Total Received Ratings:{" "}
-                    {received_ratings_count}
-                  </p>
-                </div>
-                <div className="divider"></div>
-                <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative">
-                  <p>
-                    <FontAwesomeIcon icon="star-half-alt" /> Total Given
-                    Ratings: {given_ratings_count}
-                  </p>
-                </div>
-              </div>
-            </details>
+              </details>
+            </>
           ) : (
             <div className="justify-center items-center text-center">
               <div className="col-md-8 justify-content-center">
@@ -313,7 +315,7 @@ export default function UserProfile() {
                       type="text"
                       placeholder="Type here the First Name"
                       className="input input-bordered w-full max-w-xs bg-gray-200"
-                        onChange={(e) => setFormUsername(e.target.value)}
+                      onChange={(e) => setFormUsername(e.target.value)}
                     />
                   </label>
                 </div>
@@ -339,11 +341,10 @@ export default function UserProfile() {
                       type="password"
                       placeholder="Type here the Last Name"
                       className="input input-bordered w-full max-w-xs bg-gray-200"
-                        onChange={(e) => setFormPassword(e.target.value)}
+                      onChange={(e) => setFormPassword(e.target.value)}
                     />
                   </label>
                 </div>
-                
               </div>
               <div className="row justify-content-center">
                 {isEditing && (
@@ -356,6 +357,18 @@ export default function UserProfile() {
                 )}
               </div>
             </div>
+          )}
+        </div>
+        <div className="flex justify-center mt-4">
+          {!isEditing && (
+            <button
+            className="bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
+            onClick={() => {
+              logout();
+            }}
+          >
+            Logout
+          </button>
           )}
         </div>
       </main>
