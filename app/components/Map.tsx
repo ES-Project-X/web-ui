@@ -27,8 +27,9 @@ import Cookies from "js-cookie";
 import "../globals.css";
 import { UserData } from "../structs/user";
 import { POI } from "../structs/poi";
-import { URL_API, URL_GEO, URL_REV, URL_ROUTING, COGNITO_LOGIN_URL } from "../utils/constants";
+import { URL_API, URL_GEO, URL_REV, COGNITO_LOGIN_URL } from "../utils/constants";
 import { convertMsToTime } from "../utils/time";
+import RoutingComponent from "./Routing";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -43,7 +44,6 @@ export default function MapComponent({
 	const [creatingRoute, setCreatingRoute] = useState(false);
 	const [origin, setOrigin] = useState<string>("");
 	const [destination, setDestination] = useState<string>("");
-	const [odmap, setodmap] = useState(false);
 
 	const [markers, setMarkers] = useState<BasicPOI[]>([]);
 	const [selectedPOI, setSelectedPOI] = useState({
@@ -66,8 +66,6 @@ export default function MapComponent({
 
 	const [points, setPoints] = useState<LatLng[][]>([]);
 
-	const [gettingRoute, setGettingRoute] = useState(false);
-
 	const d = [new Direction("test", 10, 10)];
 
 	const [directions, setDirections] = useState<Direction[]>(d);
@@ -78,8 +76,6 @@ export default function MapComponent({
 
 	const [ratingPositiveStat, setRatingPositiveStat] = useState(0);
 	const [ratingNegativeStat, setRatingNegativeStat] = useState(0);
-
-	const [gettingInterRoute, setGettingInterRoute] = useState(false);
 
 	const [routes, setRoutes] = useState([]);
 	const [loggedIn, setLoggedIn] = useState<boolean>(false);
@@ -93,26 +89,6 @@ export default function MapComponent({
 
 	const [numberOfIntermediates, setNumberOfIntermediates] = useState(0);
 	const [canCall, setCanCall] = useState(false);
-
-	function getRoutes() {
-		const headers = {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${TOKEN}`,
-		};
-		const url = new URL(URL_API + "route/get");
-		fetch(url.toString(), { headers })
-			.then((response) => response.json())
-			.then((data) => {
-				if (data.detail) {
-					return;
-				} else {
-					setRoutes(data);
-				}
-			})
-			.catch(() => {
-				alert("Error getting routes");
-			});
-	}
 
 	function getUser() {
 
@@ -138,7 +114,6 @@ export default function MapComponent({
 				setFname(data.first_name);
 				localStorage.setItem("user", JSON.stringify(data));
 				setLoggedIn(true);
-				getRoutes();
 			})
 			.catch((err) => {
 				console.log(err);
@@ -171,12 +146,6 @@ export default function MapComponent({
 		}
 
 	}, []);
-
-	useEffect(() => {
-		if (gettingRoute) {
-			getRoute();
-		}
-	}, [origin, destination]);
 
 	const addToBearing = (amount: number) => {
 		if (mapRef.current) {
@@ -267,218 +236,6 @@ export default function MapComponent({
 		}
 	};
 
-	const getFromMap = () => {
-		if (odmap) {
-			setodmap(false);
-			setCreatingRoute(false);
-			setGettingRoute(false);
-			setPoints([]);
-			setOrigin("");
-			setDestination("");
-			setCurrentIndex(0);
-			// @ts-ignore
-			document.getElementById("origin-input").value = "";
-			// @ts-ignore
-			document.getElementById("origin-input").style.readonly = false;
-			// @ts-ignore
-			document.getElementById("destination-input").value = "";
-			// @ts-ignore
-			document.getElementById("destination-input").style.readonly = false;
-			// @ts-ignore
-			document.getElementById("ins-card").style.display = "none";
-		} else {
-			setodmap(true);
-			setCreatingRoute(true);
-			setGettingRoute(false);
-			setPoints([]);
-			setOrigin("");
-			setDestination("");
-			setCurrentIndex(0);
-			// @ts-ignore
-			document.getElementById("origin-input").value = "";
-			// @ts-ignore
-			document.getElementById("origin-input").style.readonly = true;
-			// @ts-ignore
-			document.getElementById("destination-input").value = "";
-			// @ts-ignore
-			document.getElementById("destination-input").style.readonly = true;
-			// @ts-ignore
-			document.getElementById("ins-card").style.display = "none";
-		}
-	};
-
-	const geoCode = async (query: string): Promise<string> => {
-		// @ts-ignore
-		return fetch(query)
-			.then((response) => response.json())
-			.then((data) => {
-				if (data.items.length === 0) {
-					window.alert("No results");
-					return "";
-				}
-				const lat = data.items[0].position.lat;
-				const lng = data.items[0].position.lng;
-				return lat + "," + lng;
-			})
-			.catch((error) => {
-				console.error("Error:", error);
-				return "";
-			});
-	};
-
-	const drawRoute = (url: string) => {
-		if (url) {
-			fetch(url)
-				.then((response) => response.json())
-				.then((data) => {
-					if (data.paths.length === 0) {
-						window.alert("No results");
-						return;
-					}
-					const points = data.paths[0].points.coordinates;
-					let points2 = [];
-					for (let point of points) {
-						points2.push(new LatLng(point[1], point[0]));
-					}
-					setPoints([points2]);
-					let directions = [];
-					for (let instruction of data.paths[0].instructions) {
-						directions.push(
-							new Direction(
-								instruction.text,
-								instruction.distance.toFixed(2),
-								instruction.time.toFixed(2)
-							)
-						);
-					}
-					setCurrentIndex(0);
-					setDirections(directions);
-					// @ts-ignore
-					document.getElementById("ins-card").style.display = "block";
-					// @ts-ignore
-					document.getElementById("cancel-route-btn").style.display = "block";
-				})
-				.catch((error) => {
-					console.error("Error:", error);
-				});
-		}
-	};
-
-	async function storeRoute(points: string[], names: string[]) {
-		const headers = {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${TOKEN}`,
-		};
-		const url = new URL(URL_API + "route/create");
-		let name = "";
-		for (let i = 0; i < names.length; i++) {
-			if (i === names.length - 1) {
-				name += names[i];
-			} else {
-				name += names[i] + "-";
-			}
-		}
-		let body = {
-			name: name,
-			points: points,
-		};
-		return fetch(url.toString(), {
-			headers,
-			method: "POST",
-			body: JSON.stringify(body),
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				getRoutes();
-				return true;
-			})
-			.catch(() => {
-				return false;
-			});
-	}
-
-	const getRoute = async () => {
-		let points = [];
-
-		if (origin === "" || destination === "") {
-			window.alert("Please fill in both fields");
-			return;
-		}
-		if (odmap) {
-			setGettingRoute(true);
-		}
-		setGettingInterRoute(true);
-		let url = URL_ROUTING;
-
-		let names = [];
-		names.push(origin);
-
-		if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
-			url += "&point=" + origin;
-			points.push(origin);
-		} else {
-			let ori = await geoCode(URL_GEO + "&q=" + origin);
-			url += "&point=" + ori;
-			points.push(ori);
-		}
-
-		for (let i = 0; i < numberOfIntermediates; i++) {
-			let intermediate = (
-				document.getElementById("intermediate-input-" + i) as HTMLInputElement
-			).value;
-			names.push(intermediate);
-			if (intermediate.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
-				url += "&point=" + intermediate;
-				points.push(intermediate);
-			} else if (intermediate === "") {
-			} else {
-				let inter = await geoCode(URL_GEO + "&q=" + intermediate);
-				url += "&point=" + inter;
-				points.push(inter);
-			}
-		}
-
-		names.push(destination);
-
-		if (destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
-			url += "&point=" + destination;
-			points.push(destination);
-		} else {
-			let dest = await geoCode(URL_GEO + "&q=" + destination);
-			url += "&point=" + dest;
-			points.push(dest);
-		}
-
-		storeRoute(points, names);
-
-		drawRoute(url!);
-	};
-
-	const hidecard = () => {
-		// @ts-ignore
-		document.getElementById("card-info").style.display = "none";
-	};
-
-	const updateOrigin = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setOrigin(event.target.value);
-	};
-
-	const updateDestination = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setDestination(event.target.value);
-	};
-	const cancelRoute = () => {
-		setPoints([]);
-		setGettingRoute(false);
-		setGettingInterRoute(false);
-		setCurrentIndex(0);
-		// @ts-ignore
-		document.getElementById("ins-card").style.display = "none";
-		// @ts-ignore
-		document.getElementById("cancel-route-btn").style.display = "none";
-		// @ts-ignore
-		document.getElementById("card-ori-dest").style.display = "none";
-	};
-
 	const handleNext = () => {
 		setCurrentIndex(currentIndex + 1);
 	};
@@ -538,60 +295,13 @@ export default function MapComponent({
 		window.location.reload();
 	};
 
-	let intermediates: any[];
-	intermediates = [];
-
-	const eliminateIntermediate = (
-		event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-	) => {
-		const id = event.currentTarget.id;
-		intermediates.splice(parseInt(id[id.length - 1]), 1);
-		setNumberOfIntermediates(numberOfIntermediates - 1);
-		setCanCall(true);
-	};
-
-	for (let i = 0; i < numberOfIntermediates; i++) {
-		let string = "Intermediate " + (i + 1);
-		intermediates.push(
-			<FormGroup id={"intermediate" + i}>
-				<FormLabel>{string}</FormLabel>
-				<div className="pl-5 mr-5">
-					<Form.Control
-						style={{ width: "82%", marginRight: "2%" }}
-						id={"intermediate-input-" + i}
-						type={"text"}
-						placeholder={"Intermediate " + (i + 1)}
-						readOnly={false}
-					/>
-					<button
-						id={"intermediate-minus-btn-" + i}
-						onClick={eliminateIntermediate}
-						className="btn"
-					>
-						-
-					</button>
-				</div>
-				<br />
-			</FormGroup>
-		);
-	}
-
-	useEffect(() => {
-		if (canCall && gettingInterRoute && origin !== "" && destination !== "") {
-			getRoute();
-		}
-		setCanCall(false);
-	}, [numberOfIntermediates]);
-
-	const addIntermediate = () => {
-		setNumberOfIntermediates(numberOfIntermediates + 1);
-	};
-
 	return (
 		<>
-			{/* Sidebar */}
+			{/* Sidebar
 
 			<Sidebar routes={routes} draw={drawRoute} />
+
+			*/}
 
 			{/* eventually change this to the main page, but for now fica aqui */}
 
@@ -626,81 +336,6 @@ export default function MapComponent({
 				/>
 				<GetClusters markers={markers} setMarkers={setMarkers} filterPOIs={filterPOIs} />
 			</MapContainer>
-			{/*
-			<button
-				id={"cancel-route-btn"}
-				onClick={cancelRoute}
-				className="btn"
-			>
-				Cancel
-			</button>
-			*/}
-			<Card
-				id={"card-ori-dest"}
-				style={{
-					zIndex: 1,
-					top: "1%",
-					left: "5%",
-					width: "15%",
-					position: "absolute",
-					display: "none",
-				}}
-			>
-				<Card.Body>
-					<Form>
-						<Form.Group>
-							<Form.Label>Origin</Form.Label>
-							<Form.Control
-								id={"origin-input"}
-								type={"text"}
-								placeholder={"Origin"}
-								onChange={updateOrigin}
-								value={origin}
-								readOnly={false}
-							/>
-						</Form.Group>
-						<br />
-						{intermediates}
-						<Form.Group>
-							<Form.Label>Destination</Form.Label>
-							<Form.Control
-								id={"destination-input"}
-								type={"text"}
-								placeholder={"Destination"}
-								onChange={updateDestination}
-								value={destination}
-								readOnly={false}
-							/>
-						</Form.Group>
-						<br />
-						<button
-							id={"add-intermediate-btn"}
-							onClick={addIntermediate}
-							className="btn"
-						>
-							Add Intermediate
-						</button>
-						<br />
-						<Form.Group className="mb-3">
-							<Form.Check
-								id="mapcbox"
-								type="checkbox"
-								onChange={getFromMap}
-								label="Select in Map"
-							/>
-						</Form.Group>
-						<div>
-							<button
-								id={"get-route-btn"}
-								onClick={getRoute}
-								className="btn"
-							>
-								Get Route
-							</button>
-						</div>
-					</Form>
-				</Card.Body>
-			</Card>
 			{directions[currentIndex] !== undefined && (
 				<Card
 					id={"ins-card"}
@@ -811,38 +446,54 @@ export default function MapComponent({
 				{/*
                     	MIDDLE PART OF THE UI
                 	*/}
-				<div className={"flex items-center h-screen"}>
-					<div className="ml-auto">
-						<FilterBoardComponent
-							filterPOIs={filterPOIs}
-							setFilterName={setFilterName}
-							setFilterTypes={setFilterTypes}
-							types={filterTypes}
+				<div className="flex h-screen">
+					<div className="mr-auto pt-32 ml-2">
+						<RoutingComponent
+							setOrigin={setOrigin}
+							origin={origin}
+							setDestination={setDestination}
+							destination={destination}
+							canCall={canCall}
+							setCanCall={setCanCall}
+							setCreatingRoute={setCreatingRoute}
+							setCurrentIndex={setCurrentIndex}
+							setDirections={setDirections}
+							setPoints={setPoints}
 						/>
 					</div>
-					<div>
-						<Card id={"poi-sidebar"} style={{ display: "none" }}>
-							<Card.Body>
-								<POIsSidebar
-									isLoggedIn={loggedIn}
-									selectedPOI={selectedPOI}
-									ratingPositive={ratingPositive}
-									setRatingPositive={setRatingPositive}
-									ratingNegative={ratingNegative}
-									setRatingNegative={setRatingNegative}
-									ratingPositiveStat={ratingPositiveStat}
-									setRatingPositiveStat={setRatingPositiveStat}
-									ratingNegativeStat={ratingNegativeStat}
-									setRatingNegativeStat={setRatingNegativeStat}
-									existsClicked={existsClicked}
-									setExistsClicked={setExistsClicked}
-									fakeNewsClicked={fakeNewsClicked}
-									setFakeNewsClicked={setFakeNewsClicked}
-									showDetails={showDetails}
-									setShowDetails={setShowDetails}
-								/>
-							</Card.Body>
-						</Card>
+					<div className={"flex items-center"}>
+						<div className="ml-auto">
+							<FilterBoardComponent
+								filterPOIs={filterPOIs}
+								setFilterName={setFilterName}
+								setFilterTypes={setFilterTypes}
+								types={filterTypes}
+							/>
+						</div>
+						<div>
+							<Card id={"poi-sidebar"} style={{ display: "none" }}>
+								<Card.Body>
+									<POIsSidebar
+										isLoggedIn={loggedIn}
+										selectedPOI={selectedPOI}
+										ratingPositive={ratingPositive}
+										setRatingPositive={setRatingPositive}
+										ratingNegative={ratingNegative}
+										setRatingNegative={setRatingNegative}
+										ratingPositiveStat={ratingPositiveStat}
+										setRatingPositiveStat={setRatingPositiveStat}
+										ratingNegativeStat={ratingNegativeStat}
+										setRatingNegativeStat={setRatingNegativeStat}
+										existsClicked={existsClicked}
+										setExistsClicked={setExistsClicked}
+										fakeNewsClicked={fakeNewsClicked}
+										setFakeNewsClicked={setFakeNewsClicked}
+										showDetails={showDetails}
+										setShowDetails={setShowDetails}
+									/>
+								</Card.Body>
+							</Card>
+						</div>
 					</div>
 				</div>
 				{/*
@@ -853,7 +504,7 @@ export default function MapComponent({
 						<button
 							id={"ori-dst-btn"}
 							onClick={createRoute}
-							className="btn py-3 px-3 border rounded-xl shadow"
+							className="btn"
 						>
 							Route
 						</button>
