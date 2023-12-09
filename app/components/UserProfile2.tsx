@@ -223,27 +223,50 @@ export default function UserProfile() {
         <div className="text-center relative z-20 pt-10 flex flex-col items-center justify-center">
           {/* Adjusted image and XP bar */}
           <div className="flex flex-col items-center relative group">
-            <img
-              style={{
-                objectFit: "cover",
-              }}
-              src={avatar}
-              alt={`${fname} ${lname}'s avatar`}
-              className="w-24 h-24 md:w-32 md:h-32 rounded-full border-1 border-white mb-4 group-hover:opacity-50"
-            />
-            <label
-              className="absolute flex justify-center items-center w-24 h-24 text-black bg-gray-300 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer"
-              htmlFor="image"
-            >
-              Change Profile Picture
-            </label>
-            <input
-              type="file"
-              id="image"
-              accept="image/*"
-              className="absolute w-0 h-0 opacity-0"
-              onChange={handleImageChange}
-            />
+            {isMobile ? (
+              <>
+                <img
+                  src={avatar}
+                  alt={`${fname} ${lname}'s avatar`}
+                  className="w-48 h-48 object-cover rounded-full cursor-pointer"
+                />
+                {isEditing && (
+                  <label htmlFor="image" className="mt-2 relative">
+                    <button className="bg-gray-300 text-white py-2 px-4 rounded cursor-pointer w-full">
+                      Change Profile Picture
+                    </button>
+                    <input
+                      type="file"
+                      id="image"
+                      accept="image/*"
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      onChange={handleImageChange}
+                    />
+                  </label>
+                )}
+              </>
+            ) : (
+              <>
+                <img
+                  src={avatar}
+                  alt={`${fname} ${lname}'s avatar`}
+                  className="w-32 h-32 object-cover rounded-full cursor-pointer group-hover:opacity-50"
+                />
+                <label
+                  className="absolute flex justify-center items-center w-48 h-48 text-white bg-gray-300 rounded-full opacity-0 cursor-pointer group-hover:opacity-100"
+                  htmlFor="image"
+                >
+                  Change Profile Picture
+                </label>
+                <input
+                  type="file"
+                  id="image"
+                  accept="image/*"
+                  className="absolute w-48 h-48 opacity-0"
+                  onChange={handleImageChange}
+                />
+              </>
+            )}
             <h1 className="text-2xl font-semibold">
               {fname} {lname}
             </h1>
@@ -306,55 +329,53 @@ export default function UserProfile() {
           ) : (
             <div className="justify-center items-center text-center">
               <div className="col-md-8 justify-content-center">
-                <div className="mb-3">
-                  <label className="form-control w-full max-w-xs">
-                    <div className="label">
-                      <span className="label-text">User Name</span>
-                    </div>
+                <div className="mb-3 flex flex-col items-center">
+                  <label className="form-control w-full max-w-md mb-2">
+                    <span className="label-text">User Name</span>
                     <input
                       type="text"
-                      placeholder="Type here the First Name"
-                      className="input input-bordered w-full max-w-xs bg-gray-200"
+                      placeholder="Type here the UserName"
+                      className="input input-bordered w-full max-w-md bg-gray-200"
                       onChange={(e) => setFormUsername(e.target.value)}
                     />
                   </label>
-                </div>
-                <div className="mb-3">
-                  <label className="form-control w-full max-w-xs ">
-                    <div className="label">
-                      <span className="label-text">Email</span>
-                    </div>
+                  <label className="form-control w-full max-w-md mb-2">
+                    <span className="label-text">Email</span>
                     <input
                       type="email"
-                      placeholder="Type here the Last Name"
-                      className="input input-bordered w-full max-w-xs bg-gray-200"
+                      placeholder="Type here the Email"
+                      className="input input-bordered w-full max-w-md bg-gray-200"
                       onChange={(e) => setFormEmail(e.target.value)}
                     />
                   </label>
-                </div>
-                <div className="mb-3">
-                  <label className="form-control w-full max-w-xs ">
-                    <div className="label">
-                      <span className="label-text">Confirm Password</span>
-                    </div>
+                  <label className="form-control w-full max-w-md mb-2">
+                    <span className="label-text">Confirm Password</span>
                     <input
                       type="password"
-                      placeholder="Type here the Last Name"
-                      className="input input-bordered w-full max-w-xs bg-gray-200"
+                      placeholder="Confirm the password"
+                      className="input input-bordered w-full max-w-md bg-gray-200"
                       onChange={(e) => setFormPassword(e.target.value)}
                     />
                   </label>
                 </div>
-              </div>
-              <div className="row justify-content-center">
-                {isEditing && (
-                  <button
-                    className="bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
-                    onClick={() => updateProfile()}
-                  >
-                    Save Changes
-                  </button>
-                )}
+                <div className="flex justify-center mt-4">
+                  {isEditing && (
+                    <>
+                      <button
+                        className="mr-2 bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
+                        onClick={() => updateProfile()}
+                      >
+                        Save Changes
+                      </button>
+                      <button
+                        className="bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
+                        onClick={() => setIsEditing(!isEditing)}
+                      >
+                        Cancel Changes
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           )}
