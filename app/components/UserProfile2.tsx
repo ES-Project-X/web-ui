@@ -186,7 +186,7 @@ export default function UserProfile() {
   }
 
   return (
-    <div className=" min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-white text-black">
       {" "}
       {/* bg-blue-900 */}
       {/* Banner + Avatar Section */}

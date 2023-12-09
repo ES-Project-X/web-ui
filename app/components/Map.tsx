@@ -41,6 +41,7 @@ import {
   COGNITO_LOGIN_URL,
 } from "../utils/constants";
 import { convertMsToTime } from "../utils/time";
+import { redirect } from "next/dist/server/api-utils";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -599,7 +600,20 @@ export default function MapComponent({
     setShowPOIButton(visibility);
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [markerCoordinates, setMarkerCoordinates] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
+
+  const openCreatePOIModal = () => {
+    console.log("openCreatePOIModal");
+    console.log("this should redirect to a new page instead of opening a modal");
+    console.log(markerCoordinates);
+
+    window.location.href = `/createpoi?lat=${markerCoordinates.latitude}&lng=${markerCoordinates.longitude}`;
+
+
+  };
 
   return (
     <>
@@ -638,8 +652,7 @@ export default function MapComponent({
           setDestination={setDestination}
           creatingRoute={creatingRoute}
           togglePOIButton={togglePOIButton}
-		  showPOIButton={showPOIButton}
-		  openModal={isModalOpen}
+          setMarkerCoordinates={setMarkerCoordinates}
         />
         <GetClusters
           markers={markers}
@@ -913,24 +926,21 @@ export default function MapComponent({
               <>
                 <Button
                   id={"create-poi-btn"} // Ensure unique IDs for the buttons
-                  onClick={() => {
-                    setIsModalOpen(true);
-                  }}
+                  onClick={openCreatePOIModal}
                   variant={"light"}
                   style={{
                     zIndex: 1,
                     scale: "100%",
                     bottom: "1%",
-                    left: "6.5em", 
+                    left: "6.5em",
                     position: "absolute",
                     border: ".1em solid black",
-					display: showPOIButton ? "block" : "none",
+                    display: showPOIButton ? "block" : "none",
                   }}
                 >
                   Create POI
                 </Button>
-              </>
-            )}
+              </>)}            
           </Col>
           {isMobile ? null : (
             <Col xs={"auto"} className={"d-flex align-items-end"}>

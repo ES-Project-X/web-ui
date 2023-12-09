@@ -17,7 +17,7 @@ const CreatePOIModal: React.FC<CreatePOIModalProps> = ({
 }) => {
     return (
         <dialog id="my_modal_1" className="modal">
-            <div className="modal-box">
+            <div className="modal-box" style={{ zIndex: 9999, position: 'relative' }}>
                 <h3 className="font-bold text-lg">Hello!</h3>
                 <p className="py-4">
                     Here are the coordinates of the marker you clicked:
