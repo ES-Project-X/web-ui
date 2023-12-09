@@ -328,8 +328,8 @@ export default function UserProfile() {
             </>
           ) : (
             <div className="justify-center items-center text-center">
-              <div className="col-md-8 justify-content-center">
-                <div className="mb-3 flex flex-col items-center">
+              <div className="col-md-12 justify-content-center">
+                <div className="mb-4 flex flex-col items-center">
                   <label className="form-control w-full max-w-md mb-2">
                     <span className="label-text">User Name</span>
                     <input
