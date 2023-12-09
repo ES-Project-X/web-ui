@@ -41,7 +41,6 @@ import {
   COGNITO_LOGIN_URL,
 } from "../utils/constants";
 import { convertMsToTime } from "../utils/time";
-import { redirect } from "next/dist/server/api-utils";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -922,7 +921,7 @@ export default function MapComponent({
             >
               Route
             </Button>
-            {showPOIButton && (
+            {showPOIButton && loggedIn && (
               <>
                 <Button
                   id={"create-poi-btn"} // Ensure unique IDs for the buttons
