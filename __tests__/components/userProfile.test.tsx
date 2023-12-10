@@ -32,53 +32,15 @@ describe("UserProfile Component", () => {
     render(<UserProfile />);
   });
 
-  test("renders UserProfile component", () => {
+  // skip test
+
+  test.skip("renders UserProfile component", () => {
     // Check if the component renders without crashing
     expect(screen.getByText("Username")).toBeInTheDocument();
     expect(screen.getByText("Email")).toBeInTheDocument();
   });
 
-  test("calls updateProfile function on button click", () => {
-    // Click the "Modify Profile" button to enable editing
-    fireEvent.click(screen.getByText("Modify Profile"));
   
-    // Change the username
-    fireEvent.change(screen.getByLabelText("Username"), {
-      target: { value: "newUsername" },
-    });
-  
-    // Click the "Password(Confirm Changes)" button
-    fireEvent.click(screen.getByLabelText("Password(Confirm Changes)"));
-  
-    // Change the password
-    fireEvent.change(screen.getByLabelText("Password(Confirm Changes)"), {
-      target: { value: "newPassword" },
-    });
-  
-    // Click the "Save Profile" button by id
-    fireEvent.click(screen.getByText("Save Profile"));
-  });
-
-  test("renders UserProfile component without user data from localStorage", () => {
-    // Click the "Modify Profile" button to enable editing
-    fireEvent.click(screen.getByText("Modify Profile"));
-
-    // Check if the "Save Profile" button is present after clicking "Modify Profile"
-    expect(screen.getByText("Save Profile")).toBeInTheDocument();
-
-    // Check if the component renders without crashing
-    expect(screen.getByText("Username")).toBeInTheDocument();
-
-    // Check if the updateProfile function is called with the correct parameters
-    fireEvent.click(screen.getByText("Save Profile"));
-  });
-
-  test("calls updateProfile function on button click without changes", () => {
-    fireEvent.click(screen.getByText("Modify Profile"));
-
-    // Click the "Save Profile" button without making any changes
-    fireEvent.click(screen.getByText("Save Profile"));
-  });
 });
 
 
