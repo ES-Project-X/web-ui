@@ -205,6 +205,23 @@ export default function CreatePOIPage() {
               </div>
               <div className="mb-4">
                 <label
+                  htmlFor="description"
+                  className="block mb-2 text-sm font-medium text-gray-900 w-full max-x-ws"
+                >
+                  Description
+                </label>
+                <input
+                  type="text"
+                  id="description"
+                  placeholder="Type the description here"
+                  className="input input-bordered w-full max-w-xs bg-slate-800 text-white"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <div className="text-red-500 text-sm">{errors.name}</div>
+              </div>
+              <div className="mb-4">
+                <label
                   htmlFor="image"
                   className="block mb-2 text-sm font-medium text-gray-900 max-x-ws"
                 >
