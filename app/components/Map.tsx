@@ -159,7 +159,7 @@ export default function MapComponent({
 
   function fetchPOIDetails(id: string) {
     // send Token if Token is defined
-    console.log(TOKEN);
+    
     let headers = {};
     if (TOKEN !== undefined && TOKEN !== null) {
       headers = {

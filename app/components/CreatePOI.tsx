@@ -1,9 +1,16 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+
+
+const TOKEN = Cookies.get('COGNITO_TOKEN')
+const URL_API = process.env.DATABASE_API_URL;
 
 export default function CreatePOIPage() {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
+  const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [errors, setErrors] = useState<{
     name: string;
@@ -17,8 +24,17 @@ export default function CreatePOIPage() {
 
   const [poiLat, setPoiLat] = useState<number>(0);
   const [poiLon, setPoiLon] = useState<number>(0);
+  const [poiImageURL, setPoiImageURL] = useState("");
+  const [imageIsPosted, setImageIsPosted] = useState(false);
+
+  function redirect(path: string) {
+    window.location.replace(path);
+  }
 
   useEffect(() => {
+    if (!TOKEN) {
+      redirect('/map');
+    }
     // Get query parameters from URL
     const searchParams = new URLSearchParams(window.location.search);
     // console.log("searchParams", searchParams);
@@ -34,10 +50,71 @@ export default function CreatePOIPage() {
     }
   }, []);
 
-  const handleSavePOI = () => {
-    if (validateForm()) {
-      // Perform save POI action
-      console.log("POI saved:", name, type, image);
+
+  const handleUpload = () => {
+    return new Promise((resolve, reject) => {
+      if (!image) {
+        // Handle case where no image is selected
+        reject(new Error("No image selected"));
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', image);
+
+      axios.post(URL_API + 's3/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      })
+        .then((res) => {
+          if (res.status === 200) {
+            resolve(res.data);
+          } else {
+            reject(new Error("Error uploading image"));
+          }
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  };
+
+  const handleSavePOI = async () => {
+    try {
+      if (validateForm()) {
+        const uploadedData = await handleUpload();
+
+        const newPOI = {
+          latitude: poiLat,
+          longitude: poiLon,
+          name: name,
+          description: description,
+          type: type,
+          picture_url: (uploadedData as { url: string }).url,
+        };
+
+        console.log(newPOI);
+
+        const saveResponse = await axios.post(URL_API + 'poi/create', newPOI, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        });
+
+        if (saveResponse.status === 200) {
+          console.log("DONE SAVING POI");
+          
+          redirect('/map');
+          
+        } else {
+          throw new Error("Error saving POI");
+        }
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -65,8 +142,17 @@ export default function CreatePOIPage() {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    setImage(selectedFile || null);
+    const selectedImage = e.target.files?.[0];
+    console.log(selectedImage);
+    const maxFileSize = 4 * 1024 * 1024; // file needs to be less than 4MB (change as needed)
+
+    if (selectedImage && selectedImage.size > maxFileSize) {
+      alert("Image must be less than 4MB");
+      return;
+    }
+
+    setImage(selectedImage || null);
+
   };
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -157,10 +243,9 @@ export default function CreatePOIPage() {
                   id="description"
                   placeholder="Type the description here"
                   className="input input-bordered w-full max-w-xs bg-slate-800 text-white"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
-                <div className="text-red-500 text-sm">{errors.name}</div>
               </div>
               <div className="mb-4">
                 <label
@@ -173,7 +258,8 @@ export default function CreatePOIPage() {
                   type="file"
                   id="image"
                   accept="image/*"
-                  onChange={handleImageChange}
+                  onChange={handleImageChange
+                  }
                 />
                 <div className="text-red-500 text-sm">{errors.image}</div>
               </div>
@@ -189,7 +275,7 @@ export default function CreatePOIPage() {
                 <div>
                   <button
                     className="bg-red-500 border-red-500 text-white py-2 px-6 rounded h-10"
-                    onClick={() => window.history.back()}
+                    onClick={() => redirect('/map')}
                   >
                     Close
                   </button>
