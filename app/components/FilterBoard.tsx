@@ -48,7 +48,7 @@ export default function FilterBoardComponent(
             {open &&
                 <div className="pr-2">
                     <div className={"p-3 border border-gray-200 rounded-lg shadow dark:border-gray-700 z-20 bg-white dark:bg-black text-black dark:text-white"}>
-
+                        <Form>
                             <Form.Group className="mb-3">
                                 <Form.Label>POI Name</Form.Label>
                                 <Form.Control
