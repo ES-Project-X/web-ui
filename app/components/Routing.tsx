@@ -46,6 +46,8 @@ export default function RoutingComponent(
     const [gettingRoute, setGettingRoute] = useState(false);
     const [names, setNames] = useState<string[]>([]);
     const [myPoints, setMyPoints] = useState<string[]>([]);
+    const [distance, setDistance] = useState("");
+    const [time, setTime] = useState("");
 
     useEffect(() => {
         if (pointToRemove === -1) {
@@ -340,6 +342,18 @@ export default function RoutingComponent(
                         return;
                     }
                     const points = data.paths[0].points.coordinates;
+                    setDistance((data.paths[0].distance / 1000).toFixed(1) + " km");
+                    const seconds = data.paths[0].time / 1000;
+                    const hours = Math.floor(seconds / 3600);
+                    const minutes = Math.floor((seconds % 3600) / 60);
+                    let time = "";
+                    if (hours > 0) {
+                        time += hours + " h ";
+                    }
+                    if (minutes > 0) {
+                        time += minutes + " min";
+                    }
+                    setTime(time);
                     let points2 = [];
                     for (let point of points) {
                         points2.push(new LatLng(point[1], point[0]));
@@ -511,6 +525,12 @@ export default function RoutingComponent(
                     </button>
                 )}
             </div>
+            {gettingRoute && (
+                <div className="flex flex-col mt-2 mr-auto">
+                    <div className="text-black dark:text-white text-xl font-bold">{time}</div>
+                    <div className="text-gray-500 text-lg">{distance}</div>
+                </div>
+            )}
             <div className="flex flex-col">
                 <div className="flex mt-2">
                     <button
@@ -520,7 +540,7 @@ export default function RoutingComponent(
                     >
                         Get Route
                     </button>
-                    {loggedIn && gettingRoute && (
+                    {gettingRoute && loggedIn && (
                         <button
                             id={"save-route-btn"}
                             onClick={async () => {
