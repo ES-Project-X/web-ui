@@ -6,7 +6,7 @@ import { isMobile } from "react-device-detect";
 import Cookies from "js-cookie";
 import { URL_API } from "../utils/constants";
 import { padTo2Digits } from "../utils/time";
-import LineChart from "react-linechart";
+// import { LineChart } from "react-linechart";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -427,7 +427,7 @@ const POIsSidebar = ({
           {/* Added padding top */}
           <div style={{ maxHeight: "250px", maxWidth: "400px" }}>
             <div className="App">
-              <LineChart width={400} height={210} data={graphData} />
+              {/* <LineChart width={400} height={210} data={graphData} /> */}
               <p> Graph goes here </p>
             </div>
           </div>
