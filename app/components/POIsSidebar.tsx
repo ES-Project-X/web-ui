@@ -493,14 +493,14 @@ const POIsSidebar = ({
                     style={buttonStyleExists}
                     onClick={() => handleClickStatus(true)}
                   >
-                    Exists
+                    Available
                   </button>
                   <button
                     className="btn btn-error"
                     style={buttonStyleFakeNews}
                     onClick={() => handleClickStatus(false)}
                   >
-                    FakeNews
+                    Not Available
                   </button>
                 </>
               )}
