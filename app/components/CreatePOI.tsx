@@ -137,11 +137,11 @@ export default function CreatePOIPage() {
                   onChange={handleTypeChange}
                 >
                   <option value="">Choose a type</option>
-                  <option value="bpark">Bycicle Parking</option>
-                  <option value="bshop">Bycicle Shop</option>
-                  <option value="water">Drinking Water</option>
+                  <option value="bicycle-parking">Bycicle Parking</option>
+                  <option value="bicycle-shop">Bycicle Shop</option>
+                  <option value="drinking-water">Drinking Water</option>
                   <option value="bench">Bench</option>
-                  <option value="toilet">Toilets</option>
+                  <option value="toilets">Toilets</option>
                 </select>
                 <div className="text-red-500 text-sm">{errors.type}</div>
               </div>
