@@ -60,29 +60,30 @@ export default function UserProfile() {
   let userChanges = {};
 
   const updateProfile = () => {
+    if (!imageChanged) {
+      if (formPassword === "") {
+        setFormUsername(username);
+        setFormEmail(email);
+        setIsEditing(false);
+        return;
+      }
 
-    if (formPassword === "") {
-      setFormUsername(username);
-      setFormEmail(email);
-      setIsEditing(false);
-      return;
-    }
+      if (formUsername === username && formEmail === email) {
+        setIsEditing(false);
+        return;
+      }
 
-    if (formUsername === username && formEmail === email) {
-      setIsEditing(false);
-      return;
-    }
+      if (formUsername !== username) {
+        userChanges = { ...userChanges, username: formUsername };
+      }
 
-    if (formUsername !== username) {
-      userChanges = { ...userChanges, username: formUsername };
-    }
+      if (formEmail !== email) {
+        userChanges = { ...userChanges, email: formEmail };
+      }
 
-    if (formEmail !== email) {
-      userChanges = { ...userChanges, email: formEmail };
-    }
-
-    if (formPassword !== "") {
-      userChanges = { ...userChanges, password: formPassword };
+      if (formPassword !== "") {
+        userChanges = { ...userChanges, password: formPassword };
+      }
     }
 
     fetch(URL_API + "user/edit", {
@@ -103,6 +104,7 @@ export default function UserProfile() {
       })
       .then((data) => {
         localStorage.setItem("user", JSON.stringify(data));
+        setAvatar(data.image_url);
         setUsername(data.username);
         setEmail(data.email);
         setFormUsername(data.username);
@@ -114,7 +116,7 @@ export default function UserProfile() {
         console.log("error:", err);
       });
 
-      userChanges = {};
+    userChanges = {};
   };
 
   useEffect(() => {
@@ -173,7 +175,7 @@ export default function UserProfile() {
       alert("Image must be less than 4MB");
       return;
     }
-    
+
     setImage(selectedImage || null);
     setImageChanged(true);
 
@@ -205,42 +207,18 @@ export default function UserProfile() {
           throw new Error("Error uploading image");
         }
       }).then((data) => {
-        const avatar_url = data.url 
+        const avatar_url = data.url
         console.log(avatar_url);
 
         userChanges = { ...userChanges, image_url: avatar_url };
-
-        fetch(URL_API + "user/edit", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${TOKEN}`,
-          },
-          body: JSON.stringify(userChanges),
-        })
-          .then((res) => {
-            if (res.status === 200) {
-              return res.json();
-            }
-            else if (res.status === 400) {
-              throw new Error("Error updating user");
-            }
-          })
-          .then((data) => {
-            localStorage.setItem("user", JSON.stringify(data));
-            setAvatar(data.image_url);
-            setImage(null);
-            setImageChanged(false);
-          })
-          .catch((err) => {
-            console.log("error:", err);
-          });
         
+        updateProfile();
+
       }
       ).catch((err) => {
         console.log(err);
       });
-    
+
     userChanges = {};
     setImageChanged(false);
   };
