@@ -149,6 +149,8 @@ export default function UserProfile() {
     window.location.replace("/map");
   }
 
+
+  /* TODO: FIX this */
   function calculateLevelAndXP(totalXP: number): LevelInfo {
     let baseXP = 500;
 

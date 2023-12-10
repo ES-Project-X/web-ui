@@ -324,15 +324,14 @@ export default function MapComponent({
     longitude: 0,
   });
 
-  const openCreatePOIModal = () => {
+  function openCreatePOIModal() {
     console.log("openCreatePOIModal");
-    console.log(
-      "this should redirect to a new page instead of opening a modal"
-    );
     console.log(markerCoordinates);
 
-    window.location.href = `/createpoi?lat=${markerCoordinates.latitude}&lng=${markerCoordinates.longitude}`;
-  };
+    window.location.replace(
+      `/createpoi?lat=${markerCoordinates.latitude}&lng=${markerCoordinates.longitude}`
+    );
+  }
 
   return (
     <>
@@ -572,26 +571,24 @@ export default function MapComponent({
                 Show
               </button>
             )}
-          </div>
-          {showPOIButton && loggedIn && (
-            <>
+            {showPOIButton && loggedIn && (
               <button
-                id={"create-poi-btn"} // Ensure unique IDs for the buttons
+                id={"create-poi-btn2"} // Ensure unique IDs for the buttons
                 onClick={openCreatePOIModal}
+                className="btn"
                 style={{
-                  zIndex: 1,
                   scale: "100%",
                   bottom: "1%",
                   left: "6.5em",
                   position: "absolute",
                   border: ".1em solid black",
-                  display: showPOIButton ? "block" : "none",
                 }}
               >
                 Create POI
               </button>
-            </>
-          )}
+            )}
+          </div>
+
           <div className={"flex ml-auto pr-2"}>
             {isMobile ? null : (
               // preciso arranjar os cantos
