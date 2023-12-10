@@ -231,8 +231,6 @@ export default function UserProfile() {
       })
       .then((data) => {
         const avatar_url = data.url;
-        console.log(avatar_url);
-
         userChanges = { ...userChanges, image_url: avatar_url };
 
         updateProfile();
