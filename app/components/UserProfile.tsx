@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 import { FloatingLabel, Form } from "react-bootstrap";
 import { isMobile } from "react-device-detect";
 import { UserData } from "../structs/user";
+import axios from "axios";
 
 const TOKEN = Cookies.get('COGNITO_TOKEN')
 const URL_API = process.env.DATABASE_API_URL;
@@ -49,6 +50,9 @@ export default function UserProfile() {
   const [formEmail, setFormEmail] = useState("");
   const [formPassword, setFormPassword] = useState("");
 
+  const [image, setImage] = useState<File | null>(null);
+  const [imageChanged, setImageChanged] = useState(false);
+
   //create dictionary with all the user info that is changed
   //if the user doesnt change anything, the value is null
   //if the user changes something, the value is the new value
@@ -56,29 +60,30 @@ export default function UserProfile() {
   let userChanges = {};
 
   const updateProfile = () => {
+    if (!imageChanged) {
+      if (formPassword === "") {
+        setFormUsername(username);
+        setFormEmail(email);
+        setIsEditing(false);
+        return;
+      }
 
-    if (formPassword === "") {
-      setFormUsername(username);
-      setFormEmail(email);
-      setIsEditing(false);
-      return;
-    }
+      if (formUsername === username && formEmail === email) {
+        setIsEditing(false);
+        return;
+      }
 
-    if (formUsername === username && formEmail === email) {
-      setIsEditing(false);
-      return;
-    }
+      if (formUsername !== username) {
+        userChanges = { ...userChanges, username: formUsername };
+      }
 
-    if (formUsername !== username) {
-      userChanges = { ...userChanges, username: formUsername };
-    }
+      if (formEmail !== email) {
+        userChanges = { ...userChanges, email: formEmail };
+      }
 
-    if (formEmail !== email) {
-      userChanges = { ...userChanges, email: formEmail };
-    }
-
-    if (formPassword !== "") {
-      userChanges = { ...userChanges, password: formPassword };
+      if (formPassword !== "") {
+        userChanges = { ...userChanges, password: formPassword };
+      }
     }
 
     fetch(URL_API + "user/edit", {
@@ -99,6 +104,7 @@ export default function UserProfile() {
       })
       .then((data) => {
         localStorage.setItem("user", JSON.stringify(data));
+        setAvatar(data.image_url);
         setUsername(data.username);
         setEmail(data.email);
         setFormUsername(data.username);
@@ -109,6 +115,8 @@ export default function UserProfile() {
       .catch((err) => {
         console.log("error:", err);
       });
+
+    userChanges = {};
   };
 
   useEffect(() => {
@@ -158,6 +166,72 @@ export default function UserProfile() {
     redirect('/map');
   }
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedImage = e.target.files?.[0];
+
+    const maxFileSize = 4 * 1024 * 1024; // file needs to be less than 4MB (change as needed)
+
+    if (selectedImage && selectedImage.size > maxFileSize) {
+      alert("Image must be less than 4MB");
+      return;
+    }
+
+    setImage(selectedImage || null);
+    setImageChanged(true);
+
+    // Reset the value of the file input field
+    e.target.value = '';
+  };
+
+
+  const handleUpload = () => {
+    if (!image) {
+      // Handle case where no image is selected
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', image);
+    console.log(formData);
+    axios.post(URL_API + 's3/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          return res.data;
+        }
+        else if (res.status === 400) {
+          throw new Error("Error uploading image");
+        }
+      }).then((data) => {
+        const avatar_url = data.url
+        console.log(avatar_url);
+
+        userChanges = { ...userChanges, image_url: avatar_url };
+        
+        updateProfile();
+
+      }
+      ).catch((err) => {
+        console.log(err);
+      });
+
+    userChanges = {};
+    setImageChanged(false);
+  };
+
+  const cancelUpload = () => {
+    setImageChanged(false);
+    setImage(null);
+
+    // Reset the value of the file input field
+    (document.getElementById('image') as HTMLInputElement).value = '';
+  }
+
+
   return (
     <div className="map-ui w-screen">
       <div className="mt-2 flex justify-between">
@@ -192,17 +266,30 @@ export default function UserProfile() {
       <div className="row justify-content-center mt-5">
         <div className="row justify-content-center align-items-center text-center" style={{ maxWidth: "700px" }}>
           <div className="row justify-content-center">
-            <img
-              src={avatar}
-              alt={`${fname} ${lname}'s avatar`}
-              style={{
-                padding: "0px",
-                width: "200px",
-                height: "200px",
-                borderRadius: "50%",
-                objectFit: "cover",
-              }}
-            />
+            <div className="relative flex justify-center items-center">
+              <div className="group flex justify-center items-center">
+                <img
+                  src={avatar}
+                  alt={`${fname} ${lname}'s avatar`}
+                  className="group-hover:opacity-50 w-48 h-48 object-cover rounded-full flex justify-center items-center z-20"
+                />
+                < label className="absolute flex justify-center items-center w-48 h-48  group-hover:text-white group-hover:z-30" htmlFor="fileInput">
+                  Change Profile Picture
+                </label>
+                <input type="file" id="image" accept="image/*" className="absolute flex justify-center items-center w-48 h-48  group-hover:text-white group-hover:z-30 opacity-0" onChange={handleImageChange} />
+              </div>
+            </div>
+            {imageChanged && (
+              <div className="row justify-center">
+                <label className="text-white mt-4">Accept Profile Picture Changes?</label>
+                <button className="btn btn-success my-3 w-25 m-2" onClick={() => handleUpload()}>
+                  Accept
+                </button>
+                <button className="btn btn-danger my-3 w-25 m-2" onClick={() => cancelUpload()}>
+                  Cancel
+                </button>
+              </div>
+            )}
             <h1 style={nameStyle}>
               {fname} {lname}
             </h1>
