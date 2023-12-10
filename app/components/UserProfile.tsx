@@ -173,7 +173,7 @@ export default function UserProfile() {
       alert("Image must be less than 4MB");
       return;
     }
-
+    
     setImage(selectedImage || null);
     setImageChanged(true);
 
@@ -240,7 +240,8 @@ export default function UserProfile() {
       ).catch((err) => {
         console.log(err);
       });
-
+    
+    userChanges = {};
     setImageChanged(false);
   };
 
