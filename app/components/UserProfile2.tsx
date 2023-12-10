@@ -13,6 +13,7 @@ import {
   faList,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "axios";
 
 // Add icons to the library
 library.add(faMapMarkerAlt, faStar, faStarHalfAlt);
@@ -43,33 +44,36 @@ export default function UserProfile() {
   const [formEmail, setFormEmail] = useState("");
   const [formPassword, setFormPassword] = useState("");
 
+  const [image, setImage] = useState<File | null>(null);
+  const [imageChanged, setImageChanged] = useState(false);
+
   let userChanges = {};
 
   const updateProfile = () => {
-    if (formPassword === "") {
-      setFormUsername(username);
-      setFormEmail(email);
-      setIsEditing(false);
-      alert("Password cannot be empty");
-      return;
-    }
+    if (!imageChanged) {
+      if (formPassword === "") {
+        setFormUsername(username);
+        setFormEmail(email);
+        setIsEditing(false);
+        return;
+      }
 
-    if (formUsername === username && formEmail === email) {
-      setIsEditing(false);
-      alert("No changes to be made");
-      return;
-    }
+      if (formUsername === username && formEmail === email) {
+        setIsEditing(false);
+        return;
+      }
 
-    if (formUsername !== username) {
-      userChanges = { ...userChanges, username: formUsername };
-    }
+      if (formUsername !== username) {
+        userChanges = { ...userChanges, username: formUsername };
+      }
 
-    if (formEmail !== email) {
-      userChanges = { ...userChanges, email: formEmail };
-    }
+      if (formEmail !== email) {
+        userChanges = { ...userChanges, email: formEmail };
+      }
 
-    if (formPassword !== "") {
-      userChanges = { ...userChanges, password: formPassword };
+      if (formPassword !== "") {
+        userChanges = { ...userChanges, password: formPassword };
+      }
     }
 
     fetch(URL_API + "user/edit", {
@@ -90,6 +94,7 @@ export default function UserProfile() {
       .then((data) => {
         localStorage.setItem("user", JSON.stringify(data));
         setUsername(data.username);
+        setAvatar(data.image_url);
         setEmail(data.email);
         setFormUsername(data.username);
         setFormEmail(data.email);
@@ -100,6 +105,8 @@ export default function UserProfile() {
       .catch((err) => {
         console.log("error:", err);
       });
+
+    userChanges = {};
   };
 
   useEffect(() => {
@@ -149,7 +156,6 @@ export default function UserProfile() {
     window.location.replace("/map");
   }
 
-
   /* TODO: FIX this */
   function calculateLevelAndXP(totalXP: number): LevelInfo {
     let baseXP = 500;
@@ -183,9 +189,70 @@ export default function UserProfile() {
     };
   }
 
-  function handleImageChange() {
-    throw new Error("Function not implemented.");
-  }
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedImage = e.target.files?.[0];
+
+    const maxFileSize = 4 * 1024 * 1024; // file needs to be less than 4MB (change as needed)
+
+    if (selectedImage && selectedImage.size > maxFileSize) {
+      alert("Image must be less than 4MB");
+      return;
+    }
+
+    setImage(selectedImage || null);
+    setImageChanged(true);
+
+    // Reset the value of the file input field
+    e.target.value = "";
+  };
+
+  const handleUpload = () => {
+    if (!image) {
+      // Handle case where no image is selected
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", image);
+    console.log(formData);
+    axios
+      .post(URL_API + "s3/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          return res.data;
+        } else if (res.status === 400) {
+          throw new Error("Error uploading image");
+        }
+      })
+      .then((data) => {
+        const avatar_url = data.url;
+        console.log(avatar_url);
+
+        userChanges = { ...userChanges, image_url: avatar_url };
+
+        updateProfile();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    userChanges = {};
+    setImageChanged(false);
+  };
+
+  const cancelUpload = () => {
+    setImageChanged(false);
+    setImage(null);
+    setIsEditing(false);
+
+    // Reset the value of the file input field
+    (document.getElementById("image") as HTMLInputElement).value = "";
+  };
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -268,6 +335,25 @@ export default function UserProfile() {
                   onChange={handleImageChange}
                 />
               </>
+            )}
+            {imageChanged && (
+              <div className="row justify-center">
+                <label className="text-white mt-4">
+                  Accept Profile Picture Changes?
+                </label>
+                <button
+                  className="btn btn-success my-3 w-25 m-2"
+                  onClick={() => handleUpload()}
+                >
+                  Accept
+                </button>
+                <button
+                  className="btn btn-danger my-3 w-25 m-2"
+                  onClick={() => cancelUpload()}
+                >
+                  Cancel
+                </button>
+              </div>
             )}
             <h1 className="text-2xl font-semibold">
               {fname} {lname}
@@ -365,13 +451,13 @@ export default function UserProfile() {
                     <>
                       <button
                         className="mr-2 bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
-                        onClick={() => updateProfile()}
+                        onClick={() => handleUpload()}
                       >
                         Save Changes
                       </button>
                       <button
                         className="bg-red-500 border-red-500 text-white py-2 px-4 rounded h-10"
-                        onClick={() => setIsEditing(!isEditing)}
+                        onClick={() => cancelUpload()}
                       >
                         Cancel Changes
                       </button>
