@@ -5,11 +5,9 @@ import { isMobile } from "react-device-detect";
 import {
 	Form,
 	Card,
-	FormGroup,
-	FormLabel,
 } from "react-bootstrap";
 import { MapContainer, Polyline, TileLayer } from "react-leaflet";
-import { LatLng } from "leaflet";
+import { LatLng, LatLngBounds } from "leaflet";
 import "leaflet-rotate";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -30,6 +28,7 @@ import { POI } from "../structs/poi";
 import { URL_API, URL_GEO, URL_REV, COGNITO_LOGIN_URL } from "../utils/constants";
 import { convertMsToTime } from "../utils/time";
 import RoutingComponent from "./Routing";
+import { SearchPoint } from "../structs/SearchComponent";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -41,9 +40,9 @@ export default function MapComponent({
 	const mapRef = useRef(null);
 	const center = new LatLng(40.64427, -8.64554);
 
-	const [creatingRoute, setCreatingRoute] = useState(false);
-	const [origin, setOrigin] = useState<string>("");
-	const [destination, setDestination] = useState<string>("");
+	const [origin, setOrigin] = useState<SearchPoint>(new SearchPoint(""));
+	const [destination, setDestination] = useState<SearchPoint>(new SearchPoint(""));
+    const [intermediates, setIntermediates] = useState<SearchPoint[]>([]);
 
 	const [markers, setMarkers] = useState<BasicPOI[]>([]);
 	const [selectedPOI, setSelectedPOI] = useState({
@@ -77,7 +76,6 @@ export default function MapComponent({
 	const [ratingPositiveStat, setRatingPositiveStat] = useState(0);
 	const [ratingNegativeStat, setRatingNegativeStat] = useState(0);
 
-	const [routes, setRoutes] = useState([]);
 	const [loggedIn, setLoggedIn] = useState<boolean>(false);
 	const [avatar, setAvatar] = useState("");
 	const [fname, setFname] = useState("");
@@ -87,8 +85,8 @@ export default function MapComponent({
 	const [fakeNewsClicked, setFakeNewsClicked] = useState(false);
 	const [showDetails, setShowDetails] = useState(false);
 
-	const [numberOfIntermediates, setNumberOfIntermediates] = useState(0);
-	const [canCall, setCanCall] = useState(false);
+	const [routing, setRouting] = useState(false);
+	const [addIntermediate, setAddIntermediate] = useState(false);
 
 	function getUser() {
 
@@ -193,6 +191,21 @@ export default function MapComponent({
 		}
 	};
 
+	const flyTo = (lat: number, lng: number, zoom: number, dur: number = 4) => {
+		// @ts-ignore
+		mapRef.current.flyTo(new LatLng(lat, lng), zoom, {duration: dur});
+	}
+
+	const fitBounds = (bounds: LatLngBounds) => {
+		// @ts-ignore
+		mapRef.current.fitBounds(bounds, {padding: [50, 50]});
+	}
+
+	const getViewBounds = () => {
+		// @ts-ignore
+		return mapRef.current.getBounds();
+	}
+
 	const getGeoLocation = (query: string) => {
 		fetch(query)
 			.then((response) => response.json())
@@ -205,7 +218,7 @@ export default function MapComponent({
 				const lat = data.items[0].position.lat;
 				const lng = data.items[0].position.lng;
 				// @ts-ignore
-				mapRef.current.flyTo(new LatLng(lat, lng), 15);
+				flyTo(lat, lng, 15);
 			})
 			.catch((error) => {
 				console.error("Error:", error);
@@ -225,15 +238,13 @@ export default function MapComponent({
 	};
 
 	const createRoute = () => {
-		var card = document.getElementById("card-ori-dest");
-		// @ts-ignore
-		if (card.style.display === "none") {
-			// @ts-ignore
-			card.style.display = "block";
-		} else {
-			// @ts-ignore
-			card.style.display = "none";
+		if (routing) {
+			setPoints([]);
+			setOrigin(new SearchPoint(""));
+			setDestination(new SearchPoint(""));
+			setIntermediates([new SearchPoint("")]);
 		}
+		setRouting(!routing);
 	};
 
 	const handleNext = () => {
@@ -327,12 +338,16 @@ export default function MapComponent({
 				attributionControl={false}
 			>
 				{tileLayerURL !== undefined ? <TileLayer url={tileLayerURL} /> : null}
-				{tileLayerURL !== undefined ? <Polyline positions={points} /> : null}
+				{tileLayerURL !== undefined ? <Polyline positions={points} weight={7} /> : null}
 				<LocateControl />
 				<MarkersManager
+					origin={origin}
 					setOrigin={setOrigin}
+					destination={destination}
 					setDestination={setDestination}
-					creatingRoute={creatingRoute}
+					intermediates={intermediates}
+					setIntermediates={setIntermediates}
+					routing={routing}
 				/>
 				<GetClusters markers={markers} setMarkers={setMarkers} filterPOIs={filterPOIs} />
 			</MapContainer>
@@ -401,7 +416,7 @@ export default function MapComponent({
 				{/*
                     	UPPER PART OF THE UI
                 	*/}
-				<div className="flex pt-2">
+				<div className="flex pt-2 w-full top-0">
 					<div className={"w-48 sm:w-96 mx-auto pt-1"}>
 						<Form>
 							<Form.Group controlId={"search-bar"}>
@@ -446,20 +461,25 @@ export default function MapComponent({
 				{/*
                     	MIDDLE PART OF THE UI
                 	*/}
-				<div className="flex h-screen">
-					<div className="mr-auto pt-32 ml-2">
-						<RoutingComponent
-							setOrigin={setOrigin}
-							origin={origin}
-							setDestination={setDestination}
-							destination={destination}
-							canCall={canCall}
-							setCanCall={setCanCall}
-							setCreatingRoute={setCreatingRoute}
-							setCurrentIndex={setCurrentIndex}
-							setDirections={setDirections}
-							setPoints={setPoints}
-						/>
+				<div className="flex">
+					<div className="flex mr-auto ml-2 pt-32">
+						{routing && (
+							<RoutingComponent
+								loggedIn={loggedIn}
+								mapFlyTo={flyTo}
+								mapFitBounds={fitBounds}
+								getViewBounds={getViewBounds}
+								origin={origin}
+								setOrigin={setOrigin}
+								destination={destination}
+								setDestination={setDestination}
+								intermediates={intermediates}
+								setIntermediates={setIntermediates}
+								setPoints={setPoints}
+								addIntermediate={addIntermediate}
+								setAddIntermediate={setAddIntermediate}
+							/>
+						)}
 					</div>
 					<div className={"flex items-center"}>
 						<div className="ml-auto">
@@ -499,7 +519,7 @@ export default function MapComponent({
 				{/*
                     	LOWER PART OF THE UI
                 	*/}
-				<div className="pb-2 flex">
+				<div className="flex pb-2 mt-auto w-full bottom-0">
 					<div className="mr-auto pl-2 flex">
 						<button
 							id={"ori-dst-btn"}

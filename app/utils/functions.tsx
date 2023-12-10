@@ -1,3 +1,4 @@
+import { LatLng } from "leaflet";
 import { POI } from "../structs/poi";
 
 function haversineDistance(coord1: { lat: number, lon: number }, coord2: { lat: number, lon: number }) {
@@ -35,3 +36,8 @@ export const getDistanceFrom = ({
     });
     return distance;
 };
+
+export function stringToLatLng(str: string) {
+    let latlng = str.split(",");
+    return new LatLng(parseFloat(latlng[0]), parseFloat(latlng[1]));
+}

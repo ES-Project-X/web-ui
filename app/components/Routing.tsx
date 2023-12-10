@@ -1,202 +1,229 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { Direction } from "../structs/direction";
-import { URL_API, URL_GEO, URL_ROUTING } from "../utils/constants";
+import { SearchPoint, copySearchPoint } from "../structs/SearchComponent";
+import { URL_API, URL_GEO, URL_REV, URL_ROUTING } from "../utils/constants";
 import Cookies from "js-cookie";
-import { LatLng } from "leaflet";
+import { LatLng, LatLngBounds } from "leaflet";
 
-const TOKEN = Cookies.get("token");
+const TOKEN = Cookies.get("COGNITO_TOKEN");
 
 export default function RoutingComponent(
     {
-        setOrigin,
+        loggedIn,
+        mapFlyTo,
+        mapFitBounds,
+        getViewBounds,
         origin,
-        setDestination,
+        setOrigin,
         destination,
-        canCall,
-        setCanCall,
-        setCreatingRoute,
+        setDestination,
+        intermediates,
+        setIntermediates,
         setPoints,
-        setCurrentIndex,
-        setDirections,
+        addIntermediate,
+        setAddIntermediate,
     }: {
-        setOrigin: (origin: string) => void,
-        origin: string,
-        setDestination: (destination: string) => void,
-        destination: string,
-        canCall: boolean,
-        setCanCall: (canCall: boolean) => void,
-        setCreatingRoute: (creatingRoute: boolean) => void,
+        loggedIn: boolean,
+        mapFlyTo: (lat: number, lng: number, zoom: number) => void,
+        mapFitBounds: (bounds: LatLngBounds) => void,
+        getViewBounds: () => LatLngBounds,
+        origin: SearchPoint,
+        setOrigin: (origin: SearchPoint) => void,
+        destination: SearchPoint
+        setDestination: (destination: SearchPoint) => void,
+        intermediates: SearchPoint[],
+        setIntermediates: (intermediates: SearchPoint[]) => void,
         setPoints: (points: LatLng[][]) => void,
-        setCurrentIndex: (currentIndex: number) => void,
-        setDirections: (directions: Direction[]) => void,
+        addIntermediate: boolean,
+        setAddIntermediate: (intermediate: boolean) => void,
     }
 ) {
-    const [odmap, setodmap] = useState(false);
-    const [gettingInterRoute, setGettingInterRoute] = useState(false);
+    const [pointToRemove, setPointToRemove] = useState(-1);
+    const [myOrigin, setMyOrigin] = useState("");
+    const [myDestination, setMyDestination] = useState("");
+    const [myIntermediates, setMyIntermediates] = useState<string[]>([]);
     const [gettingRoute, setGettingRoute] = useState(false);
-    const [intermediates, setIntermediates] = useState<JSX.Element[]>([]);
-
-    const eliminateIntermediate = (index: number) => {
-        const newIntermediates = intermediates.filter((_, i) => i !== index);
-        console.log(newIntermediates);
-        setIntermediates(newIntermediates);
-    }
-
-    const pushIntermediate = () => {
-        const i = intermediates.length+1;
-        const intermediate = (
-            <div className="flex">
-                <input
-                    id={"intermediate-input-" + i}
-                    type={"text"}
-                    placeholder={"Intermediate " + i}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-white leading-tight focus:outline-none focus:shadow-outline"
-                />
-                <button
-                    id={"eliminate-intermediate-btn-" + i}
-                    onClick={() => eliminateIntermediate(i)}
-                    className="btn-circle"
-                >
-                    -
-                </button>
-            </div>
-        );
-        setIntermediates([...intermediates, intermediate]);
-    };
-
-    const updateOrigin = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setOrigin(event.target.value);
-    };
-
-    const updateDestination = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setDestination(event.target.value);
-    };
+    const [names, setNames] = useState<string[]>([]);
+    const [myPoints, setMyPoints] = useState<string[]>([]);
 
     useEffect(() => {
-        if (canCall && gettingInterRoute && origin !== "" && destination !== "") {
-            getRoute();
+        if (pointToRemove === -1) {
+            return;
         }
-        setCanCall(false);
+        let newIntermediates1: SearchPoint[] = [];
+        let newIntermediates2: string[] = [];
+        for (let i = 0; i < myIntermediates.length; i++) {
+            if (i !== pointToRemove) {
+                newIntermediates1.push(intermediates[i]);
+                newIntermediates2.push(myIntermediates[i]);
+            }
+        }
+        setMyIntermediates(newIntermediates2);
+        setIntermediates(newIntermediates1);
+        setPointToRemove(-1);
+    }, [pointToRemove]);
+
+    useEffect(() => {
+        if (!origin.isNameNull()) {
+            setMyOrigin(origin.getName());
+        } else if (!origin.isCoordinateNull()) {
+            setMyOrigin(origin.getStringCoordinates());
+            updateOrigin(origin.getStringCoordinates());
+        } else {
+            setMyOrigin("");
+            clearRoute();
+        }
+    }, [origin]);
+
+    useEffect(() => {
+        if (!destination.isNameNull()) {
+            setMyDestination(destination.getName());
+        } else if (!destination.isCoordinateNull()) {
+            setMyDestination(destination.getStringCoordinates());
+            updateDestination(destination.getStringCoordinates());
+        } else {
+            setMyDestination("");
+            clearRoute();
+        }
+    }, [destination]);
+
+    useEffect(() => {
+        let newMyIntermediates = [];
+        for (let i = 0; i < intermediates.length; i++) {
+            if (!intermediates[i].isNameNull()) {
+                newMyIntermediates.push(intermediates[i].getName());
+            } else if (!intermediates[i].isCoordinateNull()) {
+                newMyIntermediates.push(intermediates[i].getStringCoordinates());
+                updateIntermediate(i, intermediates[i].getStringCoordinates());
+            } else {
+                newMyIntermediates.push("");
+            }
+        }
+        setMyIntermediates(newMyIntermediates);
     }, [intermediates]);
 
     useEffect(() => {
-        if (gettingRoute) {
+        if (!origin.isNull() && !destination.isNull() && gettingRoute) {
             getRoute();
         }
-    }, [origin, destination]);
+    }, [origin, destination, intermediates]);
 
-    const getRoute = async () => {
-        let points = [];
+    const pushIntermediate = () => {
+        setMyIntermediates([...myIntermediates, ""]);
+        setIntermediates([...intermediates, new SearchPoint("")]);
+    };
 
-        if (origin === "" || destination === "") {
-            window.alert("Please fill in both fields");
-            return;
-        }
-        if (odmap) {
-            setGettingRoute(true);
-        }
-        setGettingInterRoute(true);
-        let url = URL_ROUTING;
+    const updateMyIntermediate = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+        let newMyIntermediates = [...myIntermediates];
+        newMyIntermediates[index] = event.target.value;
+        setMyIntermediates(newMyIntermediates);
+    };
 
-        let names = [];
-        names.push(origin);
-
-        if (origin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
-            url += "&point=" + origin;
-            points.push(origin);
-        } else {
-            let ori = await geoCode(URL_GEO + "&q=" + origin);
-            url += "&point=" + ori;
-            points.push(ori);
-        }
-
-        for (let i = 0; i < intermediates.length; i++) {
-            let intermediate = (
-                document.getElementById("intermediate-input-" + i) as HTMLInputElement
-            ).value;
-            names.push(intermediate);
-            if (intermediate.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
-                url += "&point=" + intermediate;
-                points.push(intermediate);
-            } else if (intermediate === "") {
-            } else {
-                let inter = await geoCode(URL_GEO + "&q=" + intermediate);
-                url += "&point=" + inter;
-                points.push(inter);
+    const updateOrigin = async (newMyOrigin: string = myOrigin) => {
+        let newOrigin = copySearchPoint(origin);
+        if (newMyOrigin.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            newOrigin.setStringCoordinate(newMyOrigin);
+            const name = await getPlace(newOrigin.getLat(), newOrigin.getLng())
+            if (name !== undefined && name !== "") {
+                newOrigin.setName(name);
+                setOrigin(newOrigin);
+            }
+        } else if (newMyOrigin !== "" && newMyOrigin !== origin.getName()) {
+            const coordinate = await getCoordinates(newMyOrigin);
+            if (coordinate !== undefined && coordinate !== "") {
+                const name = await getPlace(coordinate.split(",")[0], coordinate.split(",")[1]);
+                if (name !== undefined && name !== "") {
+                    newOrigin.setStringCoordinate(coordinate);
+                    newOrigin.setName(name);
+                    setOrigin(newOrigin);
+                }
             }
         }
+        return newOrigin;
+    }
 
-        names.push(destination);
-
-        if (destination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
-            url += "&point=" + destination;
-            points.push(destination);
-        } else {
-            let dest = await geoCode(URL_GEO + "&q=" + destination);
-            url += "&point=" + dest;
-            points.push(dest);
+    const updateDestination = async (newMyDestination: string = myDestination) => {
+        let newDestination = copySearchPoint(destination);
+        if (newMyDestination.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            newDestination.setStringCoordinate(newMyDestination);
+            const name = await getPlace(newDestination.getLat(), newDestination.getLng());
+            if (name !== undefined && name !== "") {
+                newDestination.setName(name);
+                setDestination(newDestination);
+            }
+        } else if (newMyDestination !== "" && newMyDestination !== destination.getName()) {
+            const coordinate = await getCoordinates(newMyDestination);
+            if (coordinate !== undefined && coordinate !== "") {
+                const name = await getPlace(coordinate.split(",")[0], coordinate.split(",")[1]);
+                if (name !== undefined && name !== "") {
+                    newDestination.setStringCoordinate(coordinate);
+                    newDestination.setName(name);
+                    setDestination(newDestination);
+                }
+            }
         }
+        return newDestination;
+    }
 
-        drawRoute(url!);
-        storeRoute(points, names);
-    };
-
-    const cancelRoute = () => {
-        setPoints([]);
-        setGettingRoute(false);
-        setGettingInterRoute(false);
-        setCurrentIndex(0);
-        // @ts-ignore
-        document.getElementById("ins-card").style.display = "none";
-        // @ts-ignore
-        document.getElementById("cancel-route-btn").style.display = "none";
-        // @ts-ignore
-        document.getElementById("card-ori-dest").style.display = "none";
-    };
-
-    const getFromMap = () => {
-        if (odmap) {
-            setodmap(false);
-            setCreatingRoute(false);
-            setGettingRoute(false);
-            setPoints([]);
-            setOrigin("");
-            setDestination("");
-            setCurrentIndex(0);
-            // @ts-ignore
-            document.getElementById("origin-input").value = "";
-            // @ts-ignore
-            document.getElementById("origin-input").style.readonly = false;
-            // @ts-ignore
-            document.getElementById("destination-input").value = "";
-            // @ts-ignore
-            document.getElementById("destination-input").style.readonly = false;
-            // @ts-ignore
-            document.getElementById("ins-card").style.display = "none";
-        } else {
-            setodmap(true);
-            setCreatingRoute(true);
-            setGettingRoute(false);
-            setPoints([]);
-            setOrigin("");
-            setDestination("");
-            setCurrentIndex(0);
-            // @ts-ignore
-            document.getElementById("origin-input").value = "";
-            // @ts-ignore
-            document.getElementById("origin-input").style.readonly = true;
-            // @ts-ignore
-            document.getElementById("destination-input").value = "";
-            // @ts-ignore
-            document.getElementById("destination-input").style.readonly = true;
-            // @ts-ignore
-            document.getElementById("ins-card").style.display = "none";
+    const updateIntermediate = async (index: number, intermediate: string) => {
+        let newIntermediates = [...intermediates];
+        if (intermediate.match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+            newIntermediates[index].setStringCoordinate(intermediate);
+            const name = await getPlace(newIntermediates[index].getLat(), newIntermediates[index].getLng());
+            if (name !== undefined && name !== "") {
+                newIntermediates[index].setName(name);
+                setIntermediates(newIntermediates);
+            }
+        } else if (intermediate !== "" && intermediate !== newIntermediates[index].getName()) {
+            const coordinate = await getCoordinates(intermediate);
+            if (coordinate !== undefined && coordinate !== "") {
+                const name = await getPlace(coordinate.split(",")[0], coordinate.split(",")[1]);
+                if (name !== undefined && name !== "") {
+                    newIntermediates[index].setStringCoordinate(coordinate);
+                    newIntermediates[index].setName(name);
+                    setIntermediates(newIntermediates);
+                }
+            }
         }
-    };
+        return newIntermediates[index];
+    }
+
+    const updateAllIntermediates = async () => {
+        let newIntermediates = [...intermediates];
+        for (let i = 0; i < myIntermediates.length; i++) {
+            if (myIntermediates[i].match(/-?\d{1,3}[.]\d+,-?\d{1,3}[.]\d+/)) {
+                newIntermediates[i].setStringCoordinate(myIntermediates[i]);
+                const name = await getPlace(newIntermediates[i].getLat(), newIntermediates[i].getLng());
+                if (name !== undefined && name !== "") {
+                    newIntermediates[i].setName(name);
+                }
+            } else if (myIntermediates[i] !== "" && myIntermediates[i] !== newIntermediates[i].getName()) {
+                const coordinate = await getCoordinates(myIntermediates[i]);
+                if (coordinate !== undefined && coordinate !== "") {
+                    const name = await getPlace(coordinate.split(",")[0], coordinate.split(",")[1]);
+                    if (name !== undefined && name !== "") {
+                        newIntermediates[i].setStringCoordinate(coordinate);
+                        newIntermediates[i].setName(name);
+                    }
+                }
+            }
+        }
+        setIntermediates(newIntermediates);
+        return newIntermediates;
+    }
+
+    const clearIntermediate = (index: number) => {
+        let newIntermediates = [...intermediates];
+        for (let i = 0; i < newIntermediates.length; i++) {
+            if (i === index) {
+                newIntermediates[i] = new SearchPoint("");
+            }
+        }
+        setIntermediates(newIntermediates);
+    }
 
     const geoCode = async (query: string): Promise<string> => {
-        // @ts-ignore
         return fetch(query)
             .then((response) => response.json())
             .then((data) => {
@@ -212,6 +239,95 @@ export default function RoutingComponent(
                 console.error("Error:", error);
                 return "";
             });
+    };
+
+    const revGeocode = async (query: string): Promise<string> => {
+        return fetch(query)
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.items.length === 0) {
+                    window.alert("No results");
+                    return "";
+                }
+                const address1 = data.items[0].address.district;
+                const address2 = data.items[0].address.city;
+                if (address1 != undefined) {
+                    return address1 + ", " + address2;
+                } else {
+                    return address2 + ", " + data.items[0].address.county;
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                return "";
+            });
+    }
+
+    const getCoordinates = async (query: string): Promise<string> => {
+        return await geoCode(URL_GEO + "&q=" + query);
+    }
+
+    const getPlace = async (lat: number | string, lng: number | string): Promise<string> => {
+        return await revGeocode(URL_REV + "&at=" + lat + "," + lng);
+    }
+
+    const getRoute = async () => {
+        if (myOrigin === "" || myDestination === "") {
+            window.alert("Please fill in both fields");
+            clearRoute();
+            return;
+        }
+        let url = URL_ROUTING;
+        let newPoints = [];
+        let newMyPoints = [];
+        let newNames = [];
+
+        url += "&point=" + origin.getStringCoordinates();
+        newPoints.push(origin.getLatLng());
+        newMyPoints.push(origin.getStringCoordinates());
+        newNames.push(origin.getName());
+
+        for (let intermediate of intermediates) {
+            if (!intermediate.isCoordinateNull()) {
+                url += "&point=" + intermediate.getStringCoordinates();
+                newPoints.push(intermediate.getLatLng());
+                newMyPoints.push(intermediate.getStringCoordinates());
+                newNames.push(intermediate.getName());
+            }
+        }
+
+        url += "&point=" + destination.getStringCoordinates();
+        newPoints.push(destination.getLatLng());
+        newMyPoints.push(destination.getStringCoordinates());
+        newNames.push(destination.getName());
+
+        let bounds = new LatLngBounds(newPoints[0], newPoints[1]);
+        for (let i = 2; i < newPoints.length; i++) {
+            bounds.extend(newPoints[i]);
+        }
+
+        drawRoute(url!);
+        const currentBounds = getViewBounds();
+        if (!currentBounds.contains(bounds)) {
+            mapFitBounds(bounds);
+        }
+        setNames(newNames);
+        setMyPoints(newMyPoints);
+        setGettingRoute(true);
+    };
+
+    const flyTo = async (point: SearchPoint) => {
+        if (!point.isNameNull()) {
+            if (myOrigin !== "" && myDestination !== "") {
+                await updateOrigin();
+                await updateAllIntermediates();
+                await updateDestination();
+            }
+            else {
+                mapFlyTo(point.getLat(), point.getLng(), 13);
+                clearRoute();
+            }
+        }
     };
 
     const drawRoute = (url: string) => {
@@ -239,12 +355,6 @@ export default function RoutingComponent(
                             )
                         );
                     }
-                    setCurrentIndex(0);
-                    setDirections(directions);
-                    // @ts-ignore
-                    document.getElementById("ins-card").style.display = "block";
-                    // @ts-ignore
-                    document.getElementById("cancel-route-btn").style.display = "block";
                 })
                 .catch((error) => {
                     console.error("Error:", error);
@@ -252,7 +362,12 @@ export default function RoutingComponent(
         }
     };
 
-    async function storeRoute(points: string[], names: string[]) {
+    const clearRoute = () => {
+        setGettingRoute(false);
+        setPoints([]);
+    }
+
+    async function saveRoute() {
         const headers = {
             "Content-Type": "application/json",
             Authorization: `Bearer ${TOKEN}`,
@@ -266,71 +381,138 @@ export default function RoutingComponent(
                 name += names[i] + "-";
             }
         }
-        let body = {
+        const body = {
             name: name,
-            points: points,
+            points: myPoints,
         };
         return fetch(url.toString(), {
             headers,
             method: "POST",
             body: JSON.stringify(body),
         })
-            .then((response) => response.json())
-            .then(() => {
-                return true;
+            .then((response) => {
+                if (response.status === 200) {
+                    return true;
+                } else {
+                    return false;
+                }
             })
             .catch(() => {
                 return false;
             });
     }
 
+    useEffect(() => {
+        if (origin.isNameNull() || destination.isNameNull()) {
+            setAddIntermediate(false);
+            return;
+        }
+        for (let intermediate of intermediates) {
+            if (intermediate.isNameNull()) {
+                setAddIntermediate(false);
+                return;
+            }
+        }
+        setAddIntermediate(true);
+    }, [origin, destination, intermediates]);
+
     return (
-        <div className="flex">
-            <div id={"card-ori-dest"} className="card p-3">
-                    <div className="flex-col flex">
-                        <input
-                            id={"origin-input"}
-                            type={"text"}
-                            placeholder={"Origin"}
-                            onChange={updateOrigin}
-                            value={origin}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-white leading-tight focus:outline-none focus:shadow-outline"
-                        />
-                    </div>
-                    {intermediates.map((intermediate) => {
-                        return (
-                            intermediate
-                        );
-                    })}
-                    <div className="flex-col flex">
-                        <input
-                            id={"destination-input"}
-                            type={"text"}
-                            placeholder={"Destination"}
-                            onChange={updateDestination}
-                            value={destination}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-white leading-tight focus:outline-none focus:shadow-outline"
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <input
-                            id="mapcbox"
-                            type="checkbox"
-                            onChange={getFromMap}
-                            className="mr-2 leading-tight"
-                        />
-                        <label>Select in map</label>
-                    </div>
-                <div className="flex flex-col">
-                    {origin && destination &&  (
-                        <button
-                            id={"add-intermediate-btn"}
-                            onClick={pushIntermediate}
-                            className="btn mb-3"
-                        >
-                            Add Intermediate
-                        </button>
-                    )}
+        <div id={"card-ori-dest"} className="flex flex-col card p-3">
+            <div className="flex flex-col overflow-y-auto max-h-72">
+                <div className="flex-col">
+                    <input
+                        id={"origin-input"}
+                        type={"text"}
+                        placeholder={"Origin"}
+                        onChange={(event) => setMyOrigin(event.target.value)}
+                        onBlur={async () => await updateOrigin()}
+                        onKeyDown={async (event) => {
+                            if (event.key === "Enter") {
+                                flyTo(await updateOrigin());
+                            } else if (event.key === "Backspace") {
+                                let newOrigin = copySearchPoint(origin);
+                                newOrigin.setName("");
+                                newOrigin.resetCoordinate();
+                                setOrigin(newOrigin);
+                                clearRoute();
+                            }
+                        }}
+                        value={myOrigin}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-white leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                </div>
+                {myIntermediates.map((intermediate, index) => {
+                    return (
+                        <div className="flex items-center" key={index}>
+                            <div>
+                                <button
+                                    onClick={() => setPointToRemove(index)}
+                                    className="mr-2"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <input
+                                type={"text"}
+                                placeholder={"Intermediate Point"}
+                                onChange={(event) => updateMyIntermediate(event, index)}
+                                onBlur={async () => updateIntermediate(index, intermediate)}
+                                onKeyDown={async (event) => {
+                                    if (event.key === "Enter") {
+                                        const point = await updateIntermediate(index, intermediate);
+                                        if (point !== undefined) {
+                                            flyTo(point);
+                                        }
+                                    } else if (event.key === "Backspace") {
+                                        clearIntermediate(index);
+                                    }
+                                }}
+                                value={intermediate}
+                                className="shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-white leading-tight focus:outline-none focus:shadow-outline"
+                            />
+                        </div>
+                    );
+                })}
+                <div className="flex-col flex">
+                    <input
+                        id={"destination-input"}
+                        type={"text"}
+                        placeholder={"Destination"}
+                        onChange={(event) => setMyDestination(event.target.value)}
+                        onBlur={async () => await updateDestination()}
+                        onKeyDown={async (event) => {
+                            if (event.key === "Enter") {
+                                flyTo(await updateDestination());
+                            } else if (event.key === "Backspace") {
+                                let newDestination = copySearchPoint(destination);
+                                newDestination.setName("");
+                                newDestination.resetCoordinate();
+                                setDestination(newDestination);
+                                clearRoute();
+                            }
+                        }}
+                        value={myDestination}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-white leading-tight focus:outline-none focus:shadow-outline"
+                    />
+                </div>
+                {addIntermediate && (
+                    <button
+                        id={"add-inter-btn"}
+                        onClick={pushIntermediate}
+                    >
+                        <div className="flex mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <label style={{ cursor: 'pointer' }}>Add Intermediate</label>
+                        </div>
+                    </button>
+                )}
+            </div>
+            <div className="flex flex-col">
+                <div className="flex mt-2">
                     <button
                         id={"get-route-btn"}
                         onClick={getRoute}
@@ -338,8 +520,24 @@ export default function RoutingComponent(
                     >
                         Get Route
                     </button>
+                    {loggedIn && gettingRoute && (
+                        <button
+                            id={"save-route-btn"}
+                            onClick={async () => {
+                                if (await saveRoute()) {
+                                    window.alert("Route saved");
+                                } else {
+                                    window.alert("Error saving route");
+                                }
+                            }}
+                            style={{ borderWidth: "3px", borderStyle: "solid" }}
+                            className="bg-white border-green-600 btn ml-auto text-green-600"
+                        >
+                            Save Route
+                        </button>
+                    )}
                 </div>
             </div>
-        </div >
+        </div>
     );
 }

@@ -31,7 +31,7 @@ export default function FilterBoardComponent(
         <div className="flex">
             <button onClick={toggleOpen} className="z-10">
                 {open ?
-                    <div className={"py-3 rounded-s-lg border border-gray-200 shadow bg-primary dark:border-gray-700"}>
+                    <div className={"py-3 rounded-s-lg border border-gray-200 dark:border-gray-700 shadow bg-white dark:bg-black"}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                         </svg>

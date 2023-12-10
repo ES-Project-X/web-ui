@@ -1,5 +1,5 @@
 import { AiFillCloseCircle, AiFillDislike, AiFillLike } from "react-icons/ai";
-import { getDistanceFrom } from "../utils/getDistanceFrom";
+import { getDistanceFrom } from "../utils/functions";
 import { POI } from "../structs/poi";
 import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
