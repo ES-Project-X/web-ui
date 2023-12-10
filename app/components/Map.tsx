@@ -461,8 +461,8 @@ export default function MapComponent({
 				{/*
                     	MIDDLE PART OF THE UI
                 	*/}
-				<div className="flex">
-					<div className="flex mr-auto ml-2 pt-32">
+				<div className="flex h-screen">
+					<div className="flex flex-col mr-auto ml-2 pt-32">
 						{routing && (
 							<RoutingComponent
 								loggedIn={loggedIn}
@@ -519,7 +519,7 @@ export default function MapComponent({
 				{/*
                     	LOWER PART OF THE UI
                 	*/}
-				<div className="flex pb-2 mt-auto w-full bottom-0">
+				<div className="flex pb-2 mt-auto w-full">
 					<div className="mr-auto pl-2 flex">
 						<button
 							id={"ori-dst-btn"}
