@@ -1,5 +1,11 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+
+
+const TOKEN = Cookies.get('COGNITO_TOKEN')
+const URL_API = process.env.DATABASE_API_URL;
 
 export default function CreatePOIPage() {
   const [name, setName] = useState("");
@@ -17,6 +23,7 @@ export default function CreatePOIPage() {
 
   const [poiLat, setPoiLat] = useState<number>(0);
   const [poiLon, setPoiLon] = useState<number>(0);
+  const [poiImageURL, setPoiImageURL] = useState<string>("");
 
   useEffect(() => {
     // Get query parameters from URL
@@ -34,10 +41,50 @@ export default function CreatePOIPage() {
     }
   }, []);
 
+
+  const handleUpload = () => {
+    if (!image) {
+      // Handle case where no image is selected
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', image);
+    console.log(formData);
+    axios.post(URL_API + 's3/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          return res.data;
+        }
+        else if (res.status === 400) {
+          throw new Error("Error uploading image");
+        }
+      }).then((data) => {
+        console.log(data);
+        setPoiImageURL(data.url);
+      }
+      ).catch((err) => {
+        console.log(err);
+      });
+  };
+
   const handleSavePOI = () => {
     if (validateForm()) {
-      // Perform save POI action
-      console.log("POI saved:", name, type, image);
+      handleUpload();
+      const newPOI = {
+        name: name,
+        type: type,
+        picture_url: poiImageURL,
+        latitude: poiLat,
+        longitude: poiLon,
+        description: "",
+        };
+        
     }
   };
 
@@ -65,8 +112,19 @@ export default function CreatePOIPage() {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    setImage(selectedFile || null);
+    const selectedImage = e.target.files?.[0];
+
+    const maxFileSize = 4 * 1024 * 1024; // file needs to be less than 4MB (change as needed)
+
+    if (selectedImage && selectedImage.size > maxFileSize) {
+      alert("Image must be less than 4MB");
+      return;
+    }
+
+    setImage(selectedImage || null);
+    
+    // Reset the value of the file input field
+    e.target.value = '';
   };
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
