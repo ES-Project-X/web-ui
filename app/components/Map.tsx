@@ -42,7 +42,7 @@ export default function MapComponent({
 
 	const [origin, setOrigin] = useState<SearchPoint>(new SearchPoint(""));
 	const [destination, setDestination] = useState<SearchPoint>(new SearchPoint(""));
-    const [intermediates, setIntermediates] = useState<SearchPoint[]>([]);
+	const [intermediates, setIntermediates] = useState<SearchPoint[]>([]);
 
 	const [markers, setMarkers] = useState<BasicPOI[]>([]);
 	const [selectedPOI, setSelectedPOI] = useState({
@@ -87,6 +87,9 @@ export default function MapComponent({
 
 	const [routing, setRouting] = useState(false);
 	const [addIntermediate, setAddIntermediate] = useState(false);
+
+	const [openRouting, setOpenRouting] = useState(false);
+	const [showRouting, setShowRouting] = useState(true);
 
 	function getUser() {
 
@@ -193,12 +196,12 @@ export default function MapComponent({
 
 	const flyTo = (lat: number, lng: number, zoom: number, dur: number = 4) => {
 		// @ts-ignore
-		mapRef.current.flyTo(new LatLng(lat, lng), zoom, {duration: dur});
+		mapRef.current.flyTo(new LatLng(lat, lng), zoom, { duration: dur });
 	}
 
 	const fitBounds = (bounds: LatLngBounds) => {
 		// @ts-ignore
-		mapRef.current.fitBounds(bounds, {padding: [50, 50]});
+		mapRef.current.fitBounds(bounds, { padding: [50, 50] });
 	}
 
 	const getViewBounds = () => {
@@ -238,13 +241,14 @@ export default function MapComponent({
 	};
 
 	const createRoute = () => {
-		if (routing) {
+		if (openRouting) {
 			setPoints([]);
 			setOrigin(new SearchPoint(""));
 			setDestination(new SearchPoint(""));
 			setIntermediates([new SearchPoint("")]);
 		}
 		setRouting(!routing);
+		setOpenRouting(!openRouting);
 	};
 
 	const handleNext = () => {
@@ -463,8 +467,10 @@ export default function MapComponent({
                 	*/}
 				<div className="flex h-screen">
 					<div className="flex flex-col mr-auto ml-2 pt-32">
-						{routing && (
+						{openRouting && (
 							<RoutingComponent
+								showRouting={showRouting}
+								setShowRouting={setShowRouting}
 								loggedIn={loggedIn}
 								mapFlyTo={flyTo}
 								mapFitBounds={fitBounds}
@@ -521,13 +527,33 @@ export default function MapComponent({
                 	*/}
 				<div className="flex pb-2 mt-auto w-full">
 					<div className="mr-auto pl-2 flex">
-						<button
-							id={"ori-dst-btn"}
-							onClick={createRoute}
-							className="btn"
-						>
-							Route
-						</button>
+						{!isMobile ? (
+							<button
+								id={"ori-dst-btn"}
+								onClick={createRoute}
+								className="btn"
+							>
+								Route
+							</button>
+						) : (
+							showRouting ? (
+								<button
+									id={"ori-dst-btn"}
+									onClick={createRoute}
+									className="btn"
+								>
+									Route
+								</button>
+							) : (
+								<button
+									id={"ori-dst-btn"}
+									onClick={() => setShowRouting(true)}
+									className="btn"
+								>
+									Show
+								</button>
+							)
+						)}
 					</div>
 					<div className={"flex ml-auto pr-2"}>
 						{isMobile ? null :

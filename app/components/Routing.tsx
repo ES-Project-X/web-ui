@@ -5,11 +5,15 @@ import { SearchPoint, copySearchPoint } from "../structs/SearchComponent";
 import { URL_API, URL_GEO, URL_REV, URL_ROUTING } from "../utils/constants";
 import Cookies from "js-cookie";
 import { LatLng, LatLngBounds } from "leaflet";
+import { isMobile } from "react-device-detect";
+import { get } from "http";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
 export default function RoutingComponent(
     {
+        showRouting,
+        setShowRouting,
         loggedIn,
         mapFlyTo,
         mapFitBounds,
@@ -24,6 +28,8 @@ export default function RoutingComponent(
         addIntermediate,
         setAddIntermediate,
     }: {
+        showRouting: boolean,
+        setShowRouting: (showRouting: boolean) => void,
         loggedIn: boolean,
         mapFlyTo: (lat: number, lng: number, zoom: number) => void,
         mapFitBounds: (bounds: LatLngBounds) => void,
@@ -106,7 +112,7 @@ export default function RoutingComponent(
     }, [intermediates]);
 
     useEffect(() => {
-        if (!origin.isNull() && !destination.isNull() && gettingRoute) {
+        if (!origin.isCoordinateNull() && !destination.isCoordinateNull() && gettingRoute) {
             getRoute();
         }
     }, [origin, destination, intermediates]);
@@ -274,7 +280,7 @@ export default function RoutingComponent(
     }
 
     const getRoute = async () => {
-        if (myOrigin === "" || myDestination === "") {
+        if (origin.isCoordinateNull() || destination.isCoordinateNull()) {
             window.alert("Please fill in both fields");
             clearRoute();
             return;
@@ -430,10 +436,16 @@ export default function RoutingComponent(
         setAddIntermediate(true);
     }, [origin, destination, intermediates]);
 
+    function hide() {
+        setShowRouting(false);
+        setGettingRoute(true);
+    }
+
     return (
+        showRouting &&
         <div id={"card-ori-dest"} className="flex flex-col card p-3">
-            <div className="flex flex-col overflow-y-auto max-h-72">
-                <div className="flex-col">
+            <div className="flex flex-col overflow-y-auto max-h-48 sm:max-h-72">
+                <div className="flex flex-col">
                     <input
                         id={"origin-input"}
                         type={"text"}
@@ -489,6 +501,19 @@ export default function RoutingComponent(
                         </div>
                     );
                 })}
+                {addIntermediate && (
+                    <button
+                        id={"add-inter-btn"}
+                        onClick={pushIntermediate}
+                    >
+                        <div className="flex mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <label style={{ cursor: 'pointer' }}>Add Intermediate</label>
+                        </div>
+                    </button>
+                )}
                 <div className="flex-col flex">
                     <input
                         id={"destination-input"}
@@ -511,19 +536,6 @@ export default function RoutingComponent(
                         className="shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-white leading-tight focus:outline-none focus:shadow-outline"
                     />
                 </div>
-                {addIntermediate && (
-                    <button
-                        id={"add-inter-btn"}
-                        onClick={pushIntermediate}
-                    >
-                        <div className="flex mb-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 mr-2">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <label style={{ cursor: 'pointer' }}>Add Intermediate</label>
-                        </div>
-                    </button>
-                )}
             </div>
             {gettingRoute && (
                 <div className="flex flex-col mt-2 mr-auto">
@@ -557,6 +569,16 @@ export default function RoutingComponent(
                         </button>
                     )}
                 </div>
+                {isMobile && (
+                    <div className="flex mt-2 ">
+                        <button
+                            id={"clear-route-btn"}
+                            onClick={hide}
+                        >
+                            Hide Routing
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

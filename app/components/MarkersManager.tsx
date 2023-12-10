@@ -236,7 +236,7 @@ export default function MarkersManager({
             }}
         >
             <Popup>
-                You are at {destination.getStringCoordinates()}
+                You are at {destination.getLat().toFixed(4)}, {destination.getLng().toFixed(4)}
             </Popup>
         </Marker>
     )
