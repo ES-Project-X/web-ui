@@ -1,39 +1,27 @@
+import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import Cookies from "js-cookie";
-import { FloatingLabel, Form } from "react-bootstrap";
-import { isMobile } from "react-device-detect";
 import { UserData } from "../structs/user";
+import { isMobile } from "react-device-detect";
+
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {
+  faMapMarkerAlt,
+  faStar,
+  faStarHalfAlt,
+  faList,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 
-const TOKEN = Cookies.get('COGNITO_TOKEN')
+// Add icons to the library
+library.add(faMapMarkerAlt, faStar, faStarHalfAlt);
+
+const TOKEN = Cookies.get("COGNITO_TOKEN");
 const URL_API = process.env.DATABASE_API_URL;
 
 export default function UserProfile() {
-
-  function redirect(path: string) {
-    window.location.replace(path);
-  }
-
-  const nameStyle = {
-    fontSize: "24px",
-    margin: "10px",
-    color: "#f2f2f2",
-  };
-
-  const centerText = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-  };
-
-  const headerHeight = {
-    height: '60px', // adjust as needed
-    alignItems: 'center',
-    display: 'flex',
-    justifyContent: 'center',
-    fontWeight: 'bold',
-  };
-
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState("");
   const [fname, setFname] = useState("");
@@ -45,6 +33,12 @@ export default function UserProfile() {
   const [added_pois_count, setAddedPoiCount] = useState(0);
   const [received_ratings_count, setReceivedRatingCount] = useState(0);
   const [given_ratings_count, setGivenRatingCount] = useState(0);
+  const [levelInfo, setLevelInfo] = useState<LevelInfo>({
+    currentLevel: 1,
+    xpToNextLevel: 500,
+    xpForCurrentLevel: 0,
+    progress: 0,
+  });
 
   const [formUsername, setFormUsername] = useState("");
   const [formEmail, setFormEmail] = useState("");
@@ -52,10 +46,6 @@ export default function UserProfile() {
 
   const [image, setImage] = useState<File | null>(null);
   const [imageChanged, setImageChanged] = useState(false);
-
-  //create dictionary with all the user info that is changed
-  //if the user doesnt change anything, the value is null
-  //if the user changes something, the value is the new value
 
   let userChanges = {};
 
@@ -97,19 +87,19 @@ export default function UserProfile() {
       .then((res) => {
         if (res.status === 200) {
           return res.json();
-        }
-        else if (res.status === 400) {
+        } else if (res.status === 400) {
           throw new Error("Error updating user");
         }
       })
       .then((data) => {
         localStorage.setItem("user", JSON.stringify(data));
-        setAvatar(data.image_url);
         setUsername(data.username);
+        setAvatar(data.image_url);
         setEmail(data.email);
         setFormUsername(data.username);
         setFormEmail(data.email);
         setPassword("");
+        alert("User updated successfully");
         setIsEditing(false);
       })
       .catch((err) => {
@@ -120,9 +110,8 @@ export default function UserProfile() {
   };
 
   useEffect(() => {
-
     if (!TOKEN) {
-      redirect('/login');
+      redirect("/map");
     }
 
     const headers = {
@@ -134,7 +123,7 @@ export default function UserProfile() {
     fetch(url.toString(), { headers })
       .then(async (res) => {
         if (res.status !== 200) {
-          redirect('/map');
+          redirect("/map");
           return;
         }
         const user: UserData = await res.json();
@@ -151,19 +140,53 @@ export default function UserProfile() {
           setAddedPoiCount(user.added_pois_count);
           setReceivedRatingCount(user.received_ratings_count);
           setGivenRatingCount(user.given_ratings_count);
+          setLevelInfo(calculateLevelAndXP(user.total_xp));
         }
-
+        console.log(user);
       })
       .catch((err) => {
         console.log(err);
       });
-
-  });
+  }, []);
 
   function logout() {
-    Cookies.remove('COGNITO_TOKEN');
-    localStorage.removeItem('user');
-    redirect('/map');
+    console.log("logout");
+    Cookies.remove("COGNITO_TOKEN");
+    localStorage.removeItem("user");
+    window.location.replace("/map");
+  }
+
+  /* TODO: FIX this */
+  function calculateLevelAndXP(totalXP: number): LevelInfo {
+    let baseXP = 500;
+
+    let level = Math.floor(totalXP / baseXP);
+    let level_count = 1;
+    let restXp = totalXP % baseXP;
+
+    if (level * baseXP < totalXP) {
+      level++;
+      level_count++;
+    }
+    console.log("restXp:", restXp);
+    console.log("level:", level);
+    console.log("level_count:", level_count);
+
+    let maxXpNextLevel = baseXP + level_count * 500;
+    console.log("maxXpNextLevel:", maxXpNextLevel);
+
+    let xpForCurrentLevel = totalXP - restXp;
+    console.log("xpForCurrentLevel:", xpForCurrentLevel);
+
+    let progress = (xpForCurrentLevel / maxXpNextLevel) * 100;
+    console.log("progress:", progress);
+
+    return {
+      currentLevel: level,
+      xpToNextLevel: maxXpNextLevel,
+      xpForCurrentLevel: xpForCurrentLevel,
+      progress: progress,
+    };
   }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,9 +203,8 @@ export default function UserProfile() {
     setImageChanged(true);
 
     // Reset the value of the file input field
-    e.target.value = '';
+    e.target.value = "";
   };
-
 
   const handleUpload = () => {
     if (!image) {
@@ -191,31 +213,29 @@ export default function UserProfile() {
     }
 
     const formData = new FormData();
-    formData.append('file', image);
+    formData.append("file", image);
     console.log(formData);
-    axios.post(URL_API + 's3/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${TOKEN}`,
-      },
-    })
+    axios
+      .post(URL_API + "s3/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      })
       .then((res) => {
         if (res.status === 200) {
           return res.data;
-        }
-        else if (res.status === 400) {
+        } else if (res.status === 400) {
           throw new Error("Error uploading image");
         }
-      }).then((data) => {
-        const avatar_url = data.url
-        console.log(avatar_url);
-
+      })
+      .then((data) => {
+        const avatar_url = data.url;
         userChanges = { ...userChanges, image_url: avatar_url };
-        
-        updateProfile();
 
-      }
-      ).catch((err) => {
+        updateProfile();
+      })
+      .catch((err) => {
         console.log(err);
       });
 
@@ -226,157 +246,239 @@ export default function UserProfile() {
   const cancelUpload = () => {
     setImageChanged(false);
     setImage(null);
+    setIsEditing(false);
 
     // Reset the value of the file input field
-    (document.getElementById('image') as HTMLInputElement).value = '';
-  }
-
+    (document.getElementById("image") as HTMLInputElement).value = "";
+  };
 
   return (
-    <div className="map-ui w-screen">
-      <div className="mt-2 flex justify-between">
-        <div className="ml-2">
-          <button
-            className="btn btn-secondary"
-            onClick={() => logout()}
-          >
-            Logout
-          </button>
-        </div>
-        <div className="justify-end mr-2">
-          {isMobile ?
+    <div className="min-h-screen bg-white text-black">
+      {" "}
+      {/* bg-blue-900 */}
+      {/* Banner + Avatar Section */}
+      <section className="relative h-screen/3 flex items-center justify-center overflow-hidden">
+        {/* Linear gradient overlay for fading effect */}
+        <div
+          className="absolute inset-0 z-10"
+          style={{
+            backgroundImage:
+              "linear-gradient(to bottom, rgba(0, 176, 80, 1.5), rgba(0, 0, 255, 0))",
+          }}
+        >
+          {/* Buttons */}
+          <div className="absolute top-0 left-0 p-4">
+            <Link href="/map">
+              <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10">
+                Map
+              </button>
+            </Link>
+          </div>
+          <div className="absolute top-0 right-0 p-4">
             <button
-              className="btn btn-primary"
-              onClick={() => redirect('/map')}
+              className="bg-white text-black py-2 px-4 rounded h-10"
+              onClick={() => {
+                console.log("routes btn");
+              }}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5" />
-              </svg>
+              Routes
             </button>
-            :
-            <button
-              className="btn btn-primary"
-              onClick={() => redirect('/map')}
-            >
-              Go to Map
-            </button>
-          }
+          </div>
         </div>
-      </div>
-      <div className="row justify-content-center mt-5">
-        <div className="row justify-content-center align-items-center text-center" style={{ maxWidth: "700px" }}>
-          <div className="row justify-content-center">
-            <div className="relative flex justify-center items-center">
-              <div className="group flex justify-center items-center">
+
+        {/* Content */}
+        <div className="text-center relative z-20 pt-10 flex flex-col items-center justify-center">
+          {/* Adjusted image and XP bar */}
+          <div className="flex flex-col items-center relative group">
+            {isMobile ? (
+              <>
                 <img
                   src={avatar}
                   alt={`${fname} ${lname}'s avatar`}
-                  className="group-hover:opacity-50 w-48 h-48 object-cover rounded-full flex justify-center items-center z-20"
+                  className="w-48 h-48 object-cover rounded-full cursor-pointer"
                 />
-                < label className="absolute flex justify-center items-center w-48 h-48  group-hover:text-white group-hover:z-30" htmlFor="fileInput">
+                {isEditing && (
+                  <label htmlFor="image" className="mt-2 relative">
+                    <button className="bg-gray-300 text-white py-2 px-4 rounded cursor-pointer w-full">
+                      Change Profile Picture
+                    </button>
+                    <input
+                      type="file"
+                      id="image"
+                      accept="image/*"
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      onChange={handleImageChange}
+                    />
+                  </label>
+                )}
+              </>
+            ) : (
+              <>
+                <img
+                  src={avatar}
+                  alt={`${fname} ${lname}'s avatar`}
+                  className="w-32 h-32 object-cover rounded-full cursor-pointer group-hover:opacity-50"
+                />
+                <label
+                  className="absolute flex justify-center items-center w-48 h-48 text-white bg-gray-300 rounded-full opacity-0 cursor-pointer group-hover:opacity-100"
+                  htmlFor="image"
+                >
                   Change Profile Picture
                 </label>
-                <input type="file" id="image" accept="image/*" className="absolute flex justify-center items-center w-48 h-48  group-hover:text-white group-hover:z-30 opacity-0" onChange={handleImageChange} />
-              </div>
-            </div>
+                <input
+                  type="file"
+                  id="image"
+                  accept="image/*"
+                  className="absolute w-48 h-48 opacity-0"
+                  onChange={handleImageChange}
+                />
+              </>
+            )}
             {imageChanged && (
               <div className="row justify-center">
-                <label className="text-white mt-4">Accept Profile Picture Changes?</label>
-                <button className="btn btn-success my-3 w-25 m-2" onClick={() => handleUpload()}>
+                <label className="text-white mt-4">
+                  Accept Profile Picture Changes?
+                </label>
+                <button
+                  className="btn btn-success my-3 w-25 m-2"
+                  onClick={() => handleUpload()}
+                >
                   Accept
                 </button>
-                <button className="btn btn-danger my-3 w-25 m-2" onClick={() => cancelUpload()}>
+                <button
+                  className="btn btn-danger my-3 w-25 m-2"
+                  onClick={() => cancelUpload()}
+                >
                   Cancel
                 </button>
               </div>
             )}
-            <h1 style={nameStyle}>
+            <h1 className="text-2xl font-semibold">
               {fname} {lname}
             </h1>
-          </div>
-          <div className="row mt-3 mb-4">
-            <div className="col-lg-3 col-md-6 mb-3">
-              <div className="card text-white bg-primary h-100" >
-                <div className="card-header" style={headerHeight}>Total XP</div>
-                <div className="card-body" style={centerText}>
-                  <h5 className="card-title">{total_xp}</h5>
-                </div>
-              </div>
+            <h6 className="pt-2 text-2md">{email}</h6>
+            <div className="w-full bg-gray-300 rounded-full overflow-hidden mt-4">
+              <div
+                className="bg-green-500 h-4"
+                style={{ width: `${levelInfo.progress}%` }}
+              />
             </div>
-            <div className="col-lg-3 col-md-6 mb-3">
-              <div className="card text-white bg-success h-100">
-                <div className="card-header" style={headerHeight}>Added POIs</div>
-                <div className="card-body" style={centerText}>
-                  <h5 className="card-title">{added_pois_count}</h5>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6 mb-3">
-              <div className="card text-white bg-info h-100">
-                <div className="card-header" style={headerHeight}>Received Ratings</div>
-                <div className="card-body" style={centerText}>
-                  <h5 className="card-title" >{received_ratings_count}</h5>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6 mb-3" >
-              <div className="card text-white bg-warning h-100">
-                <div className="card-header" style={headerHeight}>Given Ratings</div>
-                <div className="card-body" style={centerText}>
-                  <h5 className="card-title">{given_ratings_count}</h5>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="row justify-content-center">
+            <p className="mt-2">
+              XP: {total_xp} / {levelInfo.xpToNextLevel}
+            </p>
+            <p>Level: {levelInfo.currentLevel}</p>
             {!isEditing && (
-              <button className="btn btn-secondary my-3 w-50" onClick={() => setIsEditing(!isEditing)}>
+              <button
+                className="bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
+                onClick={() => setIsEditing(!isEditing)}
+              >
                 Modify Profile
-              </button>
-            )}</div>
-          <div className="col-md-8 justify-content-center">
-            <div className="mb-3">
-              <FloatingLabel controlId="floatingInput1" label="Username">
-                <Form.Control
-                  type="text"
-                  placeholder="Username"
-                  defaultValue={formUsername}
-                  onChange={(e) => setFormUsername(e.target.value)}
-                  readOnly={!isEditing}
-                />
-              </FloatingLabel>
-            </div>
-            <div className="mb-3">
-              <FloatingLabel controlId="floatingInput2" label="Email">
-                <Form.Control
-                  type="text"
-                  placeholder="Email"
-                  defaultValue={formEmail}
-                  onChange={(e) => setFormEmail(e.target.value)}
-                  readOnly={!isEditing}
-                />
-              </FloatingLabel>
-            </div>
-            {isEditing && (<div className="mb-3">
-              <FloatingLabel controlId="floatingInput3" label="Password(Confirm Changes)">
-                <Form.Control
-                  type="password"
-                  placeholder="Password(Confirm Changes)"
-                  defaultValue={password}
-                  onChange={(e) => setFormPassword(e.target.value)}
-                />
-              </FloatingLabel>
-            </div>)}
-          </div>
-          <div className="row justify-content-center">
-            {isEditing && (
-              <button className="btn btn-secondary my-3 w-50" onClick={() => updateProfile()}>
-                Save Profile
               </button>
             )}
           </div>
         </div>
-      </div>
+      </section>
+      {/* Main Content */}
+      <main className="container mx-auto py-8">
+        <div className="flex justify-center">
+          {!isEditing ? (
+            <>
+              <details className="dropdown bg-white rounded-lg shadow-md p-8 justify-center text-center ">
+                <summary className="text-2xl font-semibold text-center m-2 btn justify-center">
+                  User Statistics <FontAwesomeIcon icon={faList} />
+                </summary>
+                {/* User Info */}
+                <div className="flex flex-col w-full">
+                  <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative pt-3">
+                    <p>
+                      <FontAwesomeIcon icon="map-marker-alt" /> Total Added
+                      POIs: {added_pois_count}
+                    </p>
+                  </div>
+                  <div className="divider"></div>
+                  <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative">
+                    <p>
+                      <FontAwesomeIcon icon="star" /> Total Received Ratings:{" "}
+                      {received_ratings_count}
+                    </p>
+                  </div>
+                  <div className="divider"></div>
+                  <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative">
+                    <p>
+                      <FontAwesomeIcon icon="star-half-alt" /> Total Given
+                      Ratings: {given_ratings_count}
+                    </p>
+                  </div>
+                </div>
+              </details>
+            </>
+          ) : (
+            <div className="justify-center items-center text-center">
+              <div className="col-md-12 justify-content-center">
+                <div className="mb-4 flex flex-col items-center">
+                  <label className="form-control w-full max-w-md mb-2">
+                    <span className="label-text">User Name</span>
+                    <input
+                      type="text"
+                      placeholder="Type here the UserName"
+                      className="input input-bordered w-full max-w-md bg-gray-200"
+                      onChange={(e) => setFormUsername(e.target.value)}
+                    />
+                  </label>
+                  <label className="form-control w-full max-w-md mb-2">
+                    <span className="label-text">Email</span>
+                    <input
+                      type="email"
+                      placeholder="Type here the Email"
+                      className="input input-bordered w-full max-w-md bg-gray-200"
+                      onChange={(e) => setFormEmail(e.target.value)}
+                    />
+                  </label>
+                  <label className="form-control w-full max-w-md mb-2">
+                    <span className="label-text">Confirm Password</span>
+                    <input
+                      type="password"
+                      placeholder="Confirm the password"
+                      className="input input-bordered w-full max-w-md bg-gray-200"
+                      onChange={(e) => setFormPassword(e.target.value)}
+                    />
+                  </label>
+                </div>
+                <div className="flex justify-center mt-4">
+                  {isEditing && (
+                    <>
+                      <button
+                        className="mr-2 bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
+                        onClick={() => handleUpload()}
+                      >
+                        Save Changes
+                      </button>
+                      <button
+                        className="bg-red-500 border-red-500 text-white py-2 px-4 rounded h-10"
+                        onClick={() => cancelUpload()}
+                      >
+                        Cancel Changes
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="flex justify-center mt-4">
+          {!isEditing && (
+            <button
+              className="bg-red-500 border-red-500 text-white py-2 px-4 rounded h-10"
+              onClick={() => {
+                logout();
+              }}
+            >
+              Logout
+            </button>
+          )}
+        </div>
+      </main>
     </div>
   );
 }
