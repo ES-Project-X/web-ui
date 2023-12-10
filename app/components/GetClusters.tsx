@@ -1,7 +1,7 @@
 
 import { useMapEvents } from "react-leaflet";
 import { useState } from "react";
-import { URL_API } from "./constants";
+import { URL_API } from "../utils/constants";
 import { BasicPOI } from "../structs/poi";
 import RedMarker from "./markers/RedMarker";
 import {
