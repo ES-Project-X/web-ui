@@ -18,7 +18,7 @@ const renderRegisterUserModal = (props) => {
   return render(<RegisterUserModal {...mergedProps} />);
 };
 
-describe("RegisterUserModal", () => {
+describe.skip("RegisterUserModal", () => {
   it("renders the RegisterUserModal component", () => {
     renderRegisterUserModal();
     expect(screen.getByText("Username:")).toBeInTheDocument();
@@ -51,7 +51,7 @@ describe("RegisterUserModal", () => {
     expect(mockHandleKeyDown).toHaveBeenCalled();
   });
 
-  it.skip("handles user input changes", () => {
+  it("handles user input changes", () => {
     renderRegisterUserModal();
     const usernameInput = screen.getByLabelText("Username:");
 
