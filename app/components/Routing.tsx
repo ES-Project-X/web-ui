@@ -587,6 +587,7 @@ export default function RoutingComponent(
                             <button
                                 id={"clear-route-btn"}
                                 onClick={openDirections}
+                                className="underline"
                             >
                                 Show Directions
                             </button>
@@ -597,6 +598,7 @@ export default function RoutingComponent(
                             <button
                                 id={"clear-route-btn"}
                                 onClick={hide}
+                                className="underline"
                             >
                                 Hide Routing
                             </button>

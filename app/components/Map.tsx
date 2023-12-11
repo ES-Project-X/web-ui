@@ -20,6 +20,7 @@ import Cookies from "js-cookie";
 import { UserData } from "../structs/user";
 import { POI } from "../structs/poi";
 import { URL_API, URL_GEO, URL_REV, COGNITO_LOGIN_URL } from "../utils/constants";
+import { getDistanceFrom } from "../utils/functions";
 import RoutingComponent from "./Routing";
 import { SearchPoint } from "../structs/SearchComponent";
 import "../globals.css";
@@ -69,17 +70,10 @@ export default function MapComponent({
 	const [ratingPositive, setRatingPositive] = useState(0);
 	const [ratingNegative, setRatingNegative] = useState(0);
 
-	const [ratingPositiveStat, setRatingPositiveStat] = useState(0);
-	const [ratingNegativeStat, setRatingNegativeStat] = useState(0);
-
 	const [loggedIn, setLoggedIn] = useState<boolean>(false);
 	const [avatar, setAvatar] = useState("");
 	const [fname, setFname] = useState("");
 	const [isRModalOpen, setIsRModalOpen] = useState(false);
-
-	const [existsClicked, setExistsClicked] = useState(false);
-	const [fakeNewsClicked, setFakeNewsClicked] = useState(false);
-	const [showDetails, setShowDetails] = useState(false);
 
 	const [routing, setRouting] = useState(false);
 	const [addIntermediate, setAddIntermediate] = useState(false);
@@ -92,6 +86,12 @@ export default function MapComponent({
 	const [searchField, setSearchField] = useState("");
 
 	const [showPOIButton, setShowPOIButton] = useState(false);
+	const [showDetails, setShowDetails] = useState(false);
+
+	const [markerCoordinates, setMarkerCoordinates] = useState({
+		latitude: 0,
+		longitude: 0,
+	});
 
 	function getUser() {
 		const headers = {
@@ -145,6 +145,26 @@ export default function MapComponent({
 			getUser();
 		}
 	}, []);
+
+	function getPosition() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					return ({
+						lat: position.coords.latitude,
+						lon: position.coords.longitude,
+					});
+				},
+				(error) => {
+					console.log(error);
+				},
+				{ enableHighAccuracy: true }
+			);
+		} else {
+			console.log("Geolocation is not supported by this browser.");
+		}
+		return null;
+	}
 
 	const addToBearing = (amount: number) => {
 		if (mapRef.current) {
@@ -283,6 +303,10 @@ export default function MapComponent({
 		}
 	}, [isRModalOpen]);
 
+	useEffect(() => {
+		setShowPOIButton(canCreatePOI());
+	}, [markerCoordinates]);
+
 	const closeModal = () => {
 		setIsRModalOpen(false);
 	};
@@ -326,28 +350,44 @@ export default function MapComponent({
 
 	function showPOIsSideBar() {
 		setPOISideBar(true);
+		setShowDetails(false);
 	}
 
 	function hidePOIsSideBar() {
 		setPOISideBar(false);
 	}
 
-	const togglePOIButton = (
-		visibility: boolean | ((prevState: boolean) => boolean)
-	) => {
-		setShowPOIButton(visibility);
-	};
-
-	const [markerCoordinates, setMarkerCoordinates] = useState({
-		latitude: 0,
-		longitude: 0,
-	});
-
 	function openCreatePOIModal() {
 		window.location.replace(
 			`/createpoi?lat=${markerCoordinates.latitude}&lng=${markerCoordinates.longitude}`
 		);
 	}
+
+	function canCreatePOI() {
+		if (!isMobile || !loggedIn) {
+			return false;
+		}
+		const markerLocation = {
+			latitude: markerCoordinates.latitude,
+			longitude: markerCoordinates.longitude,
+		};
+		const userLocation = getPosition();
+		console.log(userLocation);
+		if (userLocation === null) {
+			return false;
+		}
+		const input = {
+			currentLocation: userLocation,
+			point: markerLocation,
+		}
+		const distance = getDistanceFrom(input);
+		console.log(distance);
+		if (distance < 20) {
+			return true;
+		}
+		return false;
+	}
+
 
 	return (
 		<>
@@ -389,7 +429,6 @@ export default function MapComponent({
 					intermediates={intermediates}
 					setIntermediates={setIntermediates}
 					routing={routing}
-					togglePOIButton={togglePOIButton}
 					setMarkerCoordinates={setMarkerCoordinates}
 				/>
 				<GetClusters markers={markers} setMarkers={setMarkers} filterPOIs={filterPOIs} />
@@ -492,19 +531,11 @@ export default function MapComponent({
 									setRatingPositive={setRatingPositive}
 									ratingNegative={ratingNegative}
 									setRatingNegative={setRatingNegative}
-									ratingPositiveStat={ratingPositiveStat}
-									setRatingPositiveStat={setRatingPositiveStat}
-									ratingNegativeStat={ratingNegativeStat}
-									setRatingNegativeStat={setRatingNegativeStat}
-									existsClicked={existsClicked}
-									setExistsClicked={setExistsClicked}
-									fakeNewsClicked={fakeNewsClicked}
-									setFakeNewsClicked={setFakeNewsClicked}
+									hideCard={hidePOIsSideBar}
 									showDetails={showDetails}
 									setShowDetails={setShowDetails}
-									hideCard={hidePOIsSideBar}
+									getPosition={getPosition}
 								/>
-
 							</div>
 						)}
 					</div>
@@ -555,7 +586,7 @@ export default function MapComponent({
 							)}
 						</div>
 						<div className="mx-auto">
-							{isMobile && showPOIButton && loggedIn && (
+							{showPOIButton && (
 								<button
 									id={"create-poi-btn"} // Ensure unique IDs for the buttons
 									onClick={openCreatePOIModal}
@@ -563,7 +594,6 @@ export default function MapComponent({
 								>
 									Create POI
 								</button>
-
 							)}
 						</div>
 						<div className={"flex absolute right-2 bottom-2"}>
