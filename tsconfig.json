@@ -34,7 +34,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "jest.config.js"
-, "app/components/POIsSidebar", "__tests__/components/markersManager.test.tsx"  ],
+, "app/components/POIsSidebar", "__tests__/components/markersManager.test.tsx", ".next/userProfile.tsx", ".next/map.test.tsx", "app/components/posComp.js"  ],
   "exclude": [
     "node_modules"
   ]

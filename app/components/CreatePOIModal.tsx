@@ -1,5 +1,3 @@
-import React from "react";
-
 interface CreatePOIModalProps {
     latitude: number;
     longitude: number;
@@ -45,3 +43,4 @@ const CreatePOIModal: React.FC<CreatePOIModalProps> = ({
 };
 
 export default CreatePOIModal;
+
