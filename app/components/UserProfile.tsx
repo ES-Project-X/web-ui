@@ -181,7 +181,6 @@ export default function UserProfile() {
                 // get the image type
                 //@ts-ignore
                 setImageType(reader.result.split(",")[0].split(":")[1].split(";")[0]);
-                console.log(image_type)
             };
 
             reader.onerror = (error) => {
