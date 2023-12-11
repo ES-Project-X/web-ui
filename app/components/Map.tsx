@@ -69,17 +69,10 @@ export default function MapComponent({
 	const [ratingPositive, setRatingPositive] = useState(0);
 	const [ratingNegative, setRatingNegative] = useState(0);
 
-	const [ratingPositiveStat, setRatingPositiveStat] = useState(0);
-	const [ratingNegativeStat, setRatingNegativeStat] = useState(0);
-
 	const [loggedIn, setLoggedIn] = useState<boolean>(false);
 	const [avatar, setAvatar] = useState("");
 	const [fname, setFname] = useState("");
 	const [isRModalOpen, setIsRModalOpen] = useState(false);
-
-	const [existsClicked, setExistsClicked] = useState(false);
-	const [fakeNewsClicked, setFakeNewsClicked] = useState(false);
-	const [showDetails, setShowDetails] = useState(false);
 
 	const [routing, setRouting] = useState(false);
 	const [addIntermediate, setAddIntermediate] = useState(false);
@@ -492,19 +485,8 @@ export default function MapComponent({
 									setRatingPositive={setRatingPositive}
 									ratingNegative={ratingNegative}
 									setRatingNegative={setRatingNegative}
-									ratingPositiveStat={ratingPositiveStat}
-									setRatingPositiveStat={setRatingPositiveStat}
-									ratingNegativeStat={ratingNegativeStat}
-									setRatingNegativeStat={setRatingNegativeStat}
-									existsClicked={existsClicked}
-									setExistsClicked={setExistsClicked}
-									fakeNewsClicked={fakeNewsClicked}
-									setFakeNewsClicked={setFakeNewsClicked}
-									showDetails={showDetails}
-									setShowDetails={setShowDetails}
 									hideCard={hidePOIsSideBar}
 								/>
-
 							</div>
 						)}
 					</div>
