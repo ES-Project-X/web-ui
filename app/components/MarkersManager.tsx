@@ -15,7 +15,6 @@ export default function MarkersManager({
   intermediates,
   setIntermediates,
   routing,
-  togglePOIButton,
   setMarkerCoordinates,
 }: {
   origin: SearchPoint;
@@ -25,9 +24,7 @@ export default function MarkersManager({
   intermediates: SearchPoint[];
   setIntermediates: (intermediate: SearchPoint[]) => void;
   routing: boolean;
-  togglePOIButton: (visibility: boolean) => void;
-  setMarkerCoordinates: React.Dispatch<
-    React.SetStateAction<{ latitude: number; longitude: number }>
+  setMarkerCoordinates: React.Dispatch<React.SetStateAction<{ latitude: number; longitude: number }>
   >;
 }) {
   const [redVisible, setRedVisible] = useState<boolean>(false);
@@ -161,7 +158,6 @@ export default function MarkersManager({
 
   function handleClick(e: any) {
     if (routing) {
-      togglePOIButton(false);
       if (!greenVisible) {
         setGreenVisible(true);
         let newOrigin = copySearchPoint(origin);
@@ -195,14 +191,12 @@ export default function MarkersManager({
         return;
       }
       setRedVisible(false);
-      togglePOIButton(false);
     } else {
       setRedVisible(true);
       let newDestination = copySearchPoint(destination);
       newDestination.setLatLng(e.latlng);
       setDestination(newDestination);
       setMarkerCoordinates({ latitude: e.latlng.lat, longitude: e.latlng.lng });
-      togglePOIButton(true);
     }
   }
 
@@ -211,7 +205,6 @@ export default function MarkersManager({
       if (!routing && redVisible) {
         setRedVisible(false);
         setDestination(new SearchPoint());
-        togglePOIButton(false);
       } else {
         clickCount++;
         setTimeout(() => {

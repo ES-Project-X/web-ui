@@ -17,6 +17,9 @@ const POIsSidebar = ({
     ratingNegative,
     setRatingNegative,
     hideCard,
+    showDetails,
+    setShowDetails,
+    getPosition,
 }: {
     isLoggedIn: boolean;
     selectedPOI: POI;
@@ -25,6 +28,9 @@ const POIsSidebar = ({
     ratingNegative: number;
     setRatingNegative: (ratingNegative: number) => void;
     hideCard: () => void;
+    showDetails: boolean;
+    setShowDetails: (showDetails: boolean) => void;
+    getPosition: () => { lat: number; lon: number } | null;
 }) => {
     const [closeEnough, setCloseEnough] = useState(false);
     const [position, setPosition] = useState<{ lat: number; lon: number }>();
@@ -32,48 +38,18 @@ const POIsSidebar = ({
     const [showData, setShowData] = useState<string>("");
     const [fullData, setFullData] = useState<any>({});
 
-    const [showDetails, setShowDetails] = useState(false);
     const [existsClicked, setExistsClicked] = useState(false);
     const [fakeNewsClicked, setFakeNewsClicked] = useState(false);
 
     const [sign, setSign] = useState("");
     const [colorClass, setColorClass] = useState("");
 
-    function getPosition() {
-        if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    setPosition({
-                        lat: position.coords.latitude,
-                        lon: position.coords.longitude,
-                    });
-                },
-                (error) => {
-                    switch (error.code) {
-                        case error.PERMISSION_DENIED:
-                            console.log('User denied the request for Geolocation.');
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            console.log('Location information is unavailable.');
-                            break;
-                        case error.TIMEOUT:
-                            console.log('The request to get user location timed out.');
-                            break;
-                        default:
-                            console.log('An error occurred.');
-                            break;
-                    }
-                },
-                { enableHighAccuracy: true }
-            );
-        } else {
-            console.log('Geolocation is not supported by this browser.');
-        }
-    }
-
     useEffect(() => {
         if (isMobile) {
-            getPosition();
+            const p = getPosition();
+            if (p !== null) {;
+                setPosition(p);
+            }
         }
     }, [selectedPOI]);
 

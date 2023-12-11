@@ -28,7 +28,10 @@ export const getDistanceFrom = ({
         lat: number;
         lon: number;
     };
-    point: POI;
+    point: {
+        latitude: number;
+        longitude: number;
+    } | POI;
 }) => {
     const distance = haversineDistance(currentLocation, {
         lat: point.latitude,
