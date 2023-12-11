@@ -1,4 +1,3 @@
-import { AiFillCloseCircle, AiFillDislike, AiFillLike } from "react-icons/ai";
 import { getDistanceFrom } from "../utils/functions";
 import { POI } from "../structs/poi";
 import { useEffect, useState } from "react";
@@ -27,6 +26,7 @@ const POIsSidebar = ({
     setFakeNewsClicked,
     showDetails,
     setShowDetails,
+    hideCard,
 }: {
     isLoggedIn: boolean;
     selectedPOI: POI;
@@ -44,6 +44,7 @@ const POIsSidebar = ({
     setFakeNewsClicked: Function;
     showDetails: boolean;
     setShowDetails: Function;
+    hideCard: () => void;
 }) => {
 
     const [closeEnough, setCloseEnough] = useState(false);
@@ -147,32 +148,25 @@ const POIsSidebar = ({
             });
     }
 
-	function rateStatusFunction(id: string, status: boolean) {
-		const headers = {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${TOKEN}`,
-		};
-		const url = new URL(URL_API + "poi/status");
-		let body = {
-			id: id,
-			status: status,
-		};
-		return fetch(url.toString(), {
-			headers,
-			method: "PUT",
-			body: JSON.stringify(body),
-		});
-	}
+    function rateStatusFunction(id: string, status: boolean) {
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+        };
+        const url = new URL(URL_API + "poi/status");
+        let body = {
+            id: id,
+            status: status,
+        };
+        return fetch(url.toString(), {
+            headers,
+            method: "PUT",
+            body: JSON.stringify(body),
+        });
+    }
 
     const toggleDetails = () => {
         setShowDetails(!showDetails);
-    };
-
-    const hideCard = () => {
-        document
-            .getElementById("poi-sidebar")
-            ?.style.setProperty("display", "none");
-        setShowDetails(false);
     };
 
     async function handleClick(rate: boolean) {
@@ -233,12 +227,10 @@ const POIsSidebar = ({
             <div className="sidebar-body">
                 <div className="sidebar-body-item">
                     <div className={"flex justify-end pb-2"}>
-                        <button className="close-button" data-testid="close-button">
-                            <AiFillCloseCircle
-                                onClick={() => {
-                                    hideCard();
-                                }}
-                            />
+                        <button className="close-button" onClick={hideCard}>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+                            </svg>
                         </button>
                     </div>
                     <div
@@ -272,7 +264,10 @@ const POIsSidebar = ({
                                         handleClick(true);
                                     }}
                                 >
-                                    <AiFillLike color="green" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-green-600">
+                                        <path d="M7.493 18.75c-.425 0-.82-.236-.975-.632A7.48 7.48 0 016 15.375c0-1.75.599-3.358 1.602-4.634.151-.192.373-.309.6-.397.473-.183.89-.514 1.212-.924a9.042 9.042 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75 2.25 2.25 0 012.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23h-.777zM2.331 10.977a11.969 11.969 0 00-.831 4.398 12 12 0 00.52 3.507c.26.85 1.084 1.368 1.973 1.368H4.9c.445 0 .72-.498.523-.898a8.963 8.963 0 01-.924-3.977c0-1.708.476-3.305 1.302-4.666.245-.403-.028-.959-.5-.959H4.25c-.832 0-1.612.453-1.918 1.227z" />
+                                    </svg>
+
                                     <span className="text-green-600 ml-3">{ratingPositive}</span>
                                 </button>
                             </>
@@ -287,7 +282,9 @@ const POIsSidebar = ({
                                         handleClick(true);
                                     }}
                                 >
-                                    <AiFillLike color="white" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white">
+                                        <path d="M7.493 18.75c-.425 0-.82-.236-.975-.632A7.48 7.48 0 016 15.375c0-1.75.599-3.358 1.602-4.634.151-.192.373-.309.6-.397.473-.183.89-.514 1.212-.924a9.042 9.042 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75 2.25 2.25 0 012.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23h-.777zM2.331 10.977a11.969 11.969 0 00-.831 4.398 12 12 0 00.52 3.507c.26.85 1.084 1.368 1.973 1.368H4.9c.445 0 .72-.498.523-.898a8.963 8.963 0 01-.924-3.977c0-1.708.476-3.305 1.302-4.666.245-.403-.028-.959-.5-.959H4.25c-.832 0-1.612.453-1.918 1.227z" />
+                                    </svg>
                                     <span className="text-white ml-3">{ratingPositive}</span>
                                 </button>
                             </>
@@ -301,7 +298,10 @@ const POIsSidebar = ({
                                         handleClick(false);
                                     }}
                                 >
-                                    <AiFillDislike color="red" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-red-600">
+                                        <path d="M15.73 5.25h1.035A7.465 7.465 0 0118 9.375a7.465 7.465 0 01-1.235 4.125h-.148c-.806 0-1.534.446-2.031 1.08a9.04 9.04 0 01-2.861 2.4c-.723.384-1.35.956-1.653 1.715a4.498 4.498 0 00-.322 1.672V21a.75.75 0 01-.75.75 2.25 2.25 0 01-2.25-2.25c0-1.152.26-2.243.723-3.218C7.74 15.724 7.366 15 6.748 15H3.622c-1.026 0-1.945-.694-2.054-1.715A12.134 12.134 0 011.5 12c0-2.848.992-5.464 2.649-7.521.388-.482.987-.729 1.605-.729H9.77a4.5 4.5 0 011.423.23l3.114 1.04a4.5 4.5 0 001.423.23zM21.669 13.773c.536-1.362.831-2.845.831-4.398 0-1.22-.182-2.398-.52-3.507-.26-.85-1.084-1.368-1.973-1.368H19.1c-.445 0-.72.498-.523.898.591 1.2.924 2.55.924 3.977a8.959 8.959 0 01-1.302 4.666c-.245.403.028.959.5.959h1.053c.832 0 1.612-.453 1.918-1.227z" />
+                                    </svg>
+
                                     <span className="text-red-600 ml-3">{ratingNegative}</span>
                                 </button>
                             </>
@@ -314,7 +314,9 @@ const POIsSidebar = ({
                                         handleClick(false);
                                     }}
                                 >
-                                    <AiFillDislike color="white" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white">
+                                        <path d="M15.73 5.25h1.035A7.465 7.465 0 0118 9.375a7.465 7.465 0 01-1.235 4.125h-.148c-.806 0-1.534.446-2.031 1.08a9.04 9.04 0 01-2.861 2.4c-.723.384-1.35.956-1.653 1.715a4.498 4.498 0 00-.322 1.672V21a.75.75 0 01-.75.75 2.25 2.25 0 01-2.25-2.25c0-1.152.26-2.243.723-3.218C7.74 15.724 7.366 15 6.748 15H3.622c-1.026 0-1.945-.694-2.054-1.715A12.134 12.134 0 011.5 12c0-2.848.992-5.464 2.649-7.521.388-.482.987-.729 1.605-.729H9.77a4.5 4.5 0 011.423.23l3.114 1.04a4.5 4.5 0 001.423.23zM21.669 13.773c.536-1.362.831-2.845.831-4.398 0-1.22-.182-2.398-.52-3.507-.26-.85-1.084-1.368-1.973-1.368H19.1c-.445 0-.72.498-.523.898.591 1.2.924 2.55.924 3.977a8.959 8.959 0 01-1.302 4.666c-.245.403.028.959.5.959h1.053c.832 0 1.612-.453 1.918-1.227z" />
+                                    </svg>
                                     <span className="text-white ml-3">{ratingNegative}</span>
                                 </button>
                             </>
@@ -348,12 +350,10 @@ const POIsSidebar = ({
             {/* Display detailed view */}
             <div className="detailed-view">
                 <div className={"flex justify-end pb-2"}>
-                    <button className="close-button" data-testid="close-button">
-                        <AiFillCloseCircle
-                            onClick={() => {
-                                hideCard();
-                            }}
-                        />
+                    <button className="close-button" data-testid="close-button" onClick={hideCard}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                            <path d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+                        </svg>
                     </button>
                 </div>
                 <img
@@ -440,8 +440,10 @@ const POIsSidebar = ({
     );
 
     return (
-        <div className="sidebar" data-testid="poi-sidebar" id="poi-sidebar">
-            {showDetails ? displayDetails : displayMainContent}
+        <div className="card p-3">
+            <div className="sidebar" data-testid="poi-sidebar" id="poi-sidebar">
+                {showDetails ? displayDetails : displayMainContent}
+            </div>
         </div>
     );
 };

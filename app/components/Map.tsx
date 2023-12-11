@@ -2,10 +2,6 @@
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
-import {
-	Form,
-	Card,
-} from "react-bootstrap";
 import { MapContainer, Polyline, TileLayer } from "react-leaflet";
 import { LatLng, LatLngBounds } from "leaflet";
 import "leaflet-rotate";
@@ -22,13 +18,13 @@ import POIsSidebar from "./POIsSidebar";
 import { Direction } from "../structs/direction";
 import RegisterUserModal from "./RegisterUserModal";
 import Cookies from "js-cookie";
-import "../globals.css";
 import { UserData } from "../structs/user";
 import { POI } from "../structs/poi";
 import { URL_API, URL_GEO, URL_REV, COGNITO_LOGIN_URL } from "../utils/constants";
-import { convertMsToTime } from "../utils/time";
 import RoutingComponent from "./Routing";
 import { SearchPoint } from "../structs/SearchComponent";
+import "../globals.css";
+import DirectionsComponent from "./Directions";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -90,6 +86,11 @@ export default function MapComponent({
 
 	const [openRouting, setOpenRouting] = useState(false);
 	const [showRouting, setShowRouting] = useState(true);
+
+	const [showDirections, setShowDirections] = useState(false);
+	const [POISideBar, setPOISideBar] = useState(false);
+
+	const [searchField, setSearchField] = useState("");
 
 	function getUser() {
 
@@ -190,7 +191,7 @@ export default function MapComponent({
 				return marker.name.toLowerCase().includes(filterName.toLowerCase());
 			});
 		if (mapRef.current) {
-			updateClusterGroup(filteredMarkers, mapRef, fetchPOIDetails);
+			updateClusterGroup(filteredMarkers, mapRef, fetchPOIDetails, showPOIsSideBar);
 		}
 	};
 
@@ -231,7 +232,7 @@ export default function MapComponent({
 	const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
 		if (event.key === "Enter") {
 			event.preventDefault();
-			const query = (event.target as HTMLInputElement).value;
+			const query = searchField;
 			if (query.match(/-?[0-9]{1,3}[.][0-9]+,-?[0-9]{1,3}[.][0-9]+/)) {
 				getGeoLocation(URL_REV + "&at=" + query);
 			} else {
@@ -241,7 +242,11 @@ export default function MapComponent({
 	};
 
 	const createRoute = () => {
-		if (openRouting) {
+		if (showDirections) {
+			closeDirections();
+			return;
+		}
+		else if (openRouting) {
 			setPoints([]);
 			setOrigin(new SearchPoint(""));
 			setDestination(new SearchPoint(""));
@@ -249,13 +254,16 @@ export default function MapComponent({
 		}
 		setRouting(!routing);
 		setOpenRouting(!openRouting);
+		closeDirections();
 	};
 
 	const handleNext = () => {
+		if (currentIndex === directions.length - 1) return;
 		setCurrentIndex(currentIndex + 1);
 	};
 
 	const handleBefore = () => {
+		if (currentIndex === 0) return;
 		setCurrentIndex(currentIndex - 1);
 	};
 
@@ -310,6 +318,24 @@ export default function MapComponent({
 		window.location.reload();
 	};
 
+	function closeDirections() {
+		setShowDirections(false);
+		setShowRouting(true);
+	}
+
+	function openDirections() {
+		setShowRouting(false);
+		setShowDirections(true);
+	}
+
+	function showPOIsSideBar() {
+		setPOISideBar(true);
+	}
+
+	function hidePOIsSideBar() {
+		setPOISideBar(false);
+	}
+
 	return (
 		<>
 			{/* Sidebar
@@ -317,8 +343,6 @@ export default function MapComponent({
 			<Sidebar routes={routes} draw={drawRoute} />
 
 			*/}
-
-			{/* eventually change this to the main page, but for now fica aqui */}
 
 			<MapContainer
 				id={"map-container"}
@@ -355,82 +379,28 @@ export default function MapComponent({
 				/>
 				<GetClusters markers={markers} setMarkers={setMarkers} filterPOIs={filterPOIs} />
 			</MapContainer>
-			{directions[currentIndex] !== undefined && (
-				<Card
-					id={"ins-card"}
-					style={{
-						zIndex: 1,
-						bottom: "10%",
-						left: "0.5em",
-						position: "absolute",
-						display: "none",
-					}}
-				>
-					<Card.Body>
-						<Card.Title>{directions[currentIndex].direction}</Card.Title>
-						<Card.Text>
-							Distance: {directions[currentIndex].distance} meters <br />
-							Time: {convertMsToTime(directions[currentIndex].duration)}
-						</Card.Text>
-						<button
-							id={"next-ins-btn"}
-							onClick={handleNext}
-							className="btn"
-						>
-							Next
-						</button>
-						<button
-							id={"before-ins-btn"}
-							onClick={handleBefore}
-							className="btn"
-						>
-							Before
-						</button>
-					</Card.Body>
-				</Card>
-			)}
 			<div className="map-ui w-full h-screen flex flex-col">
 				{isRModalOpen && (
 					<RegisterUserModal
 						onClose={closeModal}
 						onRegisterUser={registerUser}
 						handleKeyDown={(e) => {
-							// Handle key down events if needed
+							
 						}}
 					/>
 				)}
-				{/*
-                    POPUP CARD
-                */}
-				<Card
-					id={"card-info"}
-					style={{
-						position: "absolute",
-						top: "10em",
-						left: "50%",
-						display: "none",
-					}}
-				>
-					<Card.Body>
-						<div id={"location-text"}></div>
-						<div id={"lat-text"}></div>
-						<div id={"lng-txt"}></div>
-					</Card.Body>
-				</Card>
 				{/*
                     	UPPER PART OF THE UI
                 	*/}
 				<div className="flex pt-2 w-full top-0">
 					<div className={"w-48 sm:w-96 mx-auto pt-1"}>
-						<Form>
-							<Form.Group controlId={"search-bar"}>
-								<Form.Control
-									type={"text"}
-									placeholder={"Search"}
-									onKeyDown={handleKeyDown}
-								/>
-							</Form.Group>
-						</Form>
+						<input
+							type={"text"}
+							placeholder={"Search"}
+							onKeyDown={handleKeyDown}
+							onChange={(event) => setSearchField(event.target.value)}
+							className="bg-white dark:bg-black shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-black dark:text-white leading-tight focus:outline-none focus:shadow-outline"
+						/>
 					</div>
 					<div className="absolute right-2">
 						{loggedIn ? (
@@ -466,7 +436,7 @@ export default function MapComponent({
                     	MIDDLE PART OF THE UI
                 	*/}
 				<div className="flex h-screen">
-					<div className="flex flex-col mr-auto ml-2 pt-32">
+					<div className="flex flex-col ml-2 pt-10 sm:pt-32 w-full sm:w-1/5">
 						{openRouting && (
 							<RoutingComponent
 								showRouting={showRouting}
@@ -484,59 +454,67 @@ export default function MapComponent({
 								setPoints={setPoints}
 								addIntermediate={addIntermediate}
 								setAddIntermediate={setAddIntermediate}
+								setDirections={setDirections}
+								openDirections={openDirections}
+								setCurrentIndex={setCurrentIndex}
 							/>
 						)}
 					</div>
-					<div className={"flex items-center"}>
-						<div className="ml-auto">
-							<FilterBoardComponent
-								filterPOIs={filterPOIs}
-								setFilterName={setFilterName}
-								setFilterTypes={setFilterTypes}
-								types={filterTypes}
-							/>
-						</div>
-						<div>
-							<Card id={"poi-sidebar"} style={{ display: "none" }}>
-								<Card.Body>
-									<POIsSidebar
-										isLoggedIn={loggedIn}
-										selectedPOI={selectedPOI}
-										ratingPositive={ratingPositive}
-										setRatingPositive={setRatingPositive}
-										ratingNegative={ratingNegative}
-										setRatingNegative={setRatingNegative}
-										ratingPositiveStat={ratingPositiveStat}
-										setRatingPositiveStat={setRatingPositiveStat}
-										ratingNegativeStat={ratingNegativeStat}
-										setRatingNegativeStat={setRatingNegativeStat}
-										existsClicked={existsClicked}
-										setExistsClicked={setExistsClicked}
-										fakeNewsClicked={fakeNewsClicked}
-										setFakeNewsClicked={setFakeNewsClicked}
-										showDetails={showDetails}
-										setShowDetails={setShowDetails}
-									/>
-								</Card.Body>
-							</Card>
-						</div>
+					<div className={"flex items-center ml-auto"}>
+						{!POISideBar && (
+							<div>
+								<FilterBoardComponent
+									filterPOIs={filterPOIs}
+									setFilterName={setFilterName}
+									setFilterTypes={setFilterTypes}
+									types={filterTypes}
+								/>
+							</div>
+						)}
+						{POISideBar && (
+							<div className="pr-2">
+								<POIsSidebar
+									isLoggedIn={loggedIn}
+									selectedPOI={selectedPOI}
+									ratingPositive={ratingPositive}
+									setRatingPositive={setRatingPositive}
+									ratingNegative={ratingNegative}
+									setRatingNegative={setRatingNegative}
+									ratingPositiveStat={ratingPositiveStat}
+									setRatingPositiveStat={setRatingPositiveStat}
+									ratingNegativeStat={ratingNegativeStat}
+									setRatingNegativeStat={setRatingNegativeStat}
+									existsClicked={existsClicked}
+									setExistsClicked={setExistsClicked}
+									fakeNewsClicked={fakeNewsClicked}
+									setFakeNewsClicked={setFakeNewsClicked}
+									showDetails={showDetails}
+									setShowDetails={setShowDetails}
+									hideCard={hidePOIsSideBar}
+								/>
+
+							</div>
+						)}
 					</div>
 				</div>
 				{/*
                     	LOWER PART OF THE UI
                 	*/}
-				<div className="flex pb-2 mt-auto w-full">
-					<div className="mr-auto pl-2 flex">
-						{!isMobile ? (
-							<button
-								id={"ori-dst-btn"}
-								onClick={createRoute}
-								className="btn"
-							>
-								Route
-							</button>
-						) : (
-							showRouting ? (
+				<div className="pb-2 mt-auto w-full">
+					<div className="mx-auto w-full sm:w-1/2">
+						{showDirections && (
+							<DirectionsComponent
+								directions={directions}
+								currentIndex={currentIndex}
+								handleNext={handleNext}
+								handleBefore={handleBefore}
+								closeDirections={closeDirections}
+							/>
+						)}
+					</div>
+					<div className="flex w-full">
+						<div className="flex mr-auto pl-2">
+							{!isMobile ? (
 								<button
 									id={"ori-dst-btn"}
 									onClick={createRoute}
@@ -545,38 +523,48 @@ export default function MapComponent({
 									Route
 								</button>
 							) : (
-								<button
-									id={"ori-dst-btn"}
-									onClick={() => setShowRouting(true)}
-									className="btn"
-								>
-									Show
-								</button>
-							)
-						)}
-					</div>
-					<div className={"flex ml-auto pr-2"}>
-						{isMobile ? null :
-							(
-								// preciso arranjar os cantos
-								<>
+								showRouting ? (
 									<button
-										id={"map-rotate-left-btn"}
-										onClick={() => addToBearing(-10)}
-										className="btn py-3 px-3 border rounded-l-xl shadow"
+										id={"ori-dst-btn"}
+										onClick={createRoute}
+										className="btn"
 									>
-										Rotate Left
+										Route
 									</button>
+								) : (
 									<button
-										id={"map-rotate-right-btn"}
-										onClick={() => addToBearing(10)}
-										className="btn py-3 px-3 border shadow"
+										id={"ori-dst-btn"}
+										onClick={closeDirections}
+										className="btn"
 									>
-										Rotate Right
+										Show
 									</button>
-								</>
-							)
-						}
+								)
+							)}
+						</div>
+						<div className={"flex ml-auto pr-2"}>
+							{isMobile ? null :
+								(
+									// preciso arranjar os cantos
+									<>
+										<button
+											id={"map-rotate-left-btn"}
+											onClick={() => addToBearing(-10)}
+											className="btn py-3 px-3 border rounded-none rounded-l-xl shadow"
+										>
+											Rotate Left
+										</button>
+										<button
+											id={"map-rotate-right-btn"}
+											onClick={() => addToBearing(10)}
+											className="btn py-3 px-3 border rounded-none rounded-r-xl shadow"
+										>
+											Rotate Right
+										</button>
+									</>
+								)
+							}
+						</div>
 					</div>
 				</div>
 			</div>

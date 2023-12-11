@@ -2,9 +2,7 @@ import { Marker, Popup, useMapEvents } from "react-leaflet";
 import RedMarker from "./markers/RedMarker";
 import GreenMarker from "./markers/GreenMarker";
 import BlueMarker from "./markers/BlueMarker";
-import { LatLng } from "leaflet";
 import { useState, useEffect } from "react";
-import { stringToLatLng } from "../utils/functions";
 import { SearchPoint, copySearchPoint } from "../structs/SearchComponent";
 
 let clickCount = 0;
@@ -205,6 +203,7 @@ export default function MarkersManager({
         click: (e) => {
             if (!routing && redVisible) {
                 setRedVisible(false);
+                setDestination(new SearchPoint());
             } else {
                 clickCount++;
                 setTimeout(() => {
