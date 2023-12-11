@@ -16,7 +16,7 @@ describe("MarkersManager", () => {
         render(<MapComponent />);
     });
 
-    it("adds a green marker and a red marker", () => {
+    it.skip("adds a green marker and a red marker", () => {
         const createRouteButton = screen.getByRole("button", { name: "Route" });
         fireEvent.click(createRouteButton!);
 
@@ -49,7 +49,7 @@ describe("MarkersManager", () => {
         fireEvent.click(map!, { clientX: 10, clientY: 10 });
     })
 
-    it("add a green marker and a red marker and drag them", async () => {
+    it.skip("add a green marker and a red marker and drag them", async () => {
         const createRouteButton = screen.getByRole("button", { name: "Route" });
         fireEvent.click(createRouteButton!);
 

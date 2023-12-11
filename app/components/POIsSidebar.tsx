@@ -1,11 +1,11 @@
 import { getDistanceFrom } from "../utils/functions";
 import { POI } from "../structs/poi";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 import Cookies from "js-cookie";
 import { URL_API } from "../utils/constants";
 import { padTo2Digits } from "../utils/time";
-// import LineChart from "react-linechart";
+// import { LineChart } from "react-linechart";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -46,18 +46,39 @@ const POIsSidebar = ({
     setShowDetails: Function;
     hideCard: () => void;
 }) => {
-
     const [closeEnough, setCloseEnough] = useState(false);
     const [position, setPosition] = useState(null) as any;
 
     function getPosition() {
-        navigator.geolocation.getCurrentPosition((position) => {
-            setPosition({ lat: position.coords.latitude, lon: position.coords.longitude });
-        }, (error) => {
-            console.log(error);
-        },
-            { enableHighAccuracy: true, });
-        return null;
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setPosition({
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            console.log('User denied the request for Geolocation.');
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            console.log('Location information is unavailable.');
+                            break;
+                        case error.TIMEOUT:
+                            console.log('The request to get user location timed out.');
+                            break;
+                        default:
+                            console.log('An error occurred.');
+                            break;
+                    }
+                },
+                { enableHighAccuracy: true }
+            );
+        } else {
+            console.log('Geolocation is not supported by this browser.');
+        }
     }
 
     useEffect(() => {
@@ -68,12 +89,10 @@ const POIsSidebar = ({
 
     useEffect(() => {
         if (position) {
-            const distance = getDistanceFrom(
-                {
-                    currentLocation: position,
-                    point: selectedPOI,
-                }
-            );
+            const distance = getDistanceFrom({
+                currentLocation: position,
+                point: selectedPOI,
+            });
             if (distance < 50) {
                 setCloseEnough(true);
             } else {
@@ -122,8 +141,7 @@ const POIsSidebar = ({
                 if (data.time === -1) {
                     window.alert("You cannot rate a POI that you created");
                     return false;
-                }
-                else if (data.time === 0) {
+                } else if (data.time === 0) {
                     return true;
                 } else {
                     // covert seconds in 00h00m00s
@@ -222,6 +240,55 @@ const POIsSidebar = ({
         }
     }
 
+    const data = [
+        {
+            color: "steelblue",
+            points: [
+                { x: 1, y: 2 },
+                { x: 3, y: 4 },
+                { x: 5, y: 6 },
+            ],
+        },
+    ];
+
+    const data2 = [
+        {
+            color: "red",
+            points: [
+                { x: 1, y: 2 },
+                { x: 3, y: 5 },
+                { x: 7, y: -3 },
+            ],
+        },
+    ];
+
+    const data3 = [
+        {
+            color: "green",
+            points: [
+                { x: 1, y: 2 },
+                { x: 3, y: -3 },
+                { x: 7, y: -5 },
+            ],
+        },
+    ];
+
+    const [selectedTimePeriod, setSelectedTimePeriod] = useState("7 days"); // Default
+    let graphData;
+    switch (selectedTimePeriod) {
+        case "7 days":
+            graphData = data;
+            break;
+        case "1 month":
+            graphData = data2;
+            break;
+        case "all time":
+            graphData = data3;
+            break;
+        default:
+            graphData = data;
+    }
+
     const displayMainContent = (
         <div className="main-content text-center">
             <div className="sidebar-body">
@@ -267,7 +334,6 @@ const POIsSidebar = ({
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-green-600">
                                         <path d="M7.493 18.75c-.425 0-.82-.236-.975-.632A7.48 7.48 0 016 15.375c0-1.75.599-3.358 1.602-4.634.151-.192.373-.309.6-.397.473-.183.89-.514 1.212-.924a9.042 9.042 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75 2.25 2.25 0 012.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H14.23c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23h-.777zM2.331 10.977a11.969 11.969 0 00-.831 4.398 12 12 0 00.52 3.507c.26.85 1.084 1.368 1.973 1.368H4.9c.445 0 .72-.498.523-.898a8.963 8.963 0 01-.924-3.977c0-1.708.476-3.305 1.302-4.666.245-.403-.028-.959-.5-.959H4.25c-.832 0-1.612.453-1.918 1.227z" />
                                     </svg>
-
                                     <span className="text-green-600 ml-3">{ratingPositive}</span>
                                 </button>
                             </>
@@ -330,6 +396,10 @@ const POIsSidebar = ({
         </div>
     );
 
+    const handleTimePeriodChange = (period: SetStateAction<string>) => {
+        setSelectedTimePeriod(period);
+    };
+    
     const buttonStyleExists = existsClicked
         ? {
             flex: 1,
@@ -372,50 +442,88 @@ const POIsSidebar = ({
                     {/* Added padding top */}
                     <div style={{ maxHeight: "250px", maxWidth: "400px" }}>
                         <div className="App">
-                            {/* <LineChart width={400} height={210} data={data} /> */}
+                            {/* <LineChart width={400} height={210} data={graphData} /> */}
                             <p> Graph goes here </p>
                         </div>
                     </div>
                 </div>
+                <div className="time-period-buttons mt-4">
+                    <button
+                        className={`time-period-button ${selectedTimePeriod === "7 days" ? "active" : ""
+                            }`}
+                        onClick={() => handleTimePeriodChange("7 days")}
+                        style={{
+                            marginRight: "8px",
+                            backgroundColor:
+                                selectedTimePeriod === "7 days" ? "blue" : "transparent",
+                            color: selectedTimePeriod === "7 days" ? "white" : "black",
+                        }} // Add colors for selected button
+                    >
+                        7 Days
+                    </button>
+                    <button
+                        className={`time-period-button ${selectedTimePeriod === "1 month" ? "active" : ""
+                            }`}
+                        onClick={() => handleTimePeriodChange("1 month")}
+                        style={{
+                            marginRight: "8px",
+                            backgroundColor:
+                                selectedTimePeriod === "1 month" ? "green" : "transparent",
+                            color: selectedTimePeriod === "1 month" ? "white" : "black",
+                        }} // Add colors for selected button
+                    >
+                        1 Month
+                    </button>
+                    <button
+                        className={`time-period-button ${selectedTimePeriod === "all time" ? "active" : ""
+                            }`}
+                        onClick={() => handleTimePeriodChange("all time")}
+                        style={{
+                            backgroundColor:
+                                selectedTimePeriod === "all time" ? "red" : "transparent",
+                            color: selectedTimePeriod === "all time" ? "white" : "black",
+                        }} // Add colors for selected button
+                    >
+                        All Time
+                    </button>
+                </div>
 
                 {selectedPOI.rate ? (
-                    (
-                        <>
-                            <div
-                                className="rate-status-buttons"
-                                style={{
-                                    display: "flex",
-                                    gap: "10px",
-                                    justifyContent: "center",
-                                    paddingTop: "20px",
-                                }}
-                            >
-                                {selectedPOI.status ? (
-                                    <p>
-                                        {" "}
-                                        You have already rated this POI! Try again in the next day.{" "}
-                                    </p>
-                                ) : (
-                                    <>
-                                        <button
-                                            className="btn btn-success"
-                                            style={buttonStyleExists}
-                                            onClick={() => handleClickStatus(true)}
-                                        >
-                                            Exists
-                                        </button>
-                                        <button
-                                            className="btn btn-error"
-                                            style={buttonStyleFakeNews}
-                                            onClick={() => handleClickStatus(false)}
-                                        >
-                                            FakeNews
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        </>
-                    )
+                    <>
+                        <div
+                            className="rate-status-buttons"
+                            style={{
+                                display: "flex",
+                                gap: "10px",
+                                justifyContent: "center",
+                                paddingTop: "20px",
+                            }}
+                        >
+                            {selectedPOI.status ? (
+                                <p>
+                                    {" "}
+                                    You have already rated this POI! Try again in the next day.{" "}
+                                </p>
+                            ) : (
+                                <>
+                                    <button
+                                        className="btn btn-success"
+                                        style={buttonStyleExists}
+                                        onClick={() => handleClickStatus(true)}
+                                    >
+                                        Available
+                                    </button>
+                                    <button
+                                        className="btn btn-error"
+                                        style={buttonStyleFakeNews}
+                                        onClick={() => handleClickStatus(false)}
+                                    >
+                                        Not Available
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </>
                 ) : (
                     <>
                         <div

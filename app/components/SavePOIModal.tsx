@@ -109,7 +109,7 @@ const SavePOIModal: React.FC<SavePOIModalProps> = ({
                                 id="image"
                                 accept="image/*"
                                 onChange={handleImageChange}
-                            />
+                            />  
                             <div className="text-red-500 text-sm">{errors.image}</div>
                         </div>
                     </div>

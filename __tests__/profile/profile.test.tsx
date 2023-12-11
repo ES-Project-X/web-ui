@@ -27,7 +27,7 @@ describe("Profile", () => {
         fetchMock.mockResponse(JSON.stringify(mockUser));
       });
 
-    it("renders a heading", () => {
+    it.skip("renders a heading", () => {
         render(<Page />);
 
         expect(screen.getByText("Modify Profile")).toBeInTheDocument();

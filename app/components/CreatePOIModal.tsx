@@ -43,3 +43,4 @@ const CreatePOIModal: React.FC<CreatePOIModalProps> = ({
 };
 
 export default CreatePOIModal;
+

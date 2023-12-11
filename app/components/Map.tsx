@@ -14,7 +14,6 @@ import { BasicPOI, FilterType } from "../structs/poi";
 import { updateClusterGroup } from "./DisplayPOIs";
 import Sidebar from "./Sidebar";
 import GetClusters from "./GetClusters";
-import POIsSidebar from "./POIsSidebar";
 import { Direction } from "../structs/direction";
 import RegisterUserModal from "./RegisterUserModal";
 import Cookies from "js-cookie";
@@ -25,6 +24,7 @@ import RoutingComponent from "./Routing";
 import { SearchPoint } from "../structs/SearchComponent";
 import "../globals.css";
 import DirectionsComponent from "./Directions";
+import POIsSidebar from "./POIsSidebar";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -37,7 +37,9 @@ export default function MapComponent({
 	const center = new LatLng(40.64427, -8.64554);
 
 	const [origin, setOrigin] = useState<SearchPoint>(new SearchPoint(""));
-	const [destination, setDestination] = useState<SearchPoint>(new SearchPoint(""));
+	const [destination, setDestination] = useState<SearchPoint>(
+		new SearchPoint("")
+	);
 	const [intermediates, setIntermediates] = useState<SearchPoint[]>([]);
 
 	const [markers, setMarkers] = useState<BasicPOI[]>([]);
@@ -61,9 +63,7 @@ export default function MapComponent({
 
 	const [points, setPoints] = useState<LatLng[][]>([]);
 
-	const d = [new Direction("test", 10, 10)];
-
-	const [directions, setDirections] = useState<Direction[]>(d);
+	const [directions, setDirections] = useState<Direction[]>([]);
 	const [currentIndex, setCurrentIndex] = useState(0);
 
 	const [ratingPositive, setRatingPositive] = useState(0);
@@ -89,11 +89,11 @@ export default function MapComponent({
 
 	const [showDirections, setShowDirections] = useState(false);
 	const [POISideBar, setPOISideBar] = useState(false);
-
 	const [searchField, setSearchField] = useState("");
 
-	function getUser() {
+	const [showPOIButton, setShowPOIButton] = useState(false);
 
+	function getUser() {
 		const headers = {
 			"Content-Type": "application/json",
 			Authorization: `Bearer ${TOKEN}`,
@@ -105,8 +105,7 @@ export default function MapComponent({
 				if (res.status === 400) {
 					setIsRModalOpen(true);
 					return undefined;
-				}
-				else if (res.status !== 200) {
+				} else if (res.status !== 200) {
 					return undefined;
 				}
 				return res.json();
@@ -120,33 +119,31 @@ export default function MapComponent({
 			.catch((err) => {
 				console.log(err);
 			});
-	};
+	}
 
 	useEffect(() => {
-
 		navigator.permissions.query({ name: "geolocation" }).then((result) => {
 			if (result.state === "denied") {
 				// @ts-ignore
 				const bounds = mapRef.current?.getBounds();
 				// @ts-ignore
-				mapRef.current?.fireEvent("moveend", { target: { getBounds: () => bounds } });
+				mapRef.current?.fireEvent("moveend", {
+					target: { getBounds: () => bounds },
+				});
 			}
 		});
 
 		if (!TOKEN) {
 			setLoggedIn(false);
 			localStorage.removeItem("user");
-		}
-		else if (localStorage.getItem("user")) {
+		} else if (localStorage.getItem("user")) {
 			setLoggedIn(true);
 			const userLS = JSON.parse(localStorage.getItem("user") || "");
 			setAvatar(userLS.image_url);
 			setFname(userLS.first_name);
-		}
-		else if (TOKEN) {
+		} else if (TOKEN) {
 			getUser();
 		}
-
 	}, []);
 
 	const addToBearing = (amount: number) => {
@@ -160,7 +157,7 @@ export default function MapComponent({
 
 	function fetchPOIDetails(id: string) {
 		// send Token if Token is defined
-		console.log(TOKEN);
+
 		let headers = {};
 		if (TOKEN !== undefined && TOKEN !== null) {
 			headers = {
@@ -198,23 +195,22 @@ export default function MapComponent({
 	const flyTo = (lat: number, lng: number, zoom: number, dur: number = 4) => {
 		// @ts-ignore
 		mapRef.current.flyTo(new LatLng(lat, lng), zoom, { duration: dur });
-	}
+	};
 
 	const fitBounds = (bounds: LatLngBounds) => {
 		// @ts-ignore
 		mapRef.current.fitBounds(bounds, { padding: [50, 50] });
-	}
+	};
 
 	const getViewBounds = () => {
 		// @ts-ignore
 		return mapRef.current.getBounds();
-	}
+	};
 
 	const getGeoLocation = (query: string) => {
 		fetch(query)
 			.then((response) => response.json())
 			.then((data) => {
-				console.log(data);
 				if (data.items.length === 0) {
 					window.alert("No results");
 					return;
@@ -336,6 +332,23 @@ export default function MapComponent({
 		setPOISideBar(false);
 	}
 
+	const togglePOIButton = (
+		visibility: boolean | ((prevState: boolean) => boolean)
+	) => {
+		setShowPOIButton(visibility);
+	};
+
+	const [markerCoordinates, setMarkerCoordinates] = useState({
+		latitude: 0,
+		longitude: 0,
+	});
+
+	function openCreatePOIModal() {
+		window.location.replace(
+			`/createpoi?lat=${markerCoordinates.latitude}&lng=${markerCoordinates.longitude}`
+		);
+	}
+
 	return (
 		<>
 			{/* Sidebar
@@ -376,6 +389,8 @@ export default function MapComponent({
 					intermediates={intermediates}
 					setIntermediates={setIntermediates}
 					routing={routing}
+					togglePOIButton={togglePOIButton}
+					setMarkerCoordinates={setMarkerCoordinates}
 				/>
 				<GetClusters markers={markers} setMarkers={setMarkers} filterPOIs={filterPOIs} />
 			</MapContainer>
@@ -384,9 +399,6 @@ export default function MapComponent({
 					<RegisterUserModal
 						onClose={closeModal}
 						onRegisterUser={registerUser}
-						handleKeyDown={(e) => {
-							
-						}}
 					/>
 				)}
 				{/*
@@ -416,7 +428,7 @@ export default function MapComponent({
 									<img
 										src={avatar}
 										alt={`${fname}'s profile`}
-										className="rounded-circle"
+										className="rounded-circle shadow"
 										style={{ height: "100%", objectFit: "cover" }}
 									/>
 								</button>
@@ -513,7 +525,7 @@ export default function MapComponent({
 						)}
 					</div>
 					<div className="flex w-full">
-						<div className="flex mr-auto pl-2">
+						<div className="absolute left-2 bottom-2">
 							{!isMobile ? (
 								<button
 									id={"ori-dst-btn"}
@@ -542,10 +554,21 @@ export default function MapComponent({
 								)
 							)}
 						</div>
-						<div className={"flex ml-auto pr-2"}>
+						<div className="mx-auto">
+							{isMobile && showPOIButton && loggedIn && (
+								<button
+									id={"create-poi-btn"} // Ensure unique IDs for the buttons
+									onClick={openCreatePOIModal}
+									className="btn bg-green-600 text-white border-white hover:bg-green-700 hover:border-green-700"
+								>
+									Create POI
+								</button>
+
+							)}
+						</div>
+						<div className={"flex absolute right-2 bottom-2"}>
 							{isMobile ? null :
 								(
-									// preciso arranjar os cantos
 									<>
 										<button
 											id={"map-rotate-left-btn"}
