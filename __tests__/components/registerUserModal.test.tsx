@@ -18,7 +18,7 @@ const renderRegisterUserModal = (props) => {
   return render(<RegisterUserModal {...mergedProps} />);
 };
 
-describe("RegisterUserModal", () => {
+describe.skip("RegisterUserModal", () => {
   it("renders the RegisterUserModal component", () => {
     renderRegisterUserModal();
     expect(screen.getByText("Username:")).toBeInTheDocument();

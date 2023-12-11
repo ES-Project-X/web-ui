@@ -2,7 +2,7 @@ import { useMap } from "react-leaflet";
 import { useEffect, useState } from "react";
 import "leaflet.locatecontrol";
 import "leaflet.locatecontrol/dist/L.Control.Locate.min.css";
-import { control, layerGroup } from "leaflet";
+import { control } from "leaflet";
 
 export default function LocateControl() {
 

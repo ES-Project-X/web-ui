@@ -158,8 +158,8 @@ export default function CreatePOIPage() {
   };
 
   return (
-    <div className="min-h-screen  text-black">
-      <section className="relative h-screen/2 pt-32 flex items-center justify-center overflow-hidden">
+    <div className="min-h-screen bg-white text-black">
+      <section className="relative h-screen/3 pt-32 flex items-center justify-center overflow-hidden">
         {/* Linear gradient overlay for fading effect */}
         <div
           className="absolute inset-0 z-10"

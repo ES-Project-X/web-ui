@@ -1,12 +1,10 @@
-import React, { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Direction } from "../structs/direction";
 import { SearchPoint, copySearchPoint } from "../structs/SearchComponent";
 import { URL_API, URL_GEO, URL_REV, URL_ROUTING } from "../utils/constants";
 import Cookies from "js-cookie";
 import { LatLng, LatLngBounds } from "leaflet";
 import { isMobile } from "react-device-detect";
-import { get } from "http";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -27,6 +25,9 @@ export default function RoutingComponent(
         setPoints,
         addIntermediate,
         setAddIntermediate,
+        setDirections,
+        openDirections,
+        setCurrentIndex,
     }: {
         showRouting: boolean,
         setShowRouting: (showRouting: boolean) => void,
@@ -43,6 +44,9 @@ export default function RoutingComponent(
         setPoints: (points: LatLng[][]) => void,
         addIntermediate: boolean,
         setAddIntermediate: (intermediate: boolean) => void,
+        setDirections: (directions: Direction[]) => void,
+        openDirections: () => void,
+        setCurrentIndex: (index: number) => void;
     }
 ) {
     const [pointToRemove, setPointToRemove] = useState(-1);
@@ -322,6 +326,7 @@ export default function RoutingComponent(
         setNames(newNames);
         setMyPoints(newMyPoints);
         setGettingRoute(true);
+        setCurrentIndex(0);
     };
 
     const flyTo = async (point: SearchPoint) => {
@@ -375,6 +380,7 @@ export default function RoutingComponent(
                             )
                         );
                     }
+                    setDirections(directions);
                 })
                 .catch((error) => {
                     console.error("Error:", error);
@@ -423,12 +429,12 @@ export default function RoutingComponent(
     }
 
     useEffect(() => {
-        if (origin.isNameNull() || destination.isNameNull()) {
+        if (origin.isCoordinateNull() || destination.isCoordinateNull()) {
             setAddIntermediate(false);
             return;
         }
         for (let intermediate of intermediates) {
-            if (intermediate.isNameNull()) {
+            if (intermediate.isCoordinateNull()) {
                 setAddIntermediate(false);
                 return;
             }
@@ -443,9 +449,9 @@ export default function RoutingComponent(
 
     return (
         showRouting &&
-        <div id={"card-ori-dest"} className="flex flex-col card p-3">
+        <div id={"card-ori-dest"} className="card p-3">
             <div className="flex flex-col overflow-y-auto max-h-48 sm:max-h-72">
-                <div className="flex flex-col">
+                <div className="flex">
                     <input
                         id={"origin-input"}
                         type={"text"}
@@ -464,40 +470,42 @@ export default function RoutingComponent(
                             }
                         }}
                         value={myOrigin}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-white leading-tight focus:outline-none focus:shadow-outline"
+                        className="bg-white dark:bg-black text-black dark:text-white shadow appearance-none border rounded w-full py-2 px-3 mb-2 leading-tight focus:outline-none focus:shadow-outline"
                     />
                 </div>
                 {myIntermediates.map((intermediate, index) => {
                     return (
-                        <div className="flex items-center" key={index}>
-                            <div>
-                                <button
-                                    onClick={() => setPointToRemove(index)}
-                                    className="mr-2"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <input
-                                type={"text"}
-                                placeholder={"Intermediate Point"}
-                                onChange={(event) => updateMyIntermediate(event, index)}
-                                onBlur={async () => updateIntermediate(index, intermediate)}
-                                onKeyDown={async (event) => {
-                                    if (event.key === "Enter") {
-                                        const point = await updateIntermediate(index, intermediate);
-                                        if (point !== undefined) {
-                                            flyTo(point);
+                        <div key={index}>
+                            <div className="flex items-center">
+                                <div>
+                                    <button
+                                        onClick={() => setPointToRemove(index)}
+                                        className="mr-2"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <input
+                                    type={"text"}
+                                    placeholder={"Intermediate Point"}
+                                    onChange={(event) => updateMyIntermediate(event, index)}
+                                    onBlur={async () => updateIntermediate(index, intermediate)}
+                                    onKeyDown={async (event) => {
+                                        if (event.key === "Enter") {
+                                            const point = await updateIntermediate(index, intermediate);
+                                            if (point !== undefined) {
+                                                flyTo(point);
+                                            }
+                                        } else if (event.key === "Backspace") {
+                                            clearIntermediate(index);
                                         }
-                                    } else if (event.key === "Backspace") {
-                                        clearIntermediate(index);
-                                    }
-                                }}
-                                value={intermediate}
-                                className="shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-white leading-tight focus:outline-none focus:shadow-outline"
-                            />
+                                    }}
+                                    value={intermediate}
+                                    className="bg-white dark:bg-black text-black dark:text-white shadow appearance-none border w-full rounded py-2 px-3 mb-2 leading-tight focus:outline-none focus:shadow-outline"
+                                />
+                            </div>
                         </div>
                     );
                 })}
@@ -514,7 +522,7 @@ export default function RoutingComponent(
                         </div>
                     </button>
                 )}
-                <div className="flex-col flex">
+                <div>
                     <input
                         id={"destination-input"}
                         type={"text"}
@@ -533,7 +541,7 @@ export default function RoutingComponent(
                             }
                         }}
                         value={myDestination}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 mb-2 text-white leading-tight focus:outline-none focus:shadow-outline"
+                        className="bg-white dark:bg-black text-black dark:text-white shadow appearance-none border rounded w-full py-2 px-3 mb-2 leading-tight focus:outline-none focus:shadow-outline"
                     />
                 </div>
             </div>
@@ -543,42 +551,58 @@ export default function RoutingComponent(
                     <div className="text-gray-500 text-lg">{distance}</div>
                 </div>
             )}
-            <div className="flex flex-col">
-                <div className="flex mt-2">
-                    <button
-                        id={"get-route-btn"}
-                        onClick={getRoute}
-                        className="btn"
-                    >
-                        Get Route
-                    </button>
-                    {gettingRoute && loggedIn && (
+            <div>
+                <div className="mt-2 flex w-full">
+                    <div className="w-1/2 mr-1.5">
                         <button
-                            id={"save-route-btn"}
-                            onClick={async () => {
-                                if (await saveRoute()) {
-                                    window.alert("Route saved");
-                                } else {
-                                    window.alert("Error saving route");
-                                }
-                            }}
-                            style={{ borderWidth: "3px", borderStyle: "solid" }}
-                            className="bg-white border-green-600 btn ml-auto text-green-600"
+                            id={"get-route-btn"}
+                            onClick={getRoute}
+                            className="btn w-full"
                         >
-                            Save Route
-                        </button>
-                    )}
-                </div>
-                {isMobile && (
-                    <div className="flex mt-2 ">
-                        <button
-                            id={"clear-route-btn"}
-                            onClick={hide}
-                        >
-                            Hide Routing
+                            Get Route
                         </button>
                     </div>
-                )}
+                    <div className="w-1/2 ml-1.5">
+                        {gettingRoute && loggedIn && (
+                            <button
+                                id={"save-route-btn"}
+                                onClick={async () => {
+                                    if (await saveRoute()) {
+                                        window.alert("Route saved");
+                                    } else {
+                                        window.alert("Error saving route");
+                                    }
+                                }}
+                                style={{ borderWidth: "3px", borderStyle: "solid" }}
+                                className="bg-white border-green-600 btn w-full text-green-600"
+                            >
+                                Save Route
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <div className="flex mt-2">
+                    {gettingRoute && (
+                        <div>
+                            <button
+                                id={"clear-route-btn"}
+                                onClick={openDirections}
+                            >
+                                Show Directions
+                            </button>
+                        </div>
+                    )}
+                    {isMobile && (
+                        <div className="ml-auto">
+                            <button
+                                id={"clear-route-btn"}
+                                onClick={hide}
+                            >
+                                Hide Routing
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

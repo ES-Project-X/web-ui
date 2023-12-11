@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 interface RegisterUserModalProps {
   onClose: () => void;
   onRegisterUser: (userData: UserData) => void;
-  handleKeyDown: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
 }
 
 interface UserData {
@@ -17,7 +16,6 @@ interface UserData {
 const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
   onClose,
   onRegisterUser,
-  handleKeyDown,
 }) => {
   const [userData, setUserData] = useState<UserData>({
     email: "",
@@ -115,12 +113,11 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
           <button
             name="register_user"
             className="btn glass"
-            onKeyDown={handleKeyDown}
             onClick={() => onRegisterUser(userData)}
           >
             <p>Register User</p>
           </button>
-          <button className="btn" onClick={onClose} onKeyDown={handleKeyDown}>
+          <button className="btn" onClick={onClose}>
             Close
           </button>
         </div>
