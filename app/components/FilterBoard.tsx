@@ -63,7 +63,7 @@ export default function FilterBoardComponent(
                                 <label className="text-black dark:text-white font-semibold text-lg mb-2">POI Name</label>
                                 {types.map(type => {
                                     return (
-                                        <div className="flex items-center">
+                                        <div className="flex items-center" key={type.value}>
                                             <input
                                                 type="checkbox"
                                                 id={`filter-type-${type.value}`}
