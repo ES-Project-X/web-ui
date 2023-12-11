@@ -445,7 +445,7 @@ const POIsSidebar = ({
                             marginRight: "8px",
                             backgroundColor:
                                 selectedTimePeriod === "1_month" ? "yellow" : "transparent",
-                            color: selectedTimePeriod === "1_month" ? "black" : "black",
+                            color: "black",
                         }} // Add colors for selected button
                     >
                         1 Month
