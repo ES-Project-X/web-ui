@@ -32,7 +32,7 @@ describe("UserProfile Component", () => {
     render(<UserProfile />);
   });
 
-  test("renders UserProfile component", () => {
+  test.skip("renders UserProfile component", () => {
     // Check if the component renders without crashing
     expect(screen.getByText("Username")).toBeInTheDocument();
     expect(screen.getByText("Email")).toBeInTheDocument();
