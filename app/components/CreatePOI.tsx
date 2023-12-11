@@ -24,8 +24,6 @@ export default function CreatePOIPage() {
 
   const [poiLat, setPoiLat] = useState<number>(0);
   const [poiLon, setPoiLon] = useState<number>(0);
-  const [poiImageURL, setPoiImageURL] = useState("");
-  const [imageIsPosted, setImageIsPosted] = useState(false);
 
   function redirect(path: string) {
     window.location.replace(path);

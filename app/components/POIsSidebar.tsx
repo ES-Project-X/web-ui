@@ -49,19 +49,35 @@ const POIsSidebar = ({
   const [position, setPosition] = useState(null) as any;
 
   function getPosition() {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setPosition({
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-        });
-      },
-      (error) => {
-        console.log(error);
-      },
-      { enableHighAccuracy: true }
-    );
-    return null;
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setPosition({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        (error) => {
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              console.log('User denied the request for Geolocation.');
+              break;
+            case error.POSITION_UNAVAILABLE:
+              console.log('Location information is unavailable.');
+              break;
+            case error.TIMEOUT:
+              console.log('The request to get user location timed out.');
+              break;
+            default:
+              console.log('An error occurred.');
+              break;
+          }
+        },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      console.log('Geolocation is not supported by this browser.');
+    }
   }
 
   useEffect(() => {
