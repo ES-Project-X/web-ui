@@ -4,18 +4,7 @@ import Link from "next/link";
 import Cookies from "js-cookie";
 import { UserData } from "../structs/user";
 import { isMobile } from "react-device-detect";
-
-import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-    faStar,
-    faStarHalfAlt,
-    faList,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
-
-// Add icons to the library
-library.add(faStar, faStarHalfAlt);
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 const URL_API = process.env.DATABASE_API_URL;
