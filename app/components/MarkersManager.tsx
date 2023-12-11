@@ -1,203 +1,313 @@
 import { Marker, Popup, useMapEvents } from "react-leaflet";
 import RedMarker from "./markers/RedMarker";
 import GreenMarker from "./markers/GreenMarker";
+import BlueMarker from "./markers/BlueMarker";
 import { LatLng } from "leaflet";
 import { useState, useEffect } from "react";
-import CreatePOIModal from "./CreatePOIModal";
-import SavePOIModal from "./SavePOIModal";
+import { stringToLatLng } from "../utils/functions";
+import { SearchPoint, copySearchPoint } from "../structs/SearchComponent";
 
 let clickCount = 0;
 
 export default function MarkersManager({
-    setOrigin,
-    setDestination,
-    creatingRoute,
+  origin,
+  setOrigin,
+  destination,
+  setDestination,
+  intermediates,
+  setIntermediates,
+  routing,
+  togglePOIButton,
+  setMarkerCoordinates,
 }: {
-    setOrigin: (origin: string) => void;
-    setDestination: (destination: string) => void;
-    creatingRoute: boolean;
+  origin: SearchPoint;
+  setOrigin: (origin: SearchPoint) => void;
+  destination: SearchPoint;
+  setDestination: (destination: SearchPoint) => void;
+  intermediates: SearchPoint[];
+  setIntermediates: (intermediate: SearchPoint[]) => void;
+  routing: boolean;
+  togglePOIButton: (visibility: boolean) => void;
+  setMarkerCoordinates: React.Dispatch<
+    React.SetStateAction<{ latitude: number; longitude: number }>
+  >;
 }) {
-    // close modal when ESC key is pressed
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-        if (e.key === "Escape") {
-            e.preventDefault();
-            // check which modal is open
-            if (isModalOpen) {
-                closeModal();
-            } else if (isPOIModalOpen) {
-                closePOIModal();
-            }
-        }
-    };
+  const [redVisible, setRedVisible] = useState<boolean>(false);
+  const [greenVisible, setGreenVisible] = useState<boolean>(false);
+  const [blueVisible, setBlueVisible] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isPOIModalOpen, setIsPOIModalOpen] = useState<boolean>(false);
+  const [blueMarkers, setBlueMarkers] = useState<any[]>([]);
 
-    const [redPosition, setRedPosition] = useState<LatLng | null>(null);
-    const [greenPosition, setGreenPosition] = useState<LatLng | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [isPOIModalOpen, setIsPOIModalOpen] = useState<boolean>(false);
-    const [visibleSingleMarker, setVisibleSingleMarker] = useState<boolean>(false);
-
-    // close modal when btn is clicked
-    const closeModal = () => {
-        setIsModalOpen(false);
-    };
-
-    const closePOIModal = () => {
-        setIsPOIModalOpen(false);
+  // close modal when ESC key is pressed
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      // check which modal is open
+      if (isModalOpen) {
         closeModal();
-    };
-
-    const createPOI = () => {
-        setIsPOIModalOpen(true);
-        closeModal();
-    };
-
-    const savePOI = () => {
-        const name = (document.getElementById("name") as HTMLInputElement).value;
-        const type = (document.getElementById("type") as HTMLInputElement).value;
+      } else if (isPOIModalOpen) {
         closePOIModal();
-    };
-
-    /* useEffect modal popup */
-    useEffect(() => {
-        const modal = document.getElementById("my_modal_1") as HTMLDialogElement;
-        if (modal === null) {
-            return;
-        }
-        if (isModalOpen) {
-            modal.open = true;
-        } else {
-            modal.open = false;
-            setIsModalOpen(false);
-        }
-    }, [isModalOpen]);
-
-    /* useEffect modal POI */
-    useEffect(() => {
-        const modal = document.getElementById("my_modal_2") as HTMLDialogElement;
-        if (modal === null) {
-            return;
-        }
-        if (isPOIModalOpen) {
-            modal.open = true;
-            closeModal();
-        } else {
-            modal.open = false;
-            setIsPOIModalOpen(false);
-        }
-    }, [isPOIModalOpen]);
-
-    function handleClick(e: any) {
-        if (creatingRoute) {
-            if (greenPosition === null) {
-                setGreenPosition(e.latlng);
-                setOrigin(e.latlng.lat + "," + e.latlng.lng);
-            } else {
-                setRedPosition(e.latlng);
-                setDestination(e.latlng.lat + "," + e.latlng.lng);
-            }
-        } else if (visibleSingleMarker && redPosition) {
-            if (isModalOpen || isPOIModalOpen) {
-                return;
-            }
-            setRedPosition(null);
-            setVisibleSingleMarker(false);
-        } else {
-            setRedPosition(e.latlng);
-            setVisibleSingleMarker(true);
-        }
+      }
     }
+  };
 
-    useMapEvents({
-        click: (e) => {
-            if (!creatingRoute && visibleSingleMarker) {
-                setRedPosition(null);
-                setVisibleSingleMarker(false);
-            } else {
-                clickCount++;
-                setTimeout(() => {
-                    if (clickCount === 1) {
-                        handleClick(e);
-                        clickCount = 0;
-                    }
-                }, 300);
-            }
-        },
-        dblclick: () => {
-            clickCount = 0;
-        },
+  // close modal when btn is clicked
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const closePOIModal = () => {
+    setIsPOIModalOpen(false);
+    closeModal();
+  };
+
+  const createPOI = () => {
+    setIsPOIModalOpen(true);
+    closeModal();
+  };
+
+  const savePOI = () => {
+    closePOIModal();
+  };
+
+  /* useEffect modal popup */
+  useEffect(() => {
+    const modal = document.getElementById("my_modal_1") as HTMLDialogElement;
+    if (modal === null) {
+      return;
+    }
+    if (isModalOpen) {
+      modal.open = true;
+    } else {
+      modal.open = false;
+      setIsModalOpen(false);
+    }
+  }, [isModalOpen]);
+
+  /* useEffect modal POI */
+  useEffect(() => {
+    const modal = document.getElementById("my_modal_2") as HTMLDialogElement;
+    if (modal === null) {
+      return;
+    }
+    if (isPOIModalOpen) {
+      modal.open = true;
+      closeModal();
+    } else {
+      modal.open = false;
+      setIsPOIModalOpen(false);
+    }
+  }, [isPOIModalOpen]);
+
+  useEffect(() => {
+    if (!origin.isCoordinateNull()) {
+      setGreenVisible(true);
+    } else {
+      setGreenVisible(false);
+    }
+  }, [origin]);
+
+  useEffect(() => {
+    if (!destination.isCoordinateNull()) {
+      setRedVisible(true);
+    } else {
+      setRedVisible(false);
+    }
+  }, [destination]);
+
+  useEffect(() => {
+    if (routing && redVisible) {
+      setDestination(destination);
+    } else {
+      setRedVisible(false);
+    }
+    setGreenVisible(false);
+    setBlueVisible(false);
+  }, [routing]);
+
+  useEffect(() => {
+    let newBlueMarkers = intermediates.map((value, index) => {
+      if (!value.isCoordinateNull()) {
+        return (
+          <Marker
+            key={index}
+            position={value.getLatLng()}
+            icon={BlueMarker}
+            interactive={true}
+            draggable={true}
+            eventHandlers={{
+              click: () => {
+                let newIntermediates = [...intermediates];
+                newIntermediates[index].setName("");
+                newIntermediates[index].resetCoordinate();
+                setIntermediates(newIntermediates);
+              },
+              dragend: (e) => {
+                let newIntermediateValues = [...intermediates];
+                newIntermediateValues[index].setLatLng(e.target.getLatLng());
+                setIntermediates(newIntermediateValues);
+              },
+            }}
+          ></Marker>
+        );
+      }
     });
-
-    if (creatingRoute) {
-        const redMarker = redPosition &&
-            <Marker
-                position={redPosition}
-                icon={RedMarker}
-                interactive={true}
-                draggable={true}
-                eventHandlers={{
-                    click: () => setRedPosition(null),
-                    dragend: (e) => {
-                        const newPosition = e.target.getLatLng();
-                        setRedPosition(newPosition);
-                        setDestination(newPosition.lat + "," + newPosition.lng);
-                    },
-                }}>
-            </Marker>
-        const greenMarker = greenPosition &&
-            <Marker
-                position={greenPosition}
-                icon={GreenMarker}
-                interactive={true}
-                draggable={true}
-                eventHandlers={{
-                    click: () => setGreenPosition(null),
-                    dragend: (e) => {
-                        const newPosition = e.target.getLatLng();
-                        setGreenPosition(newPosition);
-                        setOrigin(newPosition.lat + "," + newPosition.lng);
-                    },
-                }}>
-            </Marker>
-        return (
-            <>
-                {greenMarker}
-                {redMarker}
-            </>
-        );
-    } else if (visibleSingleMarker && redPosition) {
-        return (
-            <>
-                <Marker
-                    position={redPosition}
-                    icon={RedMarker}
-                    draggable={true}
-                    eventHandlers={{
-                        dragend: (e) => {
-                            setRedPosition(e.target.getLatLng());
-                        },
-                    }}
-                >
-                    <Popup>
-                        You are at {redPosition.lat.toFixed(4)},{" "}
-                        {redPosition.lng.toFixed(4)}
-                    </Popup>
-                </Marker>
-                <CreatePOIModal
-                    latitude={redPosition.lat}
-                    longitude={redPosition.lng}
-                    onClose={closeModal}
-                    onCreatePOI={createPOI}
-                    handleKeyDown={handleKeyDown}
-                />
-                <SavePOIModal
-                    poiLat={redPosition.lat}
-                    poiLon={redPosition.lng}
-                    onClose={closePOIModal}
-                    onSavePOI={savePOI}
-                    handleKeyDown={handleKeyDown}
-                />
-            </>
-        );
+    setBlueMarkers(newBlueMarkers);
+    if (intermediates.length === 0) {
+      setBlueVisible(false);
+    } else {
+      setBlueVisible(true);
     }
-    return null;
+  }, [intermediates]);
+
+  function handleClick(e: any) {
+    if (routing) {
+      togglePOIButton(false);
+      if (!greenVisible) {
+        setGreenVisible(true);
+        let newOrigin = copySearchPoint(origin);
+        newOrigin.setLatLng(e.latlng);
+        newOrigin.setName("");
+        setOrigin(newOrigin);
+        return;
+      } else {
+        for (let i = 0; i < intermediates.length; i++) {
+          if (intermediates[i].isCoordinateNull()) {
+            let newIntermediates = [...intermediates];
+            newIntermediates[i].setLatLng(e.latlng);
+            newIntermediates[i].setName("");
+            setIntermediates(newIntermediates);
+            if (!blueVisible) {
+              setBlueVisible(true);
+            }
+            return;
+          }
+        }
+      }
+      if (!redVisible) {
+        setRedVisible(true);
+      }
+      let newDestination = copySearchPoint(destination);
+      newDestination.setLatLng(e.latlng);
+      newDestination.setName("");
+      setDestination(newDestination);
+    } else if (redVisible) {
+      if (isModalOpen || isPOIModalOpen) {
+        return;
+      }
+      setRedVisible(false);
+      togglePOIButton(false);
+    } else {
+      setRedVisible(true);
+      let newDestination = copySearchPoint(destination);
+      newDestination.setLatLng(e.latlng);
+      setDestination(newDestination);
+      setMarkerCoordinates({ latitude: e.latlng.lat, longitude: e.latlng.lng });
+      togglePOIButton(true);
+    }
+  }
+
+  useMapEvents({
+    click: (e) => {
+      if (!routing && redVisible) {
+        setRedVisible(false);
+        togglePOIButton(false);
+      } else {
+        clickCount++;
+        setTimeout(() => {
+          if (clickCount === 1) {
+            handleClick(e);
+            clickCount = 0;
+          }
+        }, 300);
+      }
+    },
+    dblclick: () => {
+      clickCount = 0;
+    },
+  });
+
+  const singleMarker = (
+    <Marker
+      // @ts-ignore
+      position={destination.getLatLng()}
+      icon={RedMarker}
+      draggable={true}
+      eventHandlers={{
+        dragend: (e) => {
+          let newDestination = copySearchPoint(destination);
+          newDestination.setLatLng(e.target.getLatLng());
+          newDestination.setName("");
+          setDestination(newDestination);
+        },
+      }}
+    >
+      <Popup>
+        You are at {destination.getLat().toFixed(4)},{" "}
+        {destination.getLng().toFixed(4)}
+      </Popup>
+    </Marker>
+  );
+
+  const greenMarker = (
+    <Marker
+      // @ts-ignore
+      position={origin.getLatLng()}
+      icon={GreenMarker}
+      interactive={true}
+      draggable={true}
+      eventHandlers={{
+        click: () => {
+          setGreenVisible(false);
+          let newOrigin = copySearchPoint(origin);
+          newOrigin.setName("");
+          newOrigin.resetCoordinate();
+          setOrigin(newOrigin);
+        },
+        dragend: (e) => {
+          const newPosition = e.target.getLatLng();
+          let newOrigin = copySearchPoint(origin);
+          newOrigin.setLatLng(newPosition);
+          newOrigin.setName("");
+          setOrigin(newOrigin);
+        },
+      }}
+    ></Marker>
+  );
+
+  const redMarker = (
+    <Marker
+      // @ts-ignore
+      position={destination.getLatLng()}
+      icon={RedMarker}
+      interactive={true}
+      draggable={true}
+      eventHandlers={{
+        click: () => {
+          setRedVisible(false);
+          let newDestination = copySearchPoint(destination);
+          newDestination.setName("");
+          newDestination.resetCoordinate();
+          setDestination(newDestination);
+        },
+        dragend: (e) => {
+          const newPosition = e.target.getLatLng();
+          let newDestination = copySearchPoint(destination);
+          newDestination.setLatLng(newPosition);
+          newDestination.setName("");
+          setDestination(newDestination);
+        },
+      }}
+    ></Marker>
+  );
+
+  return (
+    <>
+      {!routing && redVisible && singleMarker}
+      {routing && greenVisible && greenMarker}
+      {routing && redVisible && redMarker}
+      {routing && blueVisible && blueMarkers}
+    </>
+  );
 }

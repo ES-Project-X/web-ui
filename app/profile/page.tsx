@@ -1,6 +1,6 @@
 "use client";
 
-import UserProfile from "../../app/components/UserProfile";
+import UserProfile from "../components/UserProfile";
 
 export default function UserPage() {
   return (
