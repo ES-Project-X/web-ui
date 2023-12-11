@@ -34,7 +34,7 @@ export default function UserProfile() {
 
     const [image, setImage] = useState<File | null>(null);
     const [imageChanged, setImageChanged] = useState(false);
-
+    const [image_type, setImageType] = useState("");
     let userChanges = {};
 
     const updateProfile = () => {
@@ -168,7 +168,30 @@ export default function UserProfile() {
         };
     }
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Function to convert a File to a base64-encoded string
+    //@ts-ignore
+    const fileToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+
+
+            reader.onload = () => {
+                //@ts-ignore
+                resolve(reader.result.split(",")[1]); // Extract the base64 part
+                // get the image type
+                //@ts-ignore
+                setImageType(reader.result.split(",")[0].split(":")[1].split(";")[0]);
+            };
+
+            reader.onerror = (error) => {
+                reject(error);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedImage = e.target.files?.[0];
 
         const maxFileSize = 4 * 1024 * 1024; // file needs to be less than 4MB (change as needed)
@@ -185,20 +208,19 @@ export default function UserProfile() {
         e.target.value = "";
     };
 
-    const handleUpload = () => {
+    const handleUpload = async () => {
         if (!image) {
             // Handle case where no image is selected
             return;
         }
 
-        const formData = new FormData();
-        formData.append("file", image);
+        const base64String = await fileToBase64(image);
         axios
-            .post(URL_API + "s3/upload", formData, {
+            .post(URL_API + "s3/upload", { base64_image: base64String, image_type: image_type}, {
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                     Authorization: `Bearer ${TOKEN}`,
-                },
+                }
             })
             .then((res) => {
                 if (res.status === 200) {
@@ -208,14 +230,12 @@ export default function UserProfile() {
                 }
             })
             .then((data) => {
-                const avatar_url = data.url;
-                userChanges = { ...userChanges, image_url: avatar_url };
-
+                const newImageUrl = data.image_url;
+                userChanges = { ...userChanges, image_url: newImageUrl };
                 updateProfile();
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+            }
+            ) 
+
 
         userChanges = {};
         setImageChanged(false);
