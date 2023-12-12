@@ -199,9 +199,6 @@ export default function UserProfile() {
 
   const handleUpload = async () => {
     if (!image) {
-      
-
-
       return;
     }
 
