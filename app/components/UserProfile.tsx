@@ -37,29 +37,11 @@ export default function UserProfile() {
   let userChanges = {};
 
   const updateProfile = () => {
+    console.log("updating profile");
     if (!imageChanged) {
-      if (formPassword === "") {
-        setFormUsername(username);
-        setFormEmail(email);
-        setIsEditing(false);
-        return;
-      }
-
-      if (formUsername === username && formEmail === email) {
-        setIsEditing(false);
-        return;
-      }
-
       if (formUsername !== username) {
+        console.log("username changed");
         userChanges = { ...userChanges, username: formUsername };
-      }
-
-      if (formEmail !== email) {
-        userChanges = { ...userChanges, email: formEmail };
-      }
-
-      if (formPassword !== "") {
-        userChanges = { ...userChanges, password: formPassword };
       }
     }
 
@@ -73,6 +55,7 @@ export default function UserProfile() {
     })
       .then((res) => {
         if (res.status === 200) {
+          console.log("user updated");
           return res.json();
         } else if (res.status === 400) {
           throw new Error("Error updating user");
@@ -216,7 +199,9 @@ export default function UserProfile() {
 
   const handleUpload = async () => {
     if (!image) {
-      // Handle case where no image is selected
+      
+
+
       return;
     }
 
@@ -359,7 +344,7 @@ export default function UserProfile() {
               </div>
             )}
             <h1 className="text-2xl font-semibold">
-              {fname} {lname}
+              {fname} {lname} <h5 className="text-sm">{username}</h5>
             </h1>
             <h6 className="pt-2 text-2md">{email}</h6>
             <div className="w-full bg-gray-300 rounded-full overflow-hidden mt-4">
@@ -477,36 +462,19 @@ export default function UserProfile() {
                     <span className="label-text">User Name</span>
                     <input
                       type="text"
-                      placeholder="Type here the UserName"
+                      placeholder="Change the username"
                       className="input input-bordered w-full max-w-md bg-gray-200"
                       onChange={(e) => setFormUsername(e.target.value)}
                     />
                   </label>
-                  <label className="form-control w-full max-w-md mb-2">
-                    <span className="label-text">Email</span>
-                    <input
-                      type="email"
-                      placeholder="Type here the Email"
-                      className="input input-bordered w-full max-w-md bg-gray-200"
-                      onChange={(e) => setFormEmail(e.target.value)}
-                    />
-                  </label>
-                  <label className="form-control w-full max-w-md mb-2">
-                    <span className="label-text">Confirm Password</span>
-                    <input
-                      type="password"
-                      placeholder="Confirm the password"
-                      className="input input-bordered w-full max-w-md bg-gray-200"
-                      onChange={(e) => setFormPassword(e.target.value)}
-                    />
-                  </label>
+                  
                 </div>
                 <div className="flex justify-center mt-4">
                   {isEditing && (
                     <>
                       <button
                         className="mr-2 bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
-                        onClick={() => handleUpload()}
+                        onClick={() => updateProfile()}
                       >
                         Save Changes
                       </button>
