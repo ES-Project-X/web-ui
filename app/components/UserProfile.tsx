@@ -339,20 +339,31 @@ export default function UserProfile() {
                 </button>
               </div>
             )}
-            <h1 className="text-2xl font-semibold">
-              {fname} {lname} <h5 className="text-sm pt-3">{username}</h5>
-            </h1>
-            <h6 className="pt-2 text-2md">{email}</h6>
-            <div className="w-full bg-gray-300 rounded-full overflow-hidden mt-4">
-              <div
-                className="bg-green-500 h-4"
-                style={{ width: `${levelInfo.progress}%` }}
-              />
-            </div>
-            <p className="mt-2">
-              XP: {total_xp} / {levelInfo.xpToNextLevel}
-            </p>
-            <p>Level: {levelInfo.currentLevel}</p>
+            {(!isEditing && (
+              <>
+                <h1 className="text-2xl font-semibold">
+                  {fname} {lname} <h5 className="text-sm pt-3">{username}</h5>
+                </h1>
+                <h6 className="pt-2 text-2md">{email}</h6>
+                <div className="w-full bg-gray-300 rounded-full overflow-hidden mt-4">
+                  <div
+                    className="bg-green-500 h-4"
+                    style={{ width: `${levelInfo.progress}%` }}
+                  />
+                </div>
+                <p className="mt-2">
+                  XP: {total_xp} / {levelInfo.xpToNextLevel}
+                </p>
+                <p>Level: {levelInfo.currentLevel}</p>
+              </>
+            )) || (
+              <>
+                <h1 className="text-2xl font-semibold pt-3">
+                  {fname} {lname}{" "}
+                  <h5 className="text-sm pt-3">{formUsername}</h5>
+                </h1>
+              </>
+            )}
             {!isEditing && (
               <button
                 className="bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
