@@ -16,7 +16,6 @@ export default function UserProfile() {
   const [lname, setLname] = useState("");
   const [email, setEmail] = useState("");
   const [avatar, setAvatar] = useState("");
-  const [password, setPassword] = useState("");
   const [total_xp, setTotal_xp] = useState(0);
   const [added_pois_count, setAddedPoiCount] = useState(0);
   const [received_ratings_count, setReceivedRatingCount] = useState(0);
@@ -28,8 +27,6 @@ export default function UserProfile() {
   });
 
   const [formUsername, setFormUsername] = useState("");
-  const [formEmail, setFormEmail] = useState("");
-  const [formPassword, setFormPassword] = useState("");
 
   const [image, setImage] = useState<File | null>(null);
   const [imageChanged, setImageChanged] = useState(false);
@@ -39,10 +36,16 @@ export default function UserProfile() {
   const updateProfile = () => {
     console.log("updating profile");
     if (!imageChanged) {
-      if (formUsername !== username) {
-        console.log("username changed");
-        userChanges = { ...userChanges, username: formUsername };
-      }
+      console.log("image not changed");
+      // updating only username;
+
+      console.log("username:", username);
+      console.log("formUsername:", formUsername);
+
+      userChanges = {
+        ...userChanges,
+        username: formUsername,
+      };
     }
 
     fetch(URL_API + "user/edit", {
@@ -67,9 +70,6 @@ export default function UserProfile() {
         setAvatar(data.image_url);
         setEmail(data.email);
         setFormUsername(data.username);
-        setFormEmail(data.email);
-        setPassword("");
-        alert("User updated successfully");
         setIsEditing(false);
       })
       .catch((err) => {
@@ -103,7 +103,6 @@ export default function UserProfile() {
           setLname(user.last_name);
           setUsername(user.username);
           setEmail(user.email);
-          setFormEmail(user.email);
           setFormUsername(user.username);
           setTotal_xp(user.total_xp);
           setAddedPoiCount(user.added_pois_count);
@@ -341,7 +340,7 @@ export default function UserProfile() {
               </div>
             )}
             <h1 className="text-2xl font-semibold">
-              {fname} {lname} <h5 className="text-sm">{username}</h5>
+              {fname} {lname} <h5 className="text-sm pt-3">{username}</h5>
             </h1>
             <h6 className="pt-2 text-2md">{email}</h6>
             <div className="w-full bg-gray-300 rounded-full overflow-hidden mt-4">
@@ -464,7 +463,6 @@ export default function UserProfile() {
                       onChange={(e) => setFormUsername(e.target.value)}
                     />
                   </label>
-                  
                 </div>
                 <div className="flex justify-center mt-4">
                   {isEditing && (
