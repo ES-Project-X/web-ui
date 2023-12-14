@@ -455,10 +455,10 @@ export default function UserProfile() {
               <div className="col-md-12 justify-content-center">
                 <div className="mb-4 flex flex-col items-center">
                   <label className="form-control w-full max-w-md mb-2">
-                    <span className="label-text">User Name</span>
+                    <span className="label-text">Change username</span>
                     <input
                       type="text"
-                      placeholder="Change the username"
+                      placeholder="New username"
                       className="input input-bordered w-full max-w-md bg-gray-200"
                       onChange={(e) => setFormUsername(e.target.value)}
                     />
