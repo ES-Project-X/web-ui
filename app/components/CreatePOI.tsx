@@ -70,35 +70,39 @@ export default function CreatePOIPage() {
     });
   };
 
-  const handleUpload = async () => {
-    return new Promise(async (resolve, reject) => {
+  const handleUpload = () => {
+    return new Promise((resolve, reject) => {
       if (!image) {
-        // Handle case where no image is selected
         reject(new Error("No image selected"));
         return;
       }
 
       const formData = new FormData();
-      const base64String = await fileToBase64(image);
-      formData.append("file", image);
+      fileToBase64(image)
+        .then((base64String) => {
+          formData.append("file", image);
 
-      axios
-        .post(
-          URL_API + "s3/upload",
-          { base64_image: base64String, image_type: image_type },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${TOKEN}`,
-            },
-          }
-        )
-        .then((res) => {
-          if (res.status === 200) {
-            resolve(res.data);
-          } else {
-            reject(new Error("Error uploading image"));
-          }
+          axios
+            .post(
+              URL_API + "s3/upload",
+              { base64_image: base64String, image_type: image_type },
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${TOKEN}`,
+                },
+              }
+            )
+            .then((res) => {
+              if (res.status === 200) {
+                resolve(res.data);
+              } else {
+                reject(new Error("Error uploading image"));
+              }
+            })
+            .catch((err) => {
+              reject(err);
+            });
         })
         .catch((err) => {
           reject(err);
