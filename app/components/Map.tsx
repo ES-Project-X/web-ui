@@ -586,7 +586,7 @@ export default function MapComponent({
 							)}
 						</div>
 						<div className="mx-auto">
-							{true && (
+							{showPOIButton && (
 								<button
 									id={"create-poi-btn"} // Ensure unique IDs for the buttons
 									onClick={openCreatePOIModal}
