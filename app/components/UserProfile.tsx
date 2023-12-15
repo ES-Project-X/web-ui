@@ -159,7 +159,6 @@ export default function UserProfile() {
     };
   }
 
-  // Function to convert a File to a base64-encoded string
   //@ts-ignore
   const fileToBase642 = (file) => {
     return new Promise((resolve, reject) => {
@@ -167,8 +166,7 @@ export default function UserProfile() {
 
       reader2.onload = () => {
         //@ts-ignore
-        resolve(reader2.result.split(",")[1]); // Extract the base64 part
-        // get the image type
+        resolve(reader2.result.split(",")[1]); 
         //@ts-ignore
         setImageType(reader2.result.split(",")[0].split(":")[1].split(";")[0]);
       };
