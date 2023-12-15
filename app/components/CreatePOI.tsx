@@ -2,6 +2,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { fileToBase64 } from "../utils/functions";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 const URL_API = process.env.DATABASE_API_URL;
@@ -47,28 +48,6 @@ export default function CreatePOIPage() {
       setPoiLon(parseFloat(lng));
     }
   }, []);
-
-  // Function to convert a File to a base64-encoded string
-  //@ts-ignore
-  const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        //@ts-ignore
-        resolve(reader.result.split(",")[1]); // Extract the base64 part
-        // get the image type
-        //@ts-ignore
-        setImageType(reader.result.split(",")[0].split(":")[1].split(";")[0]);
-      };
-
-      reader.onerror = (error) => {
-        reject(error);
-      };
-
-      reader.readAsDataURL(file);
-    });
-  };
 
   const handleUpload = async () => {
     return new Promise(async (resolve, reject) => {
