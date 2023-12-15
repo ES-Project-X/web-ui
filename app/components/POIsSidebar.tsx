@@ -456,61 +456,59 @@ const POIsSidebar = ({
           <span>{"(balance)"}</span>
         </div>
         <div className="time-period-buttons mt-2">
-        <button
-              style={
-                selectedTimePeriod === "today"
-                  ? selectedButtonStyle
-                  : buttonStyle
-              }
-              onClick={() => handleTimePeriodChange("today")}
-            >
-              Today
-            </button>
-            {" | "}
-            <button
-              style={
-                selectedTimePeriod === "yesterday"
-                  ? selectedButtonStyle
-                  : buttonStyle
-              }
-              onClick={() => handleTimePeriodChange("yesterday")}
-            >
-              Yesterday
-            </button>
-            {" | "}
-            <button
-              style={
-                selectedTimePeriod === "7_days"
-                  ? selectedButtonStyle
-                  : buttonStyle
-              }
-              onClick={() => handleTimePeriodChange("7_days")}
-            >
-              7 Days
-            </button>
+          <button
+            style={
+              selectedTimePeriod === "today" ? selectedButtonStyle : buttonStyle
+            }
+            onClick={() => handleTimePeriodChange("today")}
+          >
+            Today
+          </button>
+          {" | "}
+          <button
+            style={
+              selectedTimePeriod === "yesterday"
+                ? selectedButtonStyle
+                : buttonStyle
+            }
+            onClick={() => handleTimePeriodChange("yesterday")}
+          >
+            Yesterday
+          </button>
+          {" | "}
+          <button
+            style={
+              selectedTimePeriod === "7_days"
+                ? selectedButtonStyle
+                : buttonStyle
+            }
+            onClick={() => handleTimePeriodChange("7_days")}
+          >
+            7 Days
+          </button>
         </div>
         <div className="time-period-buttons mb-2">
           <button
-              style={
-                selectedTimePeriod === "1_month"
-                  ? selectedButtonStyle
-                  : buttonStyle
-              }
-              onClick={() => handleTimePeriodChange("1_month")}
-            >
-              1 Month 
-            </button>
-          | {" "}
+            style={
+              selectedTimePeriod === "1_month"
+                ? selectedButtonStyle
+                : buttonStyle
+            }
+            onClick={() => handleTimePeriodChange("1_month")}
+          >
+            1 Month
+          </button>
+          |{" "}
           <button
-              style={
-                selectedTimePeriod === "all_time"
-                  ? selectedButtonStyle
-                  : buttonStyle
-              }
-              onClick={() => handleTimePeriodChange("all_time")}
-            >
-              All Time
-            </button>
+            style={
+              selectedTimePeriod === "all_time"
+                ? selectedButtonStyle
+                : buttonStyle
+            }
+            onClick={() => handleTimePeriodChange("all_time")}
+          >
+            All Time
+          </button>
         </div>
         {selectedPOI.rate ? (
           <div className="rate-status-buttons flex">
