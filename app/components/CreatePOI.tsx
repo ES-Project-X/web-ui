@@ -76,11 +76,8 @@ export default function CreatePOIPage() {
         reject(new Error("No image selected"));
         return;
       }
-
-      const formData = new FormData();
       fileToBase64(image)
         .then((base64String) => {
-          formData.append("file", image);
 
           axios
             .post(
@@ -114,14 +111,14 @@ export default function CreatePOIPage() {
     try {
       if (validateForm()) {
         const uploadedData = await handleUpload();
-
+        console.log(uploadedData);
         const newPOI = {
           latitude: poiLat,
           longitude: poiLon,
           name: name,
           description: description,
           type: type,
-          picture_url: (uploadedData as { url: string }).url,
+          picture_url: (uploadedData as { image_url: string }).image_url,
         };
 
         console.log(newPOI);
