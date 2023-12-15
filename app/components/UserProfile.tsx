@@ -159,6 +159,28 @@ export default function UserProfile() {
     };
   }
 
+  // Function to convert a File to a base64-encoded string
+  //@ts-ignore
+  const fileToBase642 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader2 = new FileReader();
+
+      reader2.onload = () => {
+        //@ts-ignore
+        resolve(reader2.result.split(",")[1]); // Extract the base64 part
+        // get the image type
+        //@ts-ignore
+        setImageType(reader2.result.split(",")[0].split(":")[1].split(";")[0]);
+      };
+
+      reader2.onerror = (error) => {
+        reject(error);
+      };
+
+      reader2.readAsDataURL(file);
+    });
+  };
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedImage = e.target.files?.[0];
 
@@ -181,7 +203,7 @@ export default function UserProfile() {
       return;
     }
 
-    const base64String = await fileToBase64(image);
+    const base64String = await fileToBase642(image);
     axios
       .post(
         URL_API + "s3/upload",
