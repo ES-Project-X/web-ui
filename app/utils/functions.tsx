@@ -44,23 +44,3 @@ export function stringToLatLng(str: string) {
     let latlng = str.split(",");
     return new LatLng(parseFloat(latlng[0]), parseFloat(latlng[1]));
 }
-
-export function fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        //@ts-ignore
-        resolve(reader.result.split(",")[1]); // Extract the base64 part
-        // get the image type
-        //@ts-ignore
-        setImageType(reader.result.split(",")[0].split(":")[1].split(";")[0]);
-      };
-
-      reader.onerror = (error) => {
-        reject(error);
-      };
-
-      reader.readAsDataURL(file);
-    });
-  };
