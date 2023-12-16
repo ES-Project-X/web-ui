@@ -6,8 +6,8 @@ export class Coordinate {
     private null: boolean = true;
 
     constructor(lat: number = 0, lng: number = 0) {
-        this.lat = lat;
-        this.lng = lng;
+        this.lat = parseFloat(lat.toFixed(6));
+        this.lng = parseFloat(lng.toFixed(6));
         if (lat !== 0 && lng !== 0) {
             this.null = false;
         }
@@ -34,14 +34,14 @@ export class Coordinate {
     }
 
     setLat(lat: number) {
-        this.lat = lat;
+        this.lat = parseFloat(lat.toFixed(6));
         if (lat !== 0 && this.lng !== 0) {
             this.null = false;
         }
     }
 
     setLng(lng: number) {
-        this.lng = lng;
+        this.lng = parseFloat(lng.toFixed(6));
         if (this.lat !== 0 && lng !== 0) {
             this.null = false;
         }

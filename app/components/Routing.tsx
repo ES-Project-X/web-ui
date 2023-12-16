@@ -284,11 +284,12 @@ export default function RoutingComponent(
     }
 
     const getRoute = async () => {
-        if (origin.isCoordinateNull() || destination.isCoordinateNull()) {
+        if (origin.isNull() || destination.isNull()) {
             window.alert("Please fill in both fields");
             clearRoute();
             return;
         }
+
         let url = URL_ROUTING;
         let newPoints = [];
         let newMyPoints = [];
@@ -404,7 +405,7 @@ export default function RoutingComponent(
             if (i === names.length - 1) {
                 name += names[i];
             } else {
-                name += names[i] + "-";
+                name += names[i] + "__";
             }
         }
         const body = {

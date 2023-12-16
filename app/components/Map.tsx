@@ -3,7 +3,7 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { MapContainer, Polyline, TileLayer } from "react-leaflet";
-import { LatLng, LatLngBounds } from "leaflet";
+import { LatLng, LatLngBounds, latLng } from "leaflet";
 import "leaflet-rotate";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -22,7 +22,7 @@ import { POI } from "../structs/poi";
 import { URL_API, URL_GEO, URL_REV, COGNITO_LOGIN_URL } from "../utils/constants";
 import { getDistanceFrom } from "../utils/functions";
 import RoutingComponent from "./Routing";
-import { SearchPoint } from "../structs/SearchComponent";
+import { Coordinate, SearchPoint } from "../structs/SearchComponent";
 import "../globals.css";
 import DirectionsComponent from "./Directions";
 import POIsSidebar from "./POIsSidebar";
@@ -88,10 +88,9 @@ export default function MapComponent({
 	const [showPOIButton, setShowPOIButton] = useState(false);
 	const [showDetails, setShowDetails] = useState(false);
 
-	const [markerCoordinates, setMarkerCoordinates] = useState({
-		latitude: 0,
-		longitude: 0,
-	});
+	const [markerCoordinates, setMarkerCoordinates] = useState(new Coordinate());
+
+	const [currentLocation, setCurrentLocation] = useState(new Coordinate());
 
 	function getUser() {
 		const headers = {
@@ -145,26 +144,6 @@ export default function MapComponent({
 			getUser();
 		}
 	}, []);
-
-	function getPosition() {
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					return ({
-						lat: position.coords.latitude,
-						lon: position.coords.longitude,
-					});
-				},
-				(error) => {
-					console.log(error);
-				},
-				{ enableHighAccuracy: true }
-			);
-		} else {
-			console.log("Geolocation is not supported by this browser.");
-		}
-		return null;
-	}
 
 	const addToBearing = (amount: number) => {
 		if (mapRef.current) {
@@ -303,10 +282,6 @@ export default function MapComponent({
 		}
 	}, [isRModalOpen]);
 
-	useEffect(() => {
-		setShowPOIButton(canCreatePOI());
-	}, [markerCoordinates]);
-
 	const closeModal = () => {
 		setIsRModalOpen(false);
 	};
@@ -359,33 +334,84 @@ export default function MapComponent({
 
 	function openCreatePOIModal() {
 		window.location.replace(
-			`/createpoi?lat=${markerCoordinates.latitude}&lng=${markerCoordinates.longitude}`
+			`/createpoi?lat=${markerCoordinates.getLat()}&lon=${markerCoordinates.getLng()}`
 		);
 	}
 
-	function canCreatePOI() {
-		if (!isMobile || !loggedIn) {
-			return false;
+	async function getPosition() {
+		if ("geolocation" in navigator) {
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					const pos = {
+						latitude: position.coords.latitude,
+						longitude: position.coords.longitude,
+					}
+					setCurrentLocation(new Coordinate(pos.latitude, pos.longitude));
+					return pos;
+				},
+				(error) => {
+					setCurrentLocation(new Coordinate());
+					console.log(error);
+				}
+			);
+		} else {
+			setCurrentLocation(new Coordinate());
+			console.log("Geolocation is not supported by this browser.");
 		}
-		const markerLocation = {
-			latitude: markerCoordinates.latitude,
-			longitude: markerCoordinates.longitude,
-		};
-		const userLocation = getPosition();
-		console.log(userLocation);
-		if (userLocation === null) {
-			return false;
+	}
+
+	useEffect(() => {
+		if (!isMobile) {
+			return;
+		}
+		if (showPOIButton) {
+			setShowPOIButton(false);
+		} else {
+			getPosition();
+		}
+	}, [markerCoordinates]);
+
+	useEffect(() => {
+		if (currentLocation.isNull() || markerCoordinates.isNull()) {
+			setShowPOIButton(false);
+			return;
 		}
 		const input = {
-			currentLocation: userLocation,
-			point: markerLocation,
-		}
+			currentLocation: {
+				latitude: currentLocation.getLat(),
+				longitude: currentLocation.getLng(),
+			},
+			point: {
+				latitude: markerCoordinates.getLat(),
+				longitude: markerCoordinates.getLng(),
+			}
+		};
 		const distance = getDistanceFrom(input);
-		console.log(distance);
-		if (distance < 20) {
-			return true;
+		if (distance < 50) {
+			setShowPOIButton(true);
 		}
-		return false;
+		else {
+			setShowPOIButton(false);
+		}
+	}, [currentLocation]);
+
+	function manageModals(string: string) {
+		if (isMobile) {
+			switch (string) {
+				case "routing":
+					setOpenRouting(!openRouting);
+					break;
+				case "directions":
+					setShowDirections(!showDirections);
+					break;
+				case "poi":
+					setPOISideBar(!POISideBar);
+					break;
+				case "filer":
+				default:
+					break;
+			}
+		}
 	}
 
 
@@ -433,7 +459,7 @@ export default function MapComponent({
 				/>
 				<GetClusters markers={markers} setMarkers={setMarkers} filterPOIs={filterPOIs} />
 			</MapContainer>
-			<div className="map-ui w-full h-screen flex flex-col">
+			<div className="map-ui w-full h-full flex flex-col">
 				{isRModalOpen && (
 					<RegisterUserModal
 						onClose={closeModal}
@@ -487,8 +513,8 @@ export default function MapComponent({
                     	MIDDLE PART OF THE UI
                 	*/}
 				<div className="flex h-screen">
-					<div className="flex flex-col ml-2 pt-10 sm:pt-32 w-full sm:w-1/5">
-						{openRouting && (
+					{openRouting && (
+						<div className="flex flex-col ml-2 pt-10 sm:pt-32 w-full sm:w-1/5" >
 							<RoutingComponent
 								showRouting={showRouting}
 								setShowRouting={setShowRouting}
@@ -509,8 +535,8 @@ export default function MapComponent({
 								openDirections={openDirections}
 								setCurrentIndex={setCurrentIndex}
 							/>
-						)}
-					</div>
+						</div>
+					)}
 					<div className={"flex items-center ml-auto"}>
 						{!POISideBar && (
 							<div>

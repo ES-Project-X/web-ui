@@ -30,10 +30,10 @@ const POIsSidebar = ({
     hideCard: () => void;
     showDetails: boolean;
     setShowDetails: (showDetails: boolean) => void;
-    getPosition: () => { lat: number; lon: number } | null;
+    getPosition: () => { latitude: number; longitude: number } | null;
 }) => {
     const [closeEnough, setCloseEnough] = useState(false);
-    const [position, setPosition] = useState<{ lat: number; lon: number }>();
+    const [position, setPosition] = useState<{ latitude: number; longitude: number }>();
     const [selectedTimePeriod, setSelectedTimePeriod] = useState("today");
     const [showData, setShowData] = useState<string>("");
     const [fullData, setFullData] = useState<any>({});
