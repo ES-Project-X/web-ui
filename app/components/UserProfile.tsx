@@ -36,14 +36,7 @@ export default function UserProfile() {
     }
 
     const updateProfile = () => {
-        console.log("updating profile");
         if (!imageChanged) {
-            console.log("image not changed");
-            // updating only username;
-
-            console.log("username:", username);
-            console.log("formUsername:", formUsername);
-
             userChanges = {
                 ...userChanges,
                 username: formUsername,
@@ -60,7 +53,6 @@ export default function UserProfile() {
         })
             .then((res) => {
                 if (res.status === 200) {
-                    console.log("user updated");
                     return res.json();
                 } else if (res.status === 400) {
                     throw new Error("Error updating user");
@@ -241,35 +233,33 @@ export default function UserProfile() {
 
     return (
         <div className="min-h-screen bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80% to-white to-100%">
-            <div className="relative h-screen/3 flex items-center justify-center overflow-hidden">
-                <div className="absolute top-0 left-0 p-4">
-                    <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10" onClick={() => { redirect("/map") }}>
-                        Map
-                    </button>
-                </div>
-                <div className="absolute top-0 right-0 p-4">
-                    <button
-                        className="bg-white text-black py-2 px-4 rounded h-10"
-                        onClick={() => {
-                            redirect("/routes");
-                        }}
-                    >
-                        Routes
-                    </button>
+            <div className="h-screen/3 flex items-center justify-center overflow-hidden flex-col">
+                <div className="flex p-4 w-full">
+                        <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10 mr-auto" onClick={() => { redirect("/map") }}>
+                            Map
+                        </button>
+                        <button
+                            className="bg-white text-black py-2 px-4 rounded h-10 ml-auto"
+                            onClick={() => {
+                                redirect("/routes");
+                            }}
+                        >
+                            Routes
+                        </button>
                 </div>
                 {/* Content */}
-                <div className="text-center relative z-20 pt-10 flex flex-col items-center justify-center">
+                <div className="text-center z-20 flex flex-col items-center justify-center">
                     {/* Adjusted image and XP bar */}
-                    <div className="flex flex-col items-center relative group">
+                    <div className="flex flex-col items-center">
                         {isMobile ? (
-                            <>
+                            <div>
                                 <img
                                     src={avatar}
                                     alt={`${fname} ${lname}'s avatar`}
-                                    className="w-48 h-48 object-cover rounded-full cursor-pointer"
+                                    className="w-48 h-48 object-cover rounded-full cursor-pointer border-4 border-white"
                                 />
                                 {isEditing && (
-                                    <label htmlFor="image" className="mt-2 relative">
+                                    <label htmlFor="image" className="mt-2">
                                         <button className="bg-gray-300 text-white py-2 px-4 rounded cursor-pointer w-full">
                                             Change Profile Picture
                                         </button>
@@ -282,16 +272,16 @@ export default function UserProfile() {
                                         />
                                     </label>
                                 )}
-                            </>
+                            </div>
                         ) : (
-                            <>
+                            <div className="flex group">
                                 <img
                                     src={avatar}
-                                    alt={`${fname} ${lname}'s avatar`}
-                                    className="w-32 h-32 object-cover rounded-full cursor-pointer group-hover:opacity-50"
+                                    alt={`${fname} ${lname}`}
+                                    className="absolute w-32 h-32 object-cover rounded-full opacity-90 group-hover:opacity-50 border-4 border-white"
                                 />
                                 <label
-                                    className="absolute flex justify-center items-center w-48 h-48 text-white bg-gray-300 rounded-full opacity-0 cursor-pointer group-hover:opacity-100"
+                                    className="absolute flex justify-center items-center w-32 h-32 text-white rounded-full opacity-5 group-hover:opacity-70"
                                     htmlFor="image"
                                 >
                                     Change Profile Picture
@@ -300,10 +290,10 @@ export default function UserProfile() {
                                     type="file"
                                     id="image"
                                     accept="image/*"
-                                    className="absolute w-48 h-48 opacity-0"
+                                    className="w-32 h-32 opacity-0 cursor-pointer rounded-full"
                                     onChange={handleImageChange}
                                 />
-                            </>
+                            </div>
                         )}
                         {imageChanged && (
                             <div className="row justify-center">
@@ -326,11 +316,11 @@ export default function UserProfile() {
                         )}
                         {(!isEditing && (
                             <>
-                                <h1 className="text-2xl font-semibold">
-                                    {fname} {lname} <h5 className="text-sm pt-3">{username}</h5>
+                                <h1 className="text-2xl font-semibold mt-2">
+                                    {fname} {lname}
                                 </h1>
-                                <h6 className="pt-2 text-2md">{email}</h6>
-                                <div className="w-full bg-gray-300 rounded-full overflow-hidden mt-4">
+                                <h5 className="text-sm">{username} - {email}</h5>
+                                <div className="w-full bg-gray-300 rounded-full overflow-hidden">
                                     <div
                                         className="bg-green-500 h-4"
                                         style={{ width: `${levelInfo.progress}%` }}
@@ -384,7 +374,7 @@ export default function UserProfile() {
                                     </div>
                                 </summary>
                                 <div className="flex flex-col w-full">
-                                    <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative pt-3">
+                                    <div className="grid h-15 bg-transparent bg-base-300 place-items-center pt-3">
                                         <div className="flex items-center">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -404,7 +394,7 @@ export default function UserProfile() {
                                         </div>
                                     </div>
                                     <div className="divider"></div>
-                                    <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative">
+                                    <div className="grid h-15 bg-transparent bg-base-300 place-items-center">
                                         <div className="flex items-center">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -424,7 +414,7 @@ export default function UserProfile() {
                                         </div>
                                     </div>
                                     <div className="divider"></div>
-                                    <div className="grid h-15 bg-transparent bg-base-300 place-items-center relative">
+                                    <div className="grid h-15 bg-transparent bg-base-300 place-items-center">
                                         <div className="flex items-center">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"

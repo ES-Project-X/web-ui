@@ -178,13 +178,13 @@ export default function CreatePOIPage() {
 
     return (
         <div className="h-screen w-full bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80%  to-white to-100%">
-            <div className="absolute top-0 left-0 p-4">
+            <div className="p-4">
                 <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10" onClick={() => redirect("/map")}>
                     Back
                 </button>
             </div>
-            <h2 className="pt-24 font-extrabold text-4xl text-center">Create POI</h2>
-            <main className="container mx-auto py-8">
+            <h2 className="font-extrabold text-4xl text-center">Create POI</h2>
+            <main className="container mx-auto pt-8">
                 <div className="mx-auto px-4">
                     <div className="py-2">
                         <div className="mb-4">
@@ -272,7 +272,7 @@ export default function CreatePOIPage() {
                                 />
                                 <div className="text-red-500 text-sm">{errors.image}</div>
                             </div>
-                            <div className="flex justify-center p-3">
+                            <div className="flex justify-center pt-3">
                                 <button
                                     className="bg-green-600 text-white py-2 px-4 rounded h-10"
                                     onClick={handleSavePOI}

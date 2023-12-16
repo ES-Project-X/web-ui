@@ -6,21 +6,21 @@ import { redirect } from 'next/navigation';
 export default function Root() {
 
     useEffect(() => {
-      const params = new URLSearchParams(window.location.href);
-      const access_token = params.get('access_token');
-  
-      if (Cookies.get('COGNITO_TOKEN')) {
+        const params = new URLSearchParams(window.location.href);
+        const access_token = params.get('access_token');
+        
+        if (Cookies.get('COGNITO_TOKEN')) {
+            redirect('/map');
+        }
+        if (access_token) {
+            const expirationDate = new Date(new Date().getTime() + 3600 * 1000);
+            Cookies.set('COGNITO_TOKEN', access_token, { secure: true, expires: expirationDate });
+        }
         redirect('/map');
-      }
-      if (access_token) {
-        const expirationDate = new Date(new Date().getTime() + 3600 * 1000);
-        Cookies.set('COGNITO_TOKEN', access_token, { secure: true, expires: expirationDate });
-      }
-      redirect('/map');
     }, [])
 
     return (
-        <main className="flex min-h-screen flex-col items-center justify-center">
+        <main className="flex min-h-screen flex-col items-center justify-center bg-white dark:bg-black">
             <div className="z-10 h-full w-full items-center justify-center font-mono text-sm lg:flex">
                 <div className='flex items-center'>
                     <div className='flex ml-auto'>
