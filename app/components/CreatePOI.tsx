@@ -206,9 +206,9 @@ export default function CreatePOIPage() {
                             Here are the coordinates of the marker you clicked:
                             <br />
                             <br />
-                            Latitude: {poiLat.toFixed(3)}
+                            Latitude: {poiLat}
                             <br />
-                            Longitude: {poiLon.toFixed(3)}
+                            Longitude: {poiLon}
                         </div>
                         <form onSubmit={(e) => e.preventDefault()}>
                             <div className="mb-4">

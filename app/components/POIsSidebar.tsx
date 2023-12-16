@@ -5,6 +5,7 @@ import { isMobile } from "react-device-detect";
 import Cookies from "js-cookie";
 import { URL_API } from "../utils/constants";
 import { padTo2Digits } from "../utils/time";
+import { Coordinate } from "../structs/SearchComponent";
 // import { LineChart } from "react-linechart";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
@@ -19,7 +20,6 @@ const POIsSidebar = ({
     hideCard,
     showDetails,
     setShowDetails,
-    getPosition,
 }: {
     isLoggedIn: boolean;
     selectedPOI: POI;
@@ -30,10 +30,9 @@ const POIsSidebar = ({
     hideCard: () => void;
     showDetails: boolean;
     setShowDetails: (showDetails: boolean) => void;
-    getPosition: () => { latitude: number; longitude: number } | null;
 }) => {
     const [closeEnough, setCloseEnough] = useState(false);
-    const [position, setPosition] = useState<{ latitude: number; longitude: number }>();
+    const [position, setPosition] = useState<Coordinate>();
     const [selectedTimePeriod, setSelectedTimePeriod] = useState("today");
     const [showData, setShowData] = useState<string>("");
     const [fullData, setFullData] = useState<any>({});
@@ -44,24 +43,55 @@ const POIsSidebar = ({
     const [sign, setSign] = useState("");
     const [colorClass, setColorClass] = useState("");
 
+    const [currentLocation, setCurrentLocation] = useState<Coordinate>();
+
+    async function getPosition() {
+		if ("geolocation" in navigator) {
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					const pos = {
+						latitude: position.coords.latitude,
+						longitude: position.coords.longitude,
+					}
+					setCurrentLocation(new Coordinate(pos.latitude, pos.longitude));
+					return pos;
+				},
+				(error) => {
+					setCurrentLocation(new Coordinate());
+					console.log(error);
+				}
+			);
+		} else {
+			setCurrentLocation(new Coordinate());
+			console.log("Geolocation is not supported by this browser.");
+		}
+	}
+
     useEffect(() => {
         if (isMobile) {
-            const p = getPosition();
-            if (p !== null) {;
-                setPosition(p);
-            }
+            getPosition();
         }
     }, [selectedPOI]);
 
     useEffect(() => {
+        if (currentLocation) {
+            setPosition(currentLocation);
+        }
+    }, [currentLocation]);
+
+    useEffect(() => {
         if (position) {
             const distance = getDistanceFrom({
-                currentLocation: position,
+                currentLocation: {
+                    latitude: position.getLat(),
+                    longitude: position.getLng(),
+                },
                 point: selectedPOI,
             });
             if (distance < 50) {
                 setCloseEnough(true);
             } else {
+                alert(distance)
                 setCloseEnough(false);
             }
         }
@@ -402,7 +432,7 @@ const POIsSidebar = ({
                         style={{
                             marginRight: "8px",
                             backgroundColor:
-                                selectedTimePeriod === "today" ? "blue" : "transparent",
+                                selectedTimePeriod === "today" ? "green" : "transparent",
                             color: selectedTimePeriod === "today" ? "white" : "black",
                         }} // Add colors for selected button
                     >
@@ -429,7 +459,7 @@ const POIsSidebar = ({
                         onClick={() => handleTimePeriodChange("7_days")}
                         style={{
                             backgroundColor:
-                                selectedTimePeriod === "7_days" ? "red" : "transparent",
+                                selectedTimePeriod === "7_days" ? "green" : "transparent",
                             color: selectedTimePeriod === "7_days" ? "white" : "black",
                         }} // Add colors for selected button
                     >
@@ -444,8 +474,8 @@ const POIsSidebar = ({
                         style={{
                             marginRight: "8px",
                             backgroundColor:
-                                selectedTimePeriod === "1_month" ? "yellow" : "transparent",
-                            color: "black",
+                                selectedTimePeriod === "1_month" ? "green" : "transparent",
+                            color: selectedTimePeriod === "1_month" ? "white" : "black",
                         }} // Add colors for selected button
                     >
                         1 Month
@@ -457,7 +487,7 @@ const POIsSidebar = ({
                         onClick={() => handleTimePeriodChange("all_time")}
                         style={{
                             backgroundColor:
-                                selectedTimePeriod === "all_time" ? "cyan" : "transparent",
+                                selectedTimePeriod === "all_time" ? "green" : "transparent",
                             color: selectedTimePeriod === "all_time" ? "white" : "black",
                         }} // Add colors for selected button
                     >

@@ -75,11 +75,13 @@ export default function MapComponent({
 	const [fname, setFname] = useState("");
 	const [isRModalOpen, setIsRModalOpen] = useState(false);
 
-	const [routing, setRouting] = useState(false);
 	const [addIntermediate, setAddIntermediate] = useState(false);
 
 	const [openRouting, setOpenRouting] = useState(false);
 	const [showRouting, setShowRouting] = useState(true);
+	const [hideRouting, setHideRouting] = useState(false);
+
+	const [FilterBoard, setFilterBoard] = useState(true);
 
 	const [showDirections, setShowDirections] = useState(false);
 	const [POISideBar, setPOISideBar] = useState(false);
@@ -87,10 +89,11 @@ export default function MapComponent({
 
 	const [showPOIButton, setShowPOIButton] = useState(false);
 	const [showDetails, setShowDetails] = useState(false);
+	const [onlyInfo, setOnlyInfo] = useState(false);
 
 	const [markerCoordinates, setMarkerCoordinates] = useState(new Coordinate());
-
 	const [currentLocation, setCurrentLocation] = useState(new Coordinate());
+	const [lastStates, setLastStates] = useState([] as boolean[]);
 
 	function getUser() {
 		const headers = {
@@ -237,19 +240,13 @@ export default function MapComponent({
 	};
 
 	const createRoute = () => {
-		if (showDirections) {
-			closeDirections();
-			return;
-		}
-		else if (openRouting) {
+		if (openRouting) {
 			setPoints([]);
 			setOrigin(new SearchPoint(""));
 			setDestination(new SearchPoint(""));
-			setIntermediates([new SearchPoint("")]);
+			setIntermediates([]);
 		}
-		setRouting(!routing);
-		setOpenRouting(!openRouting);
-		closeDirections();
+		manageModals("routing", !openRouting);
 	};
 
 	const handleNext = () => {
@@ -313,23 +310,20 @@ export default function MapComponent({
 		window.location.reload();
 	};
 
-	function closeDirections() {
-		setShowDirections(false);
-		setShowRouting(true);
+	function openDirections() {
+		manageModals("directions", true);
 	}
 
-	function openDirections() {
-		setShowRouting(false);
-		setShowDirections(true);
+	function closeDirections() {
+		manageModals("directions", false);
 	}
 
 	function showPOIsSideBar() {
-		setPOISideBar(true);
-		setShowDetails(false);
+		manageModals("poi", true);
 	}
 
 	function hidePOIsSideBar() {
-		setPOISideBar(false);
+		manageModals("poi", false);
 	}
 
 	function openCreatePOIModal() {
@@ -395,34 +389,76 @@ export default function MapComponent({
 		}
 	}, [currentLocation]);
 
-	function manageModals(string: string) {
+	function manageModals(string: string, value: boolean) {
+		// lastStates = [openRouting, showRouting, showDirections, POISideBar, FilterBoard]
 		if (isMobile) {
 			switch (string) {
 				case "routing":
-					setOpenRouting(!openRouting);
+					if (value) {
+						setFilterBoard(false);
+						setShowDirections(false);
+					}
+					else {
+						setFilterBoard(true);
+					}
+					setOpenRouting(value);
 					break;
 				case "directions":
-					setShowDirections(!showDirections);
+					if (value) {
+						setShowRouting(false);
+						setHideRouting(true);
+					}
+					else {
+						setShowRouting(true);
+						setHideRouting(false);
+					}
+					setShowDirections(value);
 					break;
 				case "poi":
-					setPOISideBar(!POISideBar);
+					setLastStates([openRouting, showRouting, showDirections, POISideBar, FilterBoard]);
+					if (value) {
+						setHideRouting(true);
+						setShowRouting(false);
+						setFilterBoard(false);
+						setShowDirections(false);
+					}
+					else {
+						setHideRouting(false);
+						setShowRouting(lastStates[1]);
+						setFilterBoard(lastStates[4]);
+						setShowDirections(lastStates[2]);
+					}
+					setPOISideBar(value);
 					break;
-				case "filer":
+				case "filter":
+					setFilterBoard(value);
+					break;
+				default:
+					break;
+			}
+		}
+		else {
+			switch (string) {
+				case "routing":
+					setOpenRouting(value);
+					break;
+				case "directions":
+					setShowDirections(value);
+					break;
+				case "poi":
+					setPOISideBar(value);
+					break;
+				case "filter":
+					setFilterBoard(value);
+					break;
 				default:
 					break;
 			}
 		}
 	}
 
-
 	return (
 		<>
-			{/* Sidebar
-
-			<Sidebar routes={routes} draw={drawRoute} />
-
-			*/}
-
 			<MapContainer
 				id={"map-container"}
 				ref={mapRef}
@@ -454,7 +490,7 @@ export default function MapComponent({
 					setDestination={setDestination}
 					intermediates={intermediates}
 					setIntermediates={setIntermediates}
-					routing={routing}
+					routing={openRouting}
 					setMarkerCoordinates={setMarkerCoordinates}
 				/>
 				<GetClusters markers={markers} setMarkers={setMarkers} filterPOIs={filterPOIs} />
@@ -514,7 +550,7 @@ export default function MapComponent({
                 	*/}
 				<div className="flex h-screen">
 					{openRouting && (
-						<div className="flex flex-col ml-2 pt-10 sm:pt-32 w-full sm:w-1/5" >
+						<div className="flex flex-col ml-2 mr-2 pt-10 sm:pt-32 w-full sm:w-1/5" >
 							<RoutingComponent
 								showRouting={showRouting}
 								setShowRouting={setShowRouting}
@@ -534,11 +570,13 @@ export default function MapComponent({
 								setDirections={setDirections}
 								openDirections={openDirections}
 								setCurrentIndex={setCurrentIndex}
+								onlyInfo={onlyInfo}
+								setOnlyInfo={setOnlyInfo}
 							/>
 						</div>
 					)}
 					<div className={"flex items-center ml-auto"}>
-						{!POISideBar && (
+						{FilterBoard && (
 							<div>
 								<FilterBoardComponent
 									filterPOIs={filterPOIs}
@@ -560,7 +598,6 @@ export default function MapComponent({
 									hideCard={hidePOIsSideBar}
 									showDetails={showDetails}
 									setShowDetails={setShowDetails}
-									getPosition={getPosition}
 								/>
 							</div>
 						)}
@@ -581,8 +618,23 @@ export default function MapComponent({
 							/>
 						)}
 					</div>
+					<div className="absolute w-full">
+						<div className="flex w-full">
+							<div className="mx-auto">
+								{showPOIButton && loggedIn && (
+									<button
+										id={"create-poi-btn"}
+										onClick={openCreatePOIModal}
+										className="btn bg-green-600 text-white border-white hover:bg-green-700 hover:border-green-700"
+									>
+										Create POI
+									</button>
+								)}
+							</div>
+						</div>
+					</div>
 					<div className="flex w-full">
-						<div className="absolute left-2 bottom-2">
+						<div className="ml-2 mr-auto">
 							{!isMobile ? (
 								<button
 									id={"ori-dst-btn"}
@@ -592,37 +644,29 @@ export default function MapComponent({
 									Route
 								</button>
 							) : (
-								showRouting ? (
-									<button
-										id={"ori-dst-btn"}
-										onClick={createRoute}
-										className="btn"
-									>
-										Route
-									</button>
-								) : (
-									<button
-										id={"ori-dst-btn"}
-										onClick={closeDirections}
-										className="btn"
-									>
-										Show
-									</button>
+								!hideRouting && (
+									showRouting && !onlyInfo ? (
+										<button
+											id={"ori-dst-btn"}
+											onClick={createRoute}
+											className="btn"
+										>
+											Route
+										</button>
+									) : (
+										<button
+											id={"ori-dst-btn"}
+											onClick={() => {setShowRouting(true), setOnlyInfo(false)}}
+											className="btn"
+										>
+											Show
+										</button>
+									)
 								)
 							)}
 						</div>
-						<div className="mx-auto">
-							{showPOIButton && (
-								<button
-									id={"create-poi-btn"} // Ensure unique IDs for the buttons
-									onClick={openCreatePOIModal}
-									className="btn bg-green-600 text-white border-white hover:bg-green-700 hover:border-green-700"
-								>
-									Create POI
-								</button>
-							)}
-						</div>
-						<div className={"flex absolute right-2 bottom-2"}>
+
+						<div className={"flex mr-2 ml-auto"}>
 							{isMobile ? null :
 								(
 									<>
