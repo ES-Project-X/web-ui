@@ -11,7 +11,7 @@ export default function CreatePOIPage() {
     const [type, setType] = useState("");
     const [description, setDescription] = useState("");
     const [image, setImage] = useState<File | null>(null);
-    const [image_type, setImageType] = useState("");
+    const [imageType, setImageType] = useState("");
     const [errors, setErrors] = useState<{
         name: string;
         type: string;
@@ -79,7 +79,7 @@ export default function CreatePOIPage() {
                     axios
                         .post(
                             URL_API + "s3/upload",
-                            { base64_image: base64String, image_type: image_type },
+                            { base64_image: base64String, image_type: imageType },
                             {
                                 headers: {
                                     "Content-Type": "application/json",

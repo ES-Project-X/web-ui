@@ -20,6 +20,7 @@ const POIsSidebar = ({
     hideCard,
     showDetails,
     setShowDetails,
+    getPosition,
 }: {
     isLoggedIn: boolean;
     selectedPOI: POI;
@@ -30,6 +31,7 @@ const POIsSidebar = ({
     hideCard: () => void;
     showDetails: boolean;
     setShowDetails: (showDetails: boolean) => void;
+    getPosition: (callback: (position: Coordinate) => void) => void;
 }) => {
     const [closeEnough, setCloseEnough] = useState(false);
     const [position, setPosition] = useState<Coordinate>();
@@ -45,31 +47,9 @@ const POIsSidebar = ({
 
     const [currentLocation, setCurrentLocation] = useState<Coordinate>();
 
-    async function getPosition() {
-		if ("geolocation" in navigator) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					const pos = {
-						latitude: position.coords.latitude,
-						longitude: position.coords.longitude,
-					}
-					setCurrentLocation(new Coordinate(pos.latitude, pos.longitude));
-					return pos;
-				},
-				(error) => {
-					setCurrentLocation(new Coordinate());
-					console.log(error);
-				}
-			);
-		} else {
-			setCurrentLocation(new Coordinate());
-			console.log("Geolocation is not supported by this browser.");
-		}
-	}
-
     useEffect(() => {
         if (isMobile) {
-            getPosition();
+            getPosition(setCurrentLocation);
         }
     }, [selectedPOI]);
 

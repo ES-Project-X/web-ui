@@ -3,7 +3,7 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { MapContainer, Polyline, TileLayer } from "react-leaflet";
-import { LatLng, LatLngBounds, latLng } from "leaflet";
+import { LatLng, LatLngBounds } from "leaflet";
 import "leaflet-rotate";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -12,7 +12,6 @@ import MarkersManager from "./MarkersManager";
 import FilterBoardComponent from "./FilterBoard";
 import { BasicPOI, FilterType } from "../structs/poi";
 import { updateClusterGroup } from "./DisplayPOIs";
-import Sidebar from "./Sidebar";
 import GetClusters from "./GetClusters";
 import { Direction } from "../structs/direction";
 import RegisterUserModal from "./RegisterUserModal";
@@ -81,7 +80,7 @@ export default function MapComponent({
 	const [showRouting, setShowRouting] = useState(true);
 	const [hideRouting, setHideRouting] = useState(false);
 
-	const [FilterBoard, setFilterBoard] = useState(true);
+	const [filterBoard, setFilterBoard] = useState(true);
 
 	const [showDirections, setShowDirections] = useState(false);
 	const [POISideBar, setPOISideBar] = useState(false);
@@ -332,7 +331,7 @@ export default function MapComponent({
 		);
 	}
 
-	async function getPosition() {
+	async function getPosition(setFunction: (value: Coordinate) => void) {
 		if ("geolocation" in navigator) {
 			navigator.geolocation.getCurrentPosition(
 				(position) => {
@@ -340,16 +339,16 @@ export default function MapComponent({
 						latitude: position.coords.latitude,
 						longitude: position.coords.longitude,
 					}
-					setCurrentLocation(new Coordinate(pos.latitude, pos.longitude));
+					setFunction(new Coordinate(pos.latitude, pos.longitude));
 					return pos;
 				},
 				(error) => {
-					setCurrentLocation(new Coordinate());
+					setFunction(new Coordinate());
 					console.log(error);
 				}
 			);
 		} else {
-			setCurrentLocation(new Coordinate());
+			setFunction(new Coordinate());
 			console.log("Geolocation is not supported by this browser.");
 		}
 	}
@@ -361,7 +360,7 @@ export default function MapComponent({
 		if (showPOIButton) {
 			setShowPOIButton(false);
 		} else {
-			getPosition();
+			getPosition(setCurrentLocation);
 		}
 	}, [markerCoordinates]);
 
@@ -415,7 +414,7 @@ export default function MapComponent({
 					setShowDirections(value);
 					break;
 				case "poi":
-					setLastStates([openRouting, showRouting, showDirections, POISideBar, FilterBoard]);
+					setLastStates([openRouting, showRouting, showDirections, POISideBar, filterBoard]);
 					if (value) {
 						setHideRouting(true);
 						setShowRouting(false);
@@ -576,7 +575,7 @@ export default function MapComponent({
 						</div>
 					)}
 					<div className={"flex items-center ml-auto"}>
-						{FilterBoard && (
+						{filterBoard && (
 							<div>
 								<FilterBoardComponent
 									filterPOIs={filterPOIs}
@@ -598,6 +597,7 @@ export default function MapComponent({
 									hideCard={hidePOIsSideBar}
 									showDetails={showDetails}
 									setShowDetails={setShowDetails}
+									getPosition={getPosition}
 								/>
 							</div>
 						)}
@@ -645,7 +645,7 @@ export default function MapComponent({
 								</button>
 							) : (
 								!hideRouting && (
-									showRouting && !onlyInfo ? (
+									(showRouting && !onlyInfo) ? (
 										<button
 											id={"ori-dst-btn"}
 											onClick={createRoute}
@@ -656,7 +656,7 @@ export default function MapComponent({
 									) : (
 										<button
 											id={"ori-dst-btn"}
-											onClick={() => {setShowRouting(true), setOnlyInfo(false)}}
+											onClick={() => {setShowRouting(true); setOnlyInfo(false)}}
 											className="btn"
 										>
 											Show
