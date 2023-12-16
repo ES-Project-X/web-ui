@@ -152,20 +152,10 @@ export default function MapComponent({
 		if (sessionStorage.getItem("points") !== null) {
 			createRoute();
 			const points = JSON.parse(sessionStorage.getItem("points") || "");
-			origin.setLatLng(
-				new LatLng(
-					points[0].latitude,
-					points[0].longitude
-				)
-			);
-			setOrigin(origin);
-			destination.setLatLng(
-				new LatLng(
-					points[points.length - 1].latitude,
-					points[points.length - 1].longitude
-				)
-			);
-			setDestination(destination);
+			const newOrigin = new SearchPoint("", new Coordinate(points[0].latitude, points[0].longitude));
+			setOrigin(newOrigin);
+			const newDestination = new SearchPoint("", new Coordinate(points[points.length - 1].latitude, points[points.length - 1].longitude));
+			setDestination(newDestination);
 			if (sessionStorage.getItem("type") === "saved") {
 				const intermediates = points.slice(1, points.length - 1).map((point: any) => {
 					return new SearchPoint("", new Coordinate(point.latitude, point.longitude));
