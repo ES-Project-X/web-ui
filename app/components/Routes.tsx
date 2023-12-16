@@ -86,7 +86,7 @@ export default function RoutesComponent() {
                 {openSaved && (
                     <div className="flex flex-col">
                         {saved.map((route) => (
-                            <div className="bg-gray-200 rounded-xl shadow-md p-3 justify-start mt-4 font-bold items-center mr-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+                            <div className="bg-gray-200 rounded-xl shadow-md p-3 justify-start mt-4 font-bold items-center mr-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2" key={route.id}>
                                 <div>
                                     {route.name.replaceAll("__", " - ")}
                                 </div>
@@ -127,7 +127,7 @@ export default function RoutesComponent() {
                 {openTracked && (
                     <div className="flex flex-col">
                         {tracked.map((route) => (
-                            <div className="bg-gray-200 rounded-xl shadow-md p-3 justify-start mt-4 font-bold items-center mr-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+                            <div className="bg-gray-200 rounded-xl shadow-md p-3 justify-start mt-4 font-bold items-center mr-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2" key={route.id}>
                                 <div>
                                     {route.name.replaceAll("__", " - ")}
                                 </div>
