@@ -1,4 +1,3 @@
-import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -162,7 +161,6 @@ export default function CreatePOIPage() {
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedImage = e.target.files?.[0];
-        console.log(selectedImage);
         const maxFileSize = 4 * 1024 * 1024; // file needs to be less than 4MB (change as needed)
 
         if (selectedImage && selectedImage.size > maxFileSize) {
@@ -179,42 +177,35 @@ export default function CreatePOIPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white text-black">
-            <section className="relative h-screen/3 pt-32 flex items-center justify-center overflow-hidden">
-                {/* Linear gradient overlay for fading effect */}
-                <div
-                    className="absolute inset-0 z-10"
-                    style={{
-                        backgroundImage:
-                            "linear-gradient(to bottom, rgba(0, 176, 80, 1.5), rgba(0, 0, 255, 0))",
-                    }}
-                >
-                    <div className="absolute top-0 left-0 p-4">
-                        <Link href="/map">
-                            <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10">
-                                Back
-                            </button>
-                        </Link>
-                    </div>
-                    <h3 className="pt-24 font-bold text-lg text-center">Create POI</h3>
-                </div>
-            </section>
+        <div className="h-screen w-full bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80%  to-white to-100%">
+            <div className="absolute top-0 left-0 p-4">
+                <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10" onClick={() => redirect("/map")}>
+                    Back
+                </button>
+            </div>
+            <h2 className="pt-24 font-extrabold text-4xl text-center">Create POI</h2>
             <main className="container mx-auto py-8">
                 <div className="mx-auto px-4">
                     <div className="py-2">
                         <div className="mb-4">
-                            Here are the coordinates of the marker you clicked:
-                            <br />
-                            <br />
-                            Latitude: {poiLat}
-                            <br />
-                            Longitude: {poiLon}
+                            <span className="font-bold">
+                                Here are the coordinates of the marker you clicked:
+                            </span>
+                            <div className="flex flex-col">
+                                <br />
+                                <span className="font-bold">
+                                    Latitude: {poiLat}
+                                </span>
+                                <span className="font-bold">
+                                    Longitude: {poiLon}
+                                </span>
+                            </div>
                         </div>
                         <form onSubmit={(e) => e.preventDefault()}>
                             <div className="mb-4">
                                 <label
                                     htmlFor="name"
-                                    className="block mb-2 text-sm font-medium text-gray-900 w-full max-x-ws"
+                                    className="block mb-2 text-sm font-bold text-gray-900 w-full max-x-ws"
                                 >
                                     Name
                                 </label>
@@ -222,7 +213,7 @@ export default function CreatePOIPage() {
                                     type="text"
                                     id="name"
                                     placeholder="Type the name here"
-                                    className="input input-bordered w-full max-w-xs bg-slate-800 text-white"
+                                    className="input input-bordered w-full bg-slate-800 text-white"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                 />
@@ -231,7 +222,7 @@ export default function CreatePOIPage() {
                             <div className="mb-4">
                                 <label
                                     htmlFor="countries"
-                                    className="block mb-2 text-sm font-medium text-gray-900  max-x-ws"
+                                    className="block mb-2 text-sm font-bold text-gray-900  max-x-ws"
                                 >
                                     Select an option for the type
                                 </label>
@@ -253,7 +244,7 @@ export default function CreatePOIPage() {
                             <div className="mb-4">
                                 <label
                                     htmlFor="description"
-                                    className="block mb-2 text-sm font-medium text-gray-900 w-full max-x-ws"
+                                    className="block mb-2 text-sm font-bold text-gray-900 w-full max-x-ws"
                                 >
                                     Description
                                 </label>
@@ -261,17 +252,17 @@ export default function CreatePOIPage() {
                                     type="text"
                                     id="description"
                                     placeholder="Type the description here"
-                                    className="input input-bordered w-full max-w-xs bg-slate-800 text-white"
+                                    className="input input-bordered w-full bg-slate-800 text-white"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                 />
                             </div>
-                            <div className="mb-4">
+                            <div className="flex flex-col mb-4">
                                 <label
                                     htmlFor="image"
-                                    className="block mb-2 text-sm font-medium text-gray-900 max-x-ws"
+                                    className="block mb-2 text-sm font-bold text-gray-900 max-x-ws"
                                 >
-                                    Select an Image:
+                                    Take a Picture
                                 </label>
                                 <input
                                     type="file"
@@ -282,22 +273,12 @@ export default function CreatePOIPage() {
                                 <div className="text-red-500 text-sm">{errors.image}</div>
                             </div>
                             <div className="flex justify-center p-3">
-                                <div className="mr-3">
-                                    <button
-                                        className="bg-dark text-white bg-opacity-20 py-2 px-4 rounded h-10"
-                                        onClick={handleSavePOI}
-                                    >
-                                        Save POI
-                                    </button>
-                                </div>
-                                <div>
-                                    <button
-                                        className="bg-red-500 border-red-500 text-white py-2 px-6 rounded h-10"
-                                        onClick={() => redirect("/map")}
-                                    >
-                                        Close
-                                    </button>
-                                </div>
+                                <button
+                                    className="bg-green-600 text-white py-2 px-4 rounded h-10"
+                                    onClick={handleSavePOI}
+                                >
+                                    Save POI
+                                </button>
                             </div>
                         </form>
                     </div>

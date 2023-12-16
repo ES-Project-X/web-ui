@@ -2,7 +2,7 @@ import { slide as Menu } from "react-burger-menu";
 
 interface Route {
     name: string;
-    points: {latitude: number; longitude: number}[];
+    points: { latitude: number; longitude: number }[];
 }
 
 export default function Sidebar({
@@ -10,12 +10,12 @@ export default function Sidebar({
     draw
 }: {
     routes: Route[];
-    draw(url:string): void;
+    draw(url: string): void;
 }) {
 
     const URL_ROUTING = process.env.URL_ROUTING;
 
-    const drawR = (r:string) => {
+    const drawR = (r: string) => {
         let url = URL_ROUTING;
         let p = routes.find((route) => route.name === r)?.points;
         if (p) {
@@ -42,7 +42,7 @@ export default function Sidebar({
             return (
                 routes.map((route) => (
                     <div className="route" key={route.name}>
-                        <p id={route.name} onKeyDown={handleKeyDown} onClick={() => drawR(route.name)} style={{fontSize:"20px"}}>{route.name}</p>
+                        <p id={route.name} onKeyDown={handleKeyDown} onClick={() => drawR(route.name)} style={{ fontSize: "20px" }}>{route.name}</p>
                     </div>
                 ))
             )
