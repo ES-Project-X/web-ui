@@ -445,6 +445,12 @@ export default function MapComponent({
 					setShowDirections(value);
 					break;
 				case "poi":
+					if (value) {
+						setFilterBoard(false);
+					}
+					else {
+						setFilterBoard(true);
+					}
 					setPOISideBar(value);
 					break;
 				case "filter":
