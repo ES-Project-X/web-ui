@@ -1,13 +1,13 @@
 import { LatLng } from "leaflet";
 import { POI } from "../structs/poi";
 
-function haversineDistance(coord1: { lat: number, lon: number }, coord2: { lat: number, lon: number }) {
+function haversineDistance(coord1: { latitude: number, longitude: number }, coord2: { latitude: number, longitude: number }) {
     const R = 6371;  // Raio médio da Terra em quilômetros
-    const dLat = toRadians(coord2.lat - coord1.lat);
-    const dLon = toRadians(coord2.lon - coord1.lon);
+    const dLat = toRadians(coord2.latitude - coord1.latitude);
+    const dLon = toRadians(coord2.longitude - coord1.longitude);
 
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(toRadians(coord1.lat)) * Math.cos(toRadians(coord2.lat)) *
+        Math.cos(toRadians(coord1.latitude)) * Math.cos(toRadians(coord2.latitude)) *
         Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -25,17 +25,17 @@ export const getDistanceFrom = ({
     point,
 }: {
     currentLocation: {
-        lat: number;
-        lon: number;
-    };
+        latitude: number;
+        longitude: number;
+    } | POI;
     point: {
         latitude: number;
         longitude: number;
     } | POI;
 }) => {
     const distance = haversineDistance(currentLocation, {
-        lat: point.latitude,
-        lon: point.longitude,
+        latitude: point.latitude,
+        longitude: point.longitude,
     });
     return distance;
 };

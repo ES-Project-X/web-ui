@@ -15,12 +15,10 @@ export default function DirectionsComponent(
         directions: Direction[],
         closeDirections: () => void
     }
-
-
 ) {
     return (
         <div className="card p-3">
-            <div className="flex items-center">
+            <div className="flex items-start">
                 <label className="text-xl font-bold">{directions[currentIndex].direction}</label>
                 <button className="ml-auto" onClick={closeDirections}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
