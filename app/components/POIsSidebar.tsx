@@ -5,6 +5,7 @@ import { isMobile } from "react-device-detect";
 import Cookies from "js-cookie";
 import { URL_API } from "../utils/constants";
 import { padTo2Digits } from "../utils/time";
+import { Coordinate } from "../structs/SearchComponent";
 // import { LineChart } from "react-linechart";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
@@ -21,51 +22,60 @@ const POIsSidebar = ({
   setShowDetails,
   getPosition,
 }: {
-  isLoggedIn: boolean;
-  selectedPOI: POI;
-  ratingPositive: number;
-  setRatingPositive: (ratingPositive: number) => void;
-  ratingNegative: number;
-  setRatingNegative: (ratingNegative: number) => void;
-  hideCard: () => void;
-  showDetails: boolean;
-  setShowDetails: (showDetails: boolean) => void;
-  getPosition: () => { lat: number; lon: number } | null;
+    isLoggedIn: boolean;
+    selectedPOI: POI;
+    ratingPositive: number;
+    setRatingPositive: (ratingPositive: number) => void;
+    ratingNegative: number;
+    setRatingNegative: (ratingNegative: number) => void;
+    hideCard: () => void;
+    showDetails: boolean;
+    setShowDetails: (showDetails: boolean) => void;
+    getPosition: (callback: (position: Coordinate) => void) => void;
 }) => {
-  const [closeEnough, setCloseEnough] = useState(false);
-  const [position, setPosition] = useState<{ lat: number; lon: number }>();
-  const [selectedTimePeriod, setSelectedTimePeriod] = useState("today");
-  const [showData, setShowData] = useState<string>("");
-  const [fullData, setFullData] = useState<any>({});
+    const [closeEnough, setCloseEnough] = useState(false);
+    const [position, setPosition] = useState<Coordinate>();
+    const [selectedTimePeriod, setSelectedTimePeriod] = useState("today");
+    const [showData, setShowData] = useState<string>("");
+    const [fullData, setFullData] = useState<any>({});
 
   const [existsClicked, setExistsClicked] = useState(false);
   const [fakeNewsClicked, setFakeNewsClicked] = useState(false);
 
-  const [sign, setSign] = useState("");
-  const [colorClass, setColorClass] = useState("");
+    const [sign, setSign] = useState("");
+    const [colorClass, setColorClass] = useState("");
 
-  useEffect(() => {
-    if (isMobile) {
-      const p = getPosition();
-      if (p !== null) {
-        setPosition(p);
-      }
-    }
-  }, [selectedPOI]);
+    const [currentLocation, setCurrentLocation] = useState<Coordinate>();
 
-  useEffect(() => {
-    if (position) {
-      const distance = getDistanceFrom({
-        currentLocation: position,
-        point: selectedPOI,
-      });
-      if (distance < 50) {
-        setCloseEnough(true);
-      } else {
-        setCloseEnough(false);
-      }
-    }
-  }, [position]);
+    useEffect(() => {
+        if (isMobile) {
+            getPosition(setCurrentLocation);
+        }
+    }, [selectedPOI]);
+
+    useEffect(() => {
+        if (currentLocation) {
+            setPosition(currentLocation);
+        }
+    }, [currentLocation]);
+
+    useEffect(() => {
+        if (position) {
+            const distance = getDistanceFrom({
+                currentLocation: {
+                    latitude: position.getLat(),
+                    longitude: position.getLng(),
+                },
+                point: selectedPOI,
+            });
+            if (distance < 50) {
+                setCloseEnough(true);
+            } else {
+                alert(distance)
+                setCloseEnough(false);
+            }
+        }
+    }, [position]);
 
   function checkIfCanRate() {
     if (isLoggedIn === false) {

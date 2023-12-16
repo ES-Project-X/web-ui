@@ -6,11 +6,11 @@ import { Inter } from 'next/font/google'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-    title: 'Project-X',
+    title: 'BiX',
     description: 'Community collaboration platform for bicycle users',
     generator: "Next.js",
     manifest: "/manifest.json",
-    keywords: ["nextjs", "nextjs13", "next13", "pwa", "next-pwa", "project-x"],
+    keywords: ["nextjs", "nextjs13", "next13", "pwa", "next-pwa", "project-x", "bix"],
     themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#fff" }],
     authors: [
         {
