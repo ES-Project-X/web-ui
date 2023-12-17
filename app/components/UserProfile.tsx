@@ -155,14 +155,14 @@ export default function UserProfile() {
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedImage = e.target.files?.[0];
 
-        const maxFileSize = 4 * 1024 * 1024; // file needs to be less than 4MB (change as needed)
+        const maxFileSize = 12 * 1024 * 1024; // file needs to be less than 12MB (change as needed)
 
         if (!selectedImage) {
             return;
         }
 
         if (selectedImage && selectedImage.size > maxFileSize) {
-            alert("Image must be less than 4MB");
+            alert("Image must be less than 12MB");
             return;
         }
         setImage(selectedImage);
