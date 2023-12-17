@@ -265,7 +265,7 @@ export default function MapComponent({
 			.then((response) => response.json())
 			.then((data) => {
 				if (data.items.length === 0) {
-					window.alert("No results");
+					alert("No results");
 					return;
 				}
 				const lat = data.items[0].position.lat;
@@ -543,7 +543,6 @@ export default function MapComponent({
 			const minutes = todaysDate.getMinutes();
 			const seconds = todaysDate.getSeconds();
 			const trackedDate = `${date}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-			alert(trackedDate);
 			saveRoute(trackedDate, trackedPoints);
 		} else if (isRecording === true) {
 			const id = navigator.geolocation.watchPosition(
