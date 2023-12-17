@@ -182,7 +182,7 @@ export default function UserProfile() {
             const base64String = reader.result?.toString();
             if (base64String) {
                 setImageType(image.type);
-                setImageBase64(base64String);
+                setImageBase64(base64String.split(",")[1]);
             }
         }
         reader.readAsDataURL(image);
