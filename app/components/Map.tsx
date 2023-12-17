@@ -386,25 +386,27 @@ export default function MapComponent({
 	}
 
 	async function getPosition(setFunction: (value: Coordinate) => void) {
-		if ("geolocation" in navigator) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					const pos = {
-						latitude: position.coords.latitude,
-						longitude: position.coords.longitude,
+		navigator.permissions.query({ name: "geolocation" }).then((result) => {
+			if (result.state === "granted") {
+				navigator.geolocation.getCurrentPosition(
+					(position) => {
+						const pos = {
+							latitude: position.coords.latitude,
+							longitude: position.coords.longitude,
+						}
+						setFunction(new Coordinate(pos.latitude, pos.longitude));
+						return pos;
+					},
+					(error) => {
+						setFunction(new Coordinate());
+						console.log(error);
 					}
-					setFunction(new Coordinate(pos.latitude, pos.longitude));
-					return pos;
-				},
-				(error) => {
-					setFunction(new Coordinate());
-					console.log(error);
-				}
-			);
-		} else {
-			setFunction(new Coordinate());
-			console.log("Geolocation is not supported by this browser.");
-		}
+				);
+			} else {
+				setFunction(new Coordinate());
+				console.log("Geolocation is not supported by this browser.");
+			}
+		});
 	}
 
 	useEffect(() => {
@@ -517,10 +519,6 @@ export default function MapComponent({
 	}
 
 	function startTracking() {
-		const response = confirm("Are you sure you want to start tracking your GPS position?");
-		if (!response) {
-			return;
-		}
 		setIsRecording(true);
 	}
 
@@ -545,17 +543,31 @@ export default function MapComponent({
 			const trackedDate = `${date}-${month}-${year} ${hours}:${minutes}:${seconds}`;
 			saveRoute(trackedDate, trackedPoints);
 		} else if (isRecording === true) {
-			const id = navigator.geolocation.watchPosition(
-				(position) => {
-					let newTrackedPoints = trackedPoints;
-					trackedPoints.push(`${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`);
-					setTrackedPoints(newTrackedPoints);
-				},
-				(error) => {
-					console.log(error);
+			navigator.permissions.query({ name: "geolocation" }).then((result) => {
+				if (result.state === "granted") {
+					const response = confirm("Are you sure you want to start tracking your GPS position?");
+					if (!response) {
+						setIsRecording(false);
+						return;
+					}
+					const id = navigator.geolocation.watchPosition(
+						(position) => {
+							let newTrackedPoints = trackedPoints;
+							trackedPoints.push(`${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`);
+							setTrackedPoints(newTrackedPoints);
+						},
+						(error) => {
+							console.log(error);
+							setIsRecording(false);
+							return;
+						}
+					);
+					setTrackID(id);
+				} else {
+					alert("Please enable geolocation to use this feature.");
+					setIsRecording(false);
 				}
-			);
-			setTrackID(id);
+			});
 		}
 	}, [isRecording]);
 
@@ -632,7 +644,7 @@ export default function MapComponent({
 										src={avatar}
 										alt={`${fname}'s profile`}
 										className="rounded-circle shadow object-cover"
-										style={{ height: "100%", width: "100%"}}
+										style={{ height: "100%", width: "100%" }}
 									/>
 								</button>
 							</a>
