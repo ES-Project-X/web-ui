@@ -74,43 +74,6 @@ export default function UserProfile() {
         userChanges = {};
     };
 
-    useEffect(() => {
-        if (!TOKEN) {
-            redirect("/map");
-        }
-
-        const headers = {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${TOKEN}`,
-        };
-        const url = new URL(URL_API + "user");
-
-        fetch(url.toString(), { headers })
-            .then(async (res) => {
-                if (res.status !== 200) {
-                    redirect("/map");
-                }
-                const user: UserData = await res.json();
-
-                if (user) {
-                    setAvatar(user.image_url);
-                    setFname(user.first_name);
-                    setLname(user.last_name);
-                    setUsername(user.username);
-                    setEmail(user.email);
-                    setFormUsername(user.username);
-                    setTotal_xp(user.total_xp);
-                    setAddedPoiCount(user.added_pois_count);
-                    setReceivedRatingCount(user.received_ratings_count);
-                    setGivenRatingCount(user.given_ratings_count);
-                    setLevelInfo(calculateLevelAndXP(user.total_xp));
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }, []);
-
     function logout() {
         Cookies.remove("COGNITO_TOKEN");
         localStorage.removeItem("user");
@@ -266,7 +229,7 @@ export default function UserProfile() {
                                             type="file"
                                             id="image"
                                             accept="image/*"
-                                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                                            className="absolute opacity-0 cursor-pointer rounded-full"
                                             onChange={handleImageChange}
                                         />
                                     </label>
