@@ -25,7 +25,6 @@ import { Coordinate, SearchPoint } from "../structs/SearchComponent";
 import "../globals.css";
 import DirectionsComponent from "./Directions";
 import POIsSidebar from "./POIsSidebar";
-import { create } from "domain";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -184,8 +183,7 @@ export default function MapComponent({
 
 		if (sessionStorage.getItem("points") !== null) {
 			createRoute();
-			const points = JSON.parse(sessionStorage.getItem("points") || "");
-			console.log(points);
+			const points = JSON.parse(sessionStorage.getItem("points") ?? "");
 			const newOrigin = new SearchPoint("", new Coordinate(points[0].latitude, points[0].longitude));
 			setOrigin(newOrigin);
 			const newDestination = new SearchPoint("", new Coordinate(points[points.length - 1].latitude, points[points.length - 1].longitude));

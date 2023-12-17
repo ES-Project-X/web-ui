@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 import { UserData } from "../structs/user";
 import { isMobile } from "react-device-detect";
 import axios from "axios";
-import fs from "fs";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 const URL_API = process.env.DATABASE_API_URL;

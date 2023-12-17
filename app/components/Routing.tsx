@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
 import { Direction } from "../structs/direction";
 import { SearchPoint, copySearchPoint } from "../structs/SearchComponent";
-import { URL_API, URL_GEO, URL_REV, URL_ROUTING } from "../utils/constants";
-import Cookies from "js-cookie";
+import { URL_GEO, URL_REV, URL_ROUTING } from "../utils/constants";
 import { LatLng, LatLngBounds } from "leaflet";
 import { isMobile } from "react-device-detect";
-
-const TOKEN = Cookies.get("COGNITO_TOKEN");
 
 export default function RoutingComponent(
     {
