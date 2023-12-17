@@ -159,7 +159,7 @@ export default function CreatePOIPage() {
     };
 
     return (
-        <div className="h-fit w-full bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80%  to-white to-100%">
+        <div className="min-h-screen h-fit w-full bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80%  to-white to-100%">
             <div className="p-4">
                 <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10" onClick={() => redirect("/map")}>
                     Back
