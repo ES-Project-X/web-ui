@@ -231,7 +231,7 @@ export default function UserProfile() {
     };
 
     return (
-        <div className="min-h-screen bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80% to-white to-100%">
+        <div className="h-fit w-full bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80% to-white to-100%">
             <div className="h-screen/3 flex items-center justify-center overflow-hidden flex-col">
                 <div className="flex p-4 w-full">
                     <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded mr-auto" onClick={() => { redirect("/map") }}>
