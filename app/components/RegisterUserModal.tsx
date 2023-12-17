@@ -47,7 +47,7 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
               id="email"
               name="email"
               placeholder="email goes here"
-              className="input input-bordered w-full max-w-xm"
+              className="input input-bordered w-full max-w-xm text-black dark:text-white"
               value={userData.email}
               onChange={handleInputChange}
             />
@@ -61,7 +61,7 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
               id="username" // Make sure the id matches the htmlFor in the label
               name="username"
               placeholder="username goes here"
-              className="input input-bordered w-full max-w-xm"
+              className="input input-bordered w-full max-w-xm text-black dark:text-white"
               value={userData.username}
               onChange={handleInputChange}
             />
@@ -75,7 +75,7 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
               id="first_name"
               name="first_name"
               placeholder="First name goes here"
-              className="input input-bordered w-full max-w-xm"
+              className="input input-bordered w-full max-w-xm text-black dark:text-white"
               value={userData.first_name}
               onChange={handleInputChange}
             />
@@ -89,7 +89,7 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
               id="last_name"
               name="last_name"
               placeholder="Last name goes here"
-              className="input input-bordered w-full max-w-xm"
+              className="input input-bordered w-full max-w-xm text-black dark:text-white"
               value={userData.last_name}
               onChange={handleInputChange}
             />
@@ -103,7 +103,7 @@ const RegisterUserModal: React.FC<RegisterUserModalProps> = ({
               id="birth_date"
               name="birth_date"
               placeholder="username goes here"
-              className="input input-bordered w-full max-w-xm"
+              className="input input-bordered w-full max-w-xm text-black dark:text-white"
               value={userData.birth_date}
               onChange={handleInputChange}
             />

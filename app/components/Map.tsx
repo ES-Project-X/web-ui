@@ -96,6 +96,37 @@ export default function MapComponent({
 	const [lastStates, setLastStates] = useState([] as boolean[]);
 
 	const [gettingRoute, setGettingRoute] = useState(false);
+	const [isRecording, setIsRecording] = useState(false);
+
+	const [trackedPoints, setTrackedPoints] = useState<string[]>([]);
+	const [trackID, setTrackID] = useState(0);
+
+	async function saveRoute(routeName: string, routePoints: string[]) {
+		const headers = {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${TOKEN}`,
+		};
+		const url = new URL(URL_API + "route/create");
+		const body = {
+			name: routeName,
+			points: routePoints,
+		};
+		return fetch(url.toString(), {
+			headers,
+			method: "POST",
+			body: JSON.stringify(body),
+		})
+			.then((response) => {
+				if (response.status === 200) {
+					return true;
+				} else {
+					return false;
+				}
+			})
+			.catch(() => {
+				return false;
+			});
+	}
 
 	function getUser() {
 		const headers = {
@@ -140,6 +171,8 @@ export default function MapComponent({
 		if (!TOKEN) {
 			setLoggedIn(false);
 			localStorage.removeItem("user");
+			sessionStorage.removeItem("points");
+			sessionStorage.removeItem("type");
 		} else if (localStorage.getItem("user")) {
 			setLoggedIn(true);
 			const userLS = JSON.parse(localStorage.getItem("user") || "");
@@ -152,6 +185,7 @@ export default function MapComponent({
 		if (sessionStorage.getItem("points") !== null) {
 			createRoute();
 			const points = JSON.parse(sessionStorage.getItem("points") || "");
+			console.log(points);
 			const newOrigin = new SearchPoint("", new Coordinate(points[0].latitude, points[0].longitude));
 			setOrigin(newOrigin);
 			const newDestination = new SearchPoint("", new Coordinate(points[points.length - 1].latitude, points[points.length - 1].longitude));
@@ -484,6 +518,50 @@ export default function MapComponent({
 		}
 	}
 
+	function startTracking() {
+		const response = confirm("Are you sure you want to start tracking your GPS position?");
+		if (!response) {
+			return;
+		}
+		setIsRecording(true);
+	}
+
+	function stopTracking() {
+		const response = confirm("Are you sure you want to stop tracking?");
+		if (!response) {
+			return;
+		}
+		setIsRecording(false);
+	}
+
+	useEffect(() => {
+		if (!isRecording) {
+			navigator.geolocation.clearWatch(trackID);
+			const todaysDate = new Date();
+			const date = todaysDate.getDate();
+			const month = todaysDate.getMonth();
+			const year = todaysDate.getFullYear();
+			const hours = todaysDate.getHours();
+			const minutes = todaysDate.getMinutes();
+			const seconds = todaysDate.getSeconds();
+			const trackedDate = `${date}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+			saveRoute(trackedDate, trackedPoints);
+		}
+		else {
+			const id = navigator.geolocation.watchPosition(
+				(position) => {
+					let newTrackedPoints = trackedPoints;
+					trackedPoints.push(`${position.coords.latitude},${position.coords.longitude}`);
+					setTrackedPoints(newTrackedPoints);
+				},
+				(error) => {
+					console.log(error);
+				}
+			);
+			setTrackID(id);
+		}
+	}, [isRecording]);
+
 	return (
 		<>
 			<MapContainer
@@ -601,6 +679,7 @@ export default function MapComponent({
 								setOnlyInfo={setOnlyInfo}
 								gettingRoute={gettingRoute}
 								setGettingRoute={setGettingRoute}
+								saveRoute={saveRoute}
 							/>
 						</div>
 					)}
@@ -666,40 +745,63 @@ export default function MapComponent({
 						</div>
 					</div>
 					<div className="flex w-full">
-						<div className="ml-2 mr-auto">
-							{!isMobile ? (
-								<button
-									id={"ori-dst-btn"}
-									onClick={createRoute}
-									className="btn"
-								>
-									Route
-								</button>
-							) : (
-								!hideRouting && (
-									(showRouting && !onlyInfo) ? (
-										<button
-											id={"ori-dst-btn"}
-											onClick={createRoute}
-											className="btn"
-										>
-											Route
-										</button>
-									) : (
-										<button
-											id={"ori-dst-btn"}
-											onClick={() => { setShowRouting(true); setOnlyInfo(false) }}
-											className="btn"
-										>
-											Show
-										</button>
+						<div className="flex ml-2 mr-auto items-end">
+							<div>
+								{!isMobile ? (
+									<button
+										id={"ori-dst-btn"}
+										onClick={createRoute}
+										className="btn"
+									>
+										Route
+									</button>
+								) : (
+									!hideRouting && (
+										(showRouting && !onlyInfo) ? (
+											<button
+												id={"ori-dst-btn"}
+												onClick={createRoute}
+												className="btn"
+											>
+												Route
+											</button>
+										) : (
+											<button
+												id={"ori-dst-btn"}
+												onClick={() => { setShowRouting(true); setOnlyInfo(false) }}
+												className="btn"
+											>
+												Show
+											</button>
+										)
 									)
-								)
-							)}
+								)}
+							</div>
 						</div>
 
 						<div className={"flex mr-2 ml-auto"}>
-							{isMobile ? null :
+							{(isMobile && loggedIn) ? (
+								isRecording ? (
+									<button
+										id={"track-btn"}
+										onClick={() => stopTracking()}
+										className="animate-pulse btn w-16 h-16 shadow rounded-full uppercase font-bold items-center justify-center border-2 border-white text-white bg-red-600"
+									>
+										Rec
+									</button>
+								)
+									:
+									(
+										<button
+											id={"track-btn"}
+											onClick={() => startTracking()}
+											className="btn w-16 h-16 shadow rounded-full uppercase font-bold items-center justify-center border-2 text-black bg-green-500"
+										>
+											Track
+										</button>
+									)
+							)
+								:
 								(
 									<>
 										<button
@@ -721,8 +823,8 @@ export default function MapComponent({
 							}
 						</div>
 					</div>
-				</div>
-			</div>
+				</div >
+			</div >
 		</>
 	);
 }

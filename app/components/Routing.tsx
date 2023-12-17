@@ -32,6 +32,7 @@ export default function RoutingComponent(
         setOnlyInfo,
         gettingRoute,
         setGettingRoute,
+        saveRoute,
     }: {
         showRouting: boolean,
         setShowRouting: (showRouting: boolean) => void,
@@ -55,6 +56,7 @@ export default function RoutingComponent(
         setOnlyInfo: (onlyInfo: boolean) => void;
         gettingRoute: boolean;
         setGettingRoute: (gettingRoute: boolean) => void;
+        saveRoute: (routeName: string, routePoints: string[]) => Promise<boolean>;
     }
 ) {
     const [pointToRemove, setPointToRemove] = useState(-1);
@@ -413,33 +415,6 @@ export default function RoutingComponent(
         setPoints([]);
     }
 
-    async function saveRoute() {
-        const headers = {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${TOKEN}`,
-        };
-        const url = new URL(URL_API + "route/create");
-        const body = {
-            name: name,
-            points: myPoints,
-        };
-        return fetch(url.toString(), {
-            headers,
-            method: "POST",
-            body: JSON.stringify(body),
-        })
-            .then((response) => {
-                if (response.status === 200) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })
-            .catch(() => {
-                return false;
-            });
-    }
-
     useEffect(() => {
         if (origin.isCoordinateNull() || destination.isCoordinateNull()) {
             setAddIntermediate(false);
@@ -588,7 +563,7 @@ export default function RoutingComponent(
                                     <button
                                         id={"save-route-btn"}
                                         onClick={async () => {
-                                            if (await saveRoute()) {
+                                            if (await saveRoute(name, myPoints)) {
                                                 alert("Route saved");
                                             } else {
                                                 alert("Error saving route");

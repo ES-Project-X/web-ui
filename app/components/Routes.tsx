@@ -79,78 +79,80 @@ export default function RoutesComponent() {
     </svg>
 
     return (
-        <div className="min-h-screen bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80% to-white to-100%">
-            <div className="absolute top-0 left-0 p-4">
-                <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10" onClick={() => redirect("/profile")}>
-                    Back
-                </button>
-            </div>
-            <h2 className="pt-24 font-extrabold text-4xl text-center">My Routes</h2>
-            <div className="bg-white rounded-xl shadow-md p-8 justify-center m-8 font-bold flex-col">
-                <div className="flex cursor-pointer" onClick={() => setOpenSaved(!openSaved)}>
-                    <span className="mr-auto">Saved Routes ({saved.length})</span>
-                    {openSaved ? (
-                        upArrow
-                    ) : (
-                        downArrow
+        <div className="absolute h-full w-full bg-gradient-to-b from-0% from-green-500 via-white via-80% to-white to-100%">
+            <div>
+                <div className="absolute top-0 left-0 p-4">
+                    <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10" onClick={() => redirect("/profile")}>
+                        Back
+                    </button>
+                </div>
+                <h2 className="pt-24 font-extrabold text-4xl text-center">My Routes</h2>
+                <div className="bg-white rounded-xl shadow-md p-8 justify-center m-8 font-bold flex-col">
+                    <div className="flex cursor-pointer" onClick={() => setOpenSaved(!openSaved)}>
+                        <span className="mr-auto">Saved Routes ({saved.length})</span>
+                        {openSaved ? (
+                            upArrow
+                        ) : (
+                            downArrow
+                        )}
+                    </div>
+                    {openSaved && (
+                        <div className="flex flex-col">
+                            {saved.map((route) => (
+                                <div className="bg-gray-200 rounded-xl shadow-md p-3 justify-start mt-4 font-bold items-center mr-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2" key={route.id}>
+                                    <div>
+                                        {route.name.replaceAll("__", " - ")}
+                                    </div>
+                                    <div className="flex items-center ml-auto">
+                                        <div>
+                                            <button className="btn mr-2 bg-green-500 rounded-lg shadow-md w-12 h-12 p-0" onClick={() => drawRoute(route, "saved")}>
+                                                {routeIcon}
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <button className="btn bg-red-600 rounded-lg shadow-md w-12 h-12 p-0" onClick={() => deleteRoute(route.id)}>
+                                                {deleteIcon}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     )}
                 </div>
-                {openSaved && (
-                    <div className="flex flex-col">
-                        {saved.map((route) => (
-                            <div className="bg-gray-200 rounded-xl shadow-md p-3 justify-start mt-4 font-bold items-center mr-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2" key={route.id}>
-                                <div>
-                                    {route.name.replaceAll("__", " - ")}
-                                </div>
-                                <div className="flex items-center ml-auto">
-                                    <div>
-                                        <button className="btn mr-2 bg-green-500 rounded-lg shadow-md w-12 h-12 p-0" onClick={() => drawRoute(route, "saved")}>
-                                            {routeIcon}
-                                        </button>
-                                    </div>
-                                    <div>
-                                        <button className="btn bg-red-600 rounded-lg shadow-md w-12 h-12 p-0" onClick={() => deleteRoute(route.id)}>
-                                            {deleteIcon}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                <div className="bg-white rounded-xl shadow-md p-8 justify-center m-8 font-bold flex flex-col">
+                    <div className="flex cursor-pointer" onClick={() => setOpenTracked(!openTracked)}>
+                        <span className="mr-auto">Tracked Routes ({tracked.length})</span>
+                        {openTracked ? (
+                            upArrow
+                        ) : (
+                            downArrow
+                        )}
                     </div>
-                )}
-            </div>
-            <div className="bg-white rounded-xl shadow-md p-8 justify-center m-8 font-bold flex flex-col">
-                <div className="flex cursor-pointer" onClick={() => setOpenTracked(!openTracked)}>
-                    <span className="mr-auto">Tracked Routes ({tracked.length})</span>
-                    {openTracked ? (
-                        upArrow
-                    ) : (
-                        downArrow
+                    {openTracked && (
+                        <div className="flex flex-col">
+                            {tracked.map((route) => (
+                                <div className="bg-gray-200 rounded-xl shadow-md p-3 justify-start mt-4 font-bold items-center mr-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2" key={route.id}>
+                                    <div>
+                                        {route.name.replaceAll("__", " - ")}
+                                    </div>
+                                    <div className="flex ml-auto items-center">
+                                        <div>
+                                            <button className="btn mr-2 bg-green-500 rounded-lg shadow-md w-12 h-12 p-0" onClick={() => drawRoute(route, "tracked")}>
+                                                {routeIcon}
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <button className="btn bg-red-600 rounded-lg shadow-md w-12 h-12 p-0" onClick={() => deleteRoute(route.id)}>
+                                                {deleteIcon}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     )}
                 </div>
-                {openTracked && (
-                    <div className="flex flex-col">
-                        {tracked.map((route) => (
-                            <div className="bg-gray-200 rounded-xl shadow-md p-3 justify-start mt-4 font-bold items-center mr-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2" key={route.id}>
-                                <div>
-                                    {route.name.replaceAll("__", " - ")}
-                                </div>
-                                <div className="flex ml-auto items-center">
-                                    <div>
-                                        <button className="btn mr-2 bg-green-500 rounded-lg shadow-md w-12 h-12 p-0" onClick={() => drawRoute(route, "tracked")}>
-                                            {routeIcon}
-                                        </button>
-                                    </div>
-                                    <div>
-                                        <button className="btn bg-red-600 rounded-lg shadow-md w-12 h-12 p-0" onClick={() => deleteRoute(route.id)}>
-                                            {deleteIcon}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
             </div>
         </div>
     );
