@@ -549,7 +549,7 @@ export default function MapComponent({
 			const id = navigator.geolocation.watchPosition(
 				(position) => {
 					let newTrackedPoints = trackedPoints;
-					trackedPoints.push(`${position.coords.latitude},${position.coords.longitude}`);
+					trackedPoints.push(`${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`);
 					setTrackedPoints(newTrackedPoints);
 				},
 				(error) => {
@@ -651,7 +651,7 @@ export default function MapComponent({
 				{/*
                     	MIDDLE PART OF THE UI
                 	*/}
-				<div className="flex h-screen">
+				<div className="flex h-full">
 					{openRouting && (
 						<div className="flex flex-col ml-2 mr-2 pt-10 sm:pt-32 w-full sm:w-1/5" >
 							<RoutingComponent
@@ -727,7 +727,7 @@ export default function MapComponent({
 							)}
 						</div>
 					</div>
-					<div className="absolute w-full">
+					<div className="absolute w-full bottom-2">
 						<div className="flex w-full">
 							<div className="mx-auto">
 								{showPOIButton && loggedIn && (
@@ -800,7 +800,7 @@ export default function MapComponent({
 									)
 							)
 								:
-								(
+								(isMobile ? null : (
 									<>
 										<button
 											id={"map-rotate-left-btn"}
@@ -817,7 +817,7 @@ export default function MapComponent({
 											Rotate Right
 										</button>
 									</>
-								)
+								))
 							}
 						</div>
 					</div>
