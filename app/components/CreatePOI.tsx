@@ -1,4 +1,3 @@
-import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -11,7 +10,9 @@ export default function CreatePOIPage() {
     const [type, setType] = useState("");
     const [description, setDescription] = useState("");
     const [image, setImage] = useState<File | null>(null);
-    const [imageType, setImageType] = useState("");
+    const [imageBase64, setImageBase64] = useState("");
+    const [image_type, setImageType] = useState("");
+    const [image_url, setImageUrl] = useState("");
     const [errors, setErrors] = useState<{
         name: string;
         type: string;
@@ -45,98 +46,6 @@ export default function CreatePOIPage() {
         }
     }, []);
 
-    // Function to convert a File to a base64-encoded string
-    //@ts-ignore
-    const fileToBase64 = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-
-            reader.onload = () => {
-                //@ts-ignore
-                resolve(reader.result.split(",")[1]); // Extract the base64 part
-                // get the image type
-                //@ts-ignore
-                setImageType(reader.result.split(",")[0].split(":")[1].split(";")[0]);
-            };
-
-            reader.onerror = (error) => {
-                reject(error);
-            };
-
-            reader.readAsDataURL(file);
-        });
-    };
-
-    const handleUpload = () => {
-        return new Promise((resolve, reject) => {
-            if (!image) {
-                reject(new Error("No image selected"));
-                return;
-            }
-            fileToBase64(image)
-                .then((base64String) => {
-
-                    axios
-                        .post(
-                            URL_API + "s3/upload",
-                            { base64_image: base64String, image_type: imageType },
-                            {
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    Authorization: `Bearer ${TOKEN}`,
-                                },
-                            }
-                        )
-                        .then((res) => {
-                            if (res.status === 200) {
-                                resolve(res.data);
-                            } else {
-                                reject(new Error("Error uploading image"));
-                            }
-                        })
-                        .catch((err) => {
-                            reject(err);
-                        });
-                })
-                .catch((err) => {
-                    reject(err);
-                });
-        });
-    };
-
-    const handleSavePOI = async () => {
-        try {
-            if (validateForm()) {
-                const uploadedData = await handleUpload();
-                const newPOI = {
-                    latitude: poiLat,
-                    longitude: poiLon,
-                    name: name,
-                    description: description,
-                    type: type,
-                    picture_url: (uploadedData as { image_url: string }).image_url,
-                };
-
-                console.log(newPOI);
-
-                const saveResponse = await axios.post(URL_API + "poi/create", newPOI, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${TOKEN}`,
-                    },
-                });
-
-                if (saveResponse.status === 200) {
-                    redirect("/map");
-                } else {
-                    throw new Error("Error saving POI");
-                }
-            }
-        } catch (err) {
-            console.log(err);
-        }
-    };
-
     const validateForm = () => {
         const newErrors = { name: "", type: "", image: "" };
         let valid = true;
@@ -160,61 +69,125 @@ export default function CreatePOIPage() {
         return valid;
     };
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedImage = e.target.files?.[0];
-        console.log(selectedImage);
+
         const maxFileSize = 4 * 1024 * 1024; // file needs to be less than 4MB (change as needed)
+
+        if (!selectedImage) {
+            return;
+        }
 
         if (selectedImage && selectedImage.size > maxFileSize) {
             alert("Image must be less than 4MB");
             return;
         }
-
-        setImage(selectedImage || null);
-
+        setImage(selectedImage);
     };
+
+    const handleUpload = async () => {
+        if (!image) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result?.toString();
+            if (base64String) {
+                setImageType(image.type);
+                setImageBase64(base64String);
+            }
+        }
+        reader.readAsDataURL(image);
+    };
+
+    useEffect(() => {
+        if (!imageBase64) {
+            return;
+        }
+        axios.post(
+            URL_API + "s3/upload",
+            { base64_image: imageBase64, image_type: image_type },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${TOKEN}`,
+                },
+            }
+        )
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.data;
+                } else if (res.status === 400) {
+                    throw new Error("Error uploading image");
+                }
+            })
+            .then((data) => {
+                setImageUrl(data.image_url);
+                submitPOI(data.image_url);
+            });
+    }, [imageBase64]);
+
+    async function submitPOI(data_image_url: string) {
+        fetch(URL_API + "poi/create",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${TOKEN}`,
+                },
+                body: JSON.stringify({
+                    latitude: poiLat,
+                    longitude: poiLon,
+                    name: name,
+                    description: description,
+                    type: type,
+                    picture_url: data_image_url,
+                }),
+            })
+            .then((response) => {
+                if (response.status === 200) {
+                    redirect("/map");
+                } else {
+                    throw new Error("Error creating POI");
+                }
+            })
+    }
 
     const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setType(e.target.value);
     };
 
     return (
-        <div className="min-h-screen bg-white text-black">
-            <section className="relative h-screen/3 pt-32 flex items-center justify-center overflow-hidden">
-                {/* Linear gradient overlay for fading effect */}
-                <div
-                    className="absolute inset-0 z-10"
-                    style={{
-                        backgroundImage:
-                            "linear-gradient(to bottom, rgba(0, 176, 80, 1.5), rgba(0, 0, 255, 0))",
-                    }}
-                >
-                    <div className="absolute top-0 left-0 p-4">
-                        <Link href="/map">
-                            <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10">
-                                Back
-                            </button>
-                        </Link>
-                    </div>
-                    <h3 className="pt-24 font-bold text-lg text-center">Create POI</h3>
-                </div>
-            </section>
-            <main className="container mx-auto py-8">
+        <div className="min-h-screen h-full w-full bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80%  to-white to-100%">
+            <div className="p-4">
+                <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10" onClick={() => redirect("/map")}>
+                    Back
+                </button>
+            </div>
+            <h2 className="font-extrabold text-4xl text-center">Create POI</h2>
+            <div className="container mx-auto pt-8">
                 <div className="mx-auto px-4">
                     <div className="py-2">
                         <div className="mb-4">
-                            Here are the coordinates of the marker you clicked:
-                            <br />
-                            <br />
-                            Latitude: {poiLat}
-                            <br />
-                            Longitude: {poiLon}
+                            <span className="font-bold">
+                                Here are the coordinates of the marker you clicked:
+                            </span>
+                            <div className="flex flex-col">
+                                <br />
+                                <span className="font-bold">
+                                    Latitude: {poiLat}
+                                </span>
+                                <span className="font-bold">
+                                    Longitude: {poiLon}
+                                </span>
+                            </div>
                         </div>
-                        <form onSubmit={(e) => e.preventDefault()}>
+                        <div>
                             <div className="mb-4">
                                 <label
                                     htmlFor="name"
-                                    className="block mb-2 text-sm font-medium text-gray-900 w-full max-x-ws"
+                                    className="block mb-2 text-sm font-bold text-gray-900 w-full max-x-ws"
                                 >
                                     Name
                                 </label>
@@ -222,7 +195,7 @@ export default function CreatePOIPage() {
                                     type="text"
                                     id="name"
                                     placeholder="Type the name here"
-                                    className="input input-bordered w-full max-w-xs bg-slate-800 text-white"
+                                    className="input input-bordered w-full bg-slate-800 text-white"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                 />
@@ -231,7 +204,7 @@ export default function CreatePOIPage() {
                             <div className="mb-4">
                                 <label
                                     htmlFor="countries"
-                                    className="block mb-2 text-sm font-medium text-gray-900  max-x-ws"
+                                    className="block mb-2 text-sm font-bold text-gray-900  max-x-ws"
                                 >
                                     Select an option for the type
                                 </label>
@@ -253,7 +226,7 @@ export default function CreatePOIPage() {
                             <div className="mb-4">
                                 <label
                                     htmlFor="description"
-                                    className="block mb-2 text-sm font-medium text-gray-900 w-full max-x-ws"
+                                    className="block mb-2 text-sm font-bold text-gray-900 w-full max-x-ws"
                                 >
                                     Description
                                 </label>
@@ -261,17 +234,17 @@ export default function CreatePOIPage() {
                                     type="text"
                                     id="description"
                                     placeholder="Type the description here"
-                                    className="input input-bordered w-full max-w-xs bg-slate-800 text-white"
+                                    className="input input-bordered w-full bg-slate-800 text-white"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                 />
                             </div>
-                            <div className="mb-4">
+                            <div className="flex flex-col mb-4">
                                 <label
                                     htmlFor="image"
-                                    className="block mb-2 text-sm font-medium text-gray-900 max-x-ws"
+                                    className="block mb-2 text-sm font-bold text-gray-900 max-x-ws"
                                 >
-                                    Select an Image:
+                                    Take a Picture
                                 </label>
                                 <input
                                     type="file"
@@ -281,28 +254,18 @@ export default function CreatePOIPage() {
                                 />
                                 <div className="text-red-500 text-sm">{errors.image}</div>
                             </div>
-                            <div className="flex justify-center p-3">
-                                <div className="mr-3">
-                                    <button
-                                        className="bg-dark text-white bg-opacity-20 py-2 px-4 rounded h-10"
-                                        onClick={handleSavePOI}
-                                    >
-                                        Save POI
-                                    </button>
-                                </div>
-                                <div>
-                                    <button
-                                        className="bg-red-500 border-red-500 text-white py-2 px-6 rounded h-10"
-                                        onClick={() => redirect("/map")}
-                                    >
-                                        Close
-                                    </button>
-                                </div>
+                            <div className="flex justify-center">
+                                <button
+                                    className="bg-green-600 text-white py-2 px-4 rounded h-10"
+                                    onClick={() => { if (validateForm()) handleUpload(); }}
+                                >
+                                    Save POI
+                                </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     );
 }

@@ -61,7 +61,7 @@ export default function MapComponent({
 		{ label: "Bench", value: "bench", selected: true },
 	]);
 
-	const [points, setPoints] = useState<LatLng[][]>([]);
+	const [points, setPoints] = useState<LatLng[]>([]);
 
 	const [directions, setDirections] = useState<Direction[]>([]);
 	const [currentIndex, setCurrentIndex] = useState(0);
@@ -93,6 +93,39 @@ export default function MapComponent({
 	const [markerCoordinates, setMarkerCoordinates] = useState(new Coordinate());
 	const [currentLocation, setCurrentLocation] = useState(new Coordinate());
 	const [lastStates, setLastStates] = useState([] as boolean[]);
+
+	const [gettingRoute, setGettingRoute] = useState(false);
+	const [isRecording, setIsRecording] = useState<boolean | any>(undefined);
+
+	const [trackedPoints, setTrackedPoints] = useState<string[]>([]);
+	const [trackID, setTrackID] = useState(0);
+
+	async function saveRoute(routeName: string, routePoints: string[]) {
+		const headers = {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${TOKEN}`,
+		};
+		const url = new URL(URL_API + "route/create");
+		const body = {
+			name: routeName,
+			points: routePoints,
+		};
+		return fetch(url.toString(), {
+			headers,
+			method: "POST",
+			body: JSON.stringify(body),
+		})
+			.then((response) => {
+				if (response.status === 200) {
+					return true;
+				} else {
+					return false;
+				}
+			})
+			.catch(() => {
+				return false;
+			});
+	}
 
 	function getUser() {
 		const headers = {
@@ -137,6 +170,8 @@ export default function MapComponent({
 		if (!TOKEN) {
 			setLoggedIn(false);
 			localStorage.removeItem("user");
+			sessionStorage.removeItem("points");
+			sessionStorage.removeItem("type");
 		} else if (localStorage.getItem("user")) {
 			setLoggedIn(true);
 			const userLS = JSON.parse(localStorage.getItem("user") || "");
@@ -144,6 +179,23 @@ export default function MapComponent({
 			setFname(userLS.first_name);
 		} else if (TOKEN) {
 			getUser();
+		}
+
+		if (sessionStorage.getItem("points") !== null) {
+			createRoute();
+			const points = JSON.parse(sessionStorage.getItem("points") ?? "");
+			const newOrigin = new SearchPoint("", new Coordinate(points[0].latitude, points[0].longitude));
+			setOrigin(newOrigin);
+			const newDestination = new SearchPoint("", new Coordinate(points[points.length - 1].latitude, points[points.length - 1].longitude));
+			setDestination(newDestination);
+			if (sessionStorage.getItem("type") === "saved") {
+				const intermediates = points.slice(1, points.length - 1).map((point: any) => {
+					return new SearchPoint("", new Coordinate(point.latitude, point.longitude));
+				});
+				setIntermediates(intermediates);
+			}
+			setPoints(points.map((point: any) => new LatLng(point.latitude, point.longitude)));
+			setGettingRoute(true);
 		}
 	}, []);
 
@@ -213,7 +265,7 @@ export default function MapComponent({
 			.then((response) => response.json())
 			.then((data) => {
 				if (data.items.length === 0) {
-					window.alert("No results");
+					alert("No results");
 					return;
 				}
 				const lat = data.items[0].position.lat;
@@ -244,6 +296,8 @@ export default function MapComponent({
 			setOrigin(new SearchPoint(""));
 			setDestination(new SearchPoint(""));
 			setIntermediates([]);
+			sessionStorage.removeItem("points");
+			sessionStorage.removeItem("type");
 		}
 		manageModals("routing", !openRouting);
 	};
@@ -332,25 +386,27 @@ export default function MapComponent({
 	}
 
 	async function getPosition(setFunction: (value: Coordinate) => void) {
-		if ("geolocation" in navigator) {
-			navigator.geolocation.getCurrentPosition(
-				(position) => {
-					const pos = {
-						latitude: position.coords.latitude,
-						longitude: position.coords.longitude,
+		navigator.permissions.query({ name: "geolocation" }).then((result) => {
+			if (result.state === "granted") {
+				navigator.geolocation.getCurrentPosition(
+					(position) => {
+						const pos = {
+							latitude: position.coords.latitude,
+							longitude: position.coords.longitude,
+						}
+						setFunction(new Coordinate(pos.latitude, pos.longitude));
+						return pos;
+					},
+					(error) => {
+						setFunction(new Coordinate());
+						console.log(error);
 					}
-					setFunction(new Coordinate(pos.latitude, pos.longitude));
-					return pos;
-				},
-				(error) => {
-					setFunction(new Coordinate());
-					console.log(error);
-				}
-			);
-		} else {
-			setFunction(new Coordinate());
-			console.log("Geolocation is not supported by this browser.");
-		}
+				);
+			} else {
+				setFunction(new Coordinate());
+				console.log("Geolocation is not supported by this browser.");
+			}
+		});
 	}
 
 	useEffect(() => {
@@ -422,6 +478,7 @@ export default function MapComponent({
 						setShowDirections(false);
 					}
 					else {
+						setShowDetails(false);
 						setHideRouting(false);
 						setShowRouting(lastStates[1]);
 						setFilterBoard(lastStates[4]);
@@ -461,6 +518,59 @@ export default function MapComponent({
 			}
 		}
 	}
+
+	function startTracking() {
+		setIsRecording(true);
+	}
+
+	function stopTracking() {
+		const response = confirm("Are you sure you want to stop tracking?");
+		if (!response) {
+			return;
+		}
+		setIsRecording(false);
+	}
+
+	useEffect(() => {
+		if (isRecording === false) {
+			navigator.geolocation.clearWatch(trackID);
+			const todaysDate = new Date();
+			const date = todaysDate.getDate();
+			const month = todaysDate.getMonth();
+			const year = todaysDate.getFullYear();
+			const hours = todaysDate.getHours();
+			const minutes = todaysDate.getMinutes();
+			const seconds = todaysDate.getSeconds();
+			const trackedDate = `${date}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+			saveRoute(trackedDate, trackedPoints);
+		} else if (isRecording === true) {
+			navigator.permissions.query({ name: "geolocation" }).then((result) => {
+				if (result.state === "granted") {
+					const response = confirm("Are you sure you want to start tracking your GPS position?");
+					if (!response) {
+						setIsRecording(false);
+						return;
+					}
+					const id = navigator.geolocation.watchPosition(
+						(position) => {
+							let newTrackedPoints = trackedPoints;
+							trackedPoints.push(`${position.coords.latitude.toFixed(6)},${position.coords.longitude.toFixed(6)}`);
+							setTrackedPoints(newTrackedPoints);
+						},
+						(error) => {
+							console.log(error);
+							setIsRecording(false);
+							return;
+						}
+					);
+					setTrackID(id);
+				} else {
+					alert("Please enable geolocation to use this feature.");
+					setIsRecording(false);
+				}
+			});
+		}
+	}, [isRecording]);
 
 	return (
 		<>
@@ -534,8 +644,8 @@ export default function MapComponent({
 									<img
 										src={avatar}
 										alt={`${fname}'s profile`}
-										className="rounded-circle shadow"
-										style={{ height: "100%", objectFit: "cover" }}
+										className="rounded-circle shadow object-cover"
+										style={{ height: "100%", width: "100%" }}
 									/>
 								</button>
 							</a>
@@ -553,7 +663,7 @@ export default function MapComponent({
 				{/*
                     	MIDDLE PART OF THE UI
                 	*/}
-				<div className="flex h-screen">
+				<div className="flex h-full">
 					{openRouting && (
 						<div className="flex flex-col ml-2 mr-2 pt-10 sm:pt-32 w-full sm:w-1/5" >
 							<RoutingComponent
@@ -577,6 +687,9 @@ export default function MapComponent({
 								setCurrentIndex={setCurrentIndex}
 								onlyInfo={onlyInfo}
 								setOnlyInfo={setOnlyInfo}
+								gettingRoute={gettingRoute}
+								setGettingRoute={setGettingRoute}
+								saveRoute={saveRoute}
 							/>
 						</div>
 					)}
@@ -613,18 +726,20 @@ export default function MapComponent({
                     	LOWER PART OF THE UI
                 	*/}
 				<div className="pb-2 mt-auto w-full">
-					<div className="mx-auto w-full sm:w-1/2">
-						{showDirections && (
-							<DirectionsComponent
-								directions={directions}
-								currentIndex={currentIndex}
-								handleNext={handleNext}
-								handleBefore={handleBefore}
-								closeDirections={closeDirections}
-							/>
-						)}
+					<div className="absolute bottom-2 w-full">
+						<div className="mx-auto w-full sm:w-1/2">
+							{showDirections && (
+								<DirectionsComponent
+									directions={directions}
+									currentIndex={currentIndex}
+									handleNext={handleNext}
+									handleBefore={handleBefore}
+									closeDirections={closeDirections}
+								/>
+							)}
+						</div>
 					</div>
-					<div className="absolute w-full">
+					<div className="absolute w-full bottom-2">
 						<div className="flex w-full">
 							<div className="mx-auto">
 								{showPOIButton && loggedIn && (
@@ -640,41 +755,64 @@ export default function MapComponent({
 						</div>
 					</div>
 					<div className="flex w-full">
-						<div className="ml-2 mr-auto">
-							{!isMobile ? (
-								<button
-									id={"ori-dst-btn"}
-									onClick={createRoute}
-									className="btn"
-								>
-									Route
-								</button>
-							) : (
-								!hideRouting && (
-									(showRouting && !onlyInfo) ? (
-										<button
-											id={"ori-dst-btn"}
-											onClick={createRoute}
-											className="btn"
-										>
-											Route
-										</button>
-									) : (
-										<button
-											id={"ori-dst-btn"}
-											onClick={() => {setShowRouting(true); setOnlyInfo(false)}}
-											className="btn"
-										>
-											Show
-										</button>
+						<div className="flex ml-2 mr-auto items-end">
+							<div>
+								{!isMobile ? (
+									<button
+										id={"ori-dst-btn"}
+										onClick={createRoute}
+										className="btn"
+									>
+										Route
+									</button>
+								) : (
+									!hideRouting && (
+										(showRouting && !onlyInfo) ? (
+											<button
+												id={"ori-dst-btn"}
+												onClick={createRoute}
+												className="btn"
+											>
+												Route
+											</button>
+										) : (
+											<button
+												id={"ori-dst-btn"}
+												onClick={() => { setShowRouting(true); setOnlyInfo(false) }}
+												className="btn"
+											>
+												Show
+											</button>
+										)
 									)
-								)
-							)}
+								)}
+							</div>
 						</div>
 
 						<div className={"flex mr-2 ml-auto"}>
-							{isMobile ? null :
-								(
+							{(isMobile && loggedIn) ? (
+								isRecording ? (
+									<button
+										id={"track-btn"}
+										onClick={() => stopTracking()}
+										className="animate-pulse btn w-16 h-16 shadow rounded-full uppercase font-bold items-center justify-center border-2 border-white text-white bg-red-600"
+									>
+										Rec
+									</button>
+								)
+									:
+									(
+										<button
+											id={"track-btn"}
+											onClick={() => startTracking()}
+											className="btn w-16 h-16 shadow rounded-full uppercase font-bold items-center justify-center border-2 text-black bg-green-500"
+										>
+											Track
+										</button>
+									)
+							)
+								:
+								(isMobile ? null : (
 									<>
 										<button
 											id={"map-rotate-left-btn"}
@@ -691,12 +829,12 @@ export default function MapComponent({
 											Rotate Right
 										</button>
 									</>
-								)
+								))
 							}
 						</div>
 					</div>
-				</div>
-			</div>
+				</div >
+			</div >
 		</>
 	);
 }

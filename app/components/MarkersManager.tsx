@@ -30,70 +30,7 @@ export default function MarkersManager({
     const [redVisible, setRedVisible] = useState<boolean>(false);
     const [greenVisible, setGreenVisible] = useState<boolean>(false);
     const [blueVisible, setBlueVisible] = useState<boolean>(false);
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [isPOIModalOpen, setIsPOIModalOpen] = useState<boolean>(false);
     const [blueMarkers, setBlueMarkers] = useState<any[]>([]);
-
-    // close modal when ESC key is pressed
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-        if (e.key === "Escape") {
-            e.preventDefault();
-            // check which modal is open
-            if (isModalOpen) {
-                closeModal();
-            } else if (isPOIModalOpen) {
-                closePOIModal();
-            }
-        }
-    };
-
-    // close modal when btn is clicked
-    const closeModal = () => {
-        setIsModalOpen(false);
-    };
-
-    const closePOIModal = () => {
-        setIsPOIModalOpen(false);
-        closeModal();
-    };
-
-    const createPOI = () => {
-        setIsPOIModalOpen(true);
-        closeModal();
-    };
-
-    const savePOI = () => {
-        closePOIModal();
-    };
-
-    /* useEffect modal popup */
-    useEffect(() => {
-        const modal = document.getElementById("my_modal_1") as HTMLDialogElement;
-        if (modal === null) {
-            return;
-        }
-        if (isModalOpen) {
-            modal.open = true;
-        } else {
-            modal.open = false;
-            setIsModalOpen(false);
-        }
-    }, [isModalOpen]);
-
-    /* useEffect modal POI */
-    useEffect(() => {
-        const modal = document.getElementById("my_modal_2") as HTMLDialogElement;
-        if (modal === null) {
-            return;
-        }
-        if (isPOIModalOpen) {
-            modal.open = true;
-            closeModal();
-        } else {
-            modal.open = false;
-            setIsPOIModalOpen(false);
-        }
-    }, [isPOIModalOpen]);
 
     useEffect(() => {
         if (!origin.isCoordinateNull()) {
@@ -188,9 +125,6 @@ export default function MarkersManager({
             newDestination.setName("");
             setDestination(newDestination);
         } else if (redVisible) {
-            if (isModalOpen || isPOIModalOpen) {
-                return;
-            }
             setRedVisible(false);
             setDestination(new SearchPoint());
             setMarkerCoordinates(new Coordinate());
