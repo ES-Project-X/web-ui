@@ -25,6 +25,7 @@ import { Coordinate, SearchPoint } from "../structs/SearchComponent";
 import "../globals.css";
 import DirectionsComponent from "./Directions";
 import POIsSidebar from "./POIsSidebar";
+import { create } from "domain";
 
 const TOKEN = Cookies.get("COGNITO_TOKEN");
 
@@ -61,7 +62,7 @@ export default function MapComponent({
 		{ label: "Bench", value: "bench", selected: true },
 	]);
 
-	const [points, setPoints] = useState<LatLng[][]>([]);
+	const [points, setPoints] = useState<LatLng[]>([]);
 
 	const [directions, setDirections] = useState<Direction[]>([]);
 	const [currentIndex, setCurrentIndex] = useState(0);
@@ -93,6 +94,8 @@ export default function MapComponent({
 	const [markerCoordinates, setMarkerCoordinates] = useState(new Coordinate());
 	const [currentLocation, setCurrentLocation] = useState(new Coordinate());
 	const [lastStates, setLastStates] = useState([] as boolean[]);
+
+	const [gettingRoute, setGettingRoute] = useState(false);
 
 	function getUser() {
 		const headers = {
@@ -144,6 +147,23 @@ export default function MapComponent({
 			setFname(userLS.first_name);
 		} else if (TOKEN) {
 			getUser();
+		}
+
+		if (sessionStorage.getItem("points") !== null) {
+			createRoute();
+			const points = JSON.parse(sessionStorage.getItem("points") || "");
+			const newOrigin = new SearchPoint("", new Coordinate(points[0].latitude, points[0].longitude));
+			setOrigin(newOrigin);
+			const newDestination = new SearchPoint("", new Coordinate(points[points.length - 1].latitude, points[points.length - 1].longitude));
+			setDestination(newDestination);
+			if (sessionStorage.getItem("type") === "saved") {
+				const intermediates = points.slice(1, points.length - 1).map((point: any) => {
+					return new SearchPoint("", new Coordinate(point.latitude, point.longitude));
+				});
+				setIntermediates(intermediates);
+			}
+			setPoints(points.map((point: any) => new LatLng(point.latitude, point.longitude)));
+			setGettingRoute(true);
 		}
 	}, []);
 
@@ -244,6 +264,8 @@ export default function MapComponent({
 			setOrigin(new SearchPoint(""));
 			setDestination(new SearchPoint(""));
 			setIntermediates([]);
+			sessionStorage.removeItem("points");
+			sessionStorage.removeItem("type");
 		}
 		manageModals("routing", !openRouting);
 	};
@@ -577,6 +599,8 @@ export default function MapComponent({
 								setCurrentIndex={setCurrentIndex}
 								onlyInfo={onlyInfo}
 								setOnlyInfo={setOnlyInfo}
+								gettingRoute={gettingRoute}
+								setGettingRoute={setGettingRoute}
 							/>
 						</div>
 					)}
@@ -613,16 +637,18 @@ export default function MapComponent({
                     	LOWER PART OF THE UI
                 	*/}
 				<div className="pb-2 mt-auto w-full">
-					<div className="mx-auto w-full sm:w-1/2">
-						{showDirections && (
-							<DirectionsComponent
-								directions={directions}
-								currentIndex={currentIndex}
-								handleNext={handleNext}
-								handleBefore={handleBefore}
-								closeDirections={closeDirections}
-							/>
-						)}
+					<div className="absolute bottom-2 w-full">
+						<div className="mx-auto w-full sm:w-1/2">
+							{showDirections && (
+								<DirectionsComponent
+									directions={directions}
+									currentIndex={currentIndex}
+									handleNext={handleNext}
+									handleBefore={handleBefore}
+									closeDirections={closeDirections}
+								/>
+							)}
+						</div>
 					</div>
 					<div className="absolute w-full">
 						<div className="flex w-full">
@@ -662,7 +688,7 @@ export default function MapComponent({
 									) : (
 										<button
 											id={"ori-dst-btn"}
-											onClick={() => {setShowRouting(true); setOnlyInfo(false)}}
+											onClick={() => { setShowRouting(true); setOnlyInfo(false) }}
 											className="btn"
 										>
 											Show

@@ -29,7 +29,9 @@ export default function RoutingComponent(
         openDirections,
         setCurrentIndex,
         onlyInfo,
-        setOnlyInfo
+        setOnlyInfo,
+        gettingRoute,
+        setGettingRoute,
     }: {
         showRouting: boolean,
         setShowRouting: (showRouting: boolean) => void,
@@ -43,7 +45,7 @@ export default function RoutingComponent(
         setDestination: (destination: SearchPoint) => void,
         intermediates: SearchPoint[],
         setIntermediates: (intermediates: SearchPoint[]) => void,
-        setPoints: (points: LatLng[][]) => void,
+        setPoints: (points: LatLng[]) => void,
         addIntermediate: boolean,
         setAddIntermediate: (intermediate: boolean) => void,
         setDirections: (directions: Direction[]) => void,
@@ -51,17 +53,18 @@ export default function RoutingComponent(
         setCurrentIndex: (index: number) => void;
         onlyInfo: boolean;
         setOnlyInfo: (onlyInfo: boolean) => void;
+        gettingRoute: boolean;
+        setGettingRoute: (gettingRoute: boolean) => void;
     }
 ) {
     const [pointToRemove, setPointToRemove] = useState(-1);
     const [myOrigin, setMyOrigin] = useState("");
     const [myDestination, setMyDestination] = useState("");
     const [myIntermediates, setMyIntermediates] = useState<string[]>([]);
-    const [gettingRoute, setGettingRoute] = useState(false);
-    const [names, setNames] = useState<string[]>([]);
     const [myPoints, setMyPoints] = useState<string[]>([]);
     const [distance, setDistance] = useState("");
     const [time, setTime] = useState("");
+    const [name, setName] = useState("");
 
     useEffect(() => {
         if (pointToRemove === -1) {
@@ -244,7 +247,7 @@ export default function RoutingComponent(
             .then((response) => response.json())
             .then((data) => {
                 if (data.items.length === 0) {
-                    window.alert("No results");
+                    alert("No results");
                     return "";
                 }
                 const lat = data.items[0].position.lat;
@@ -262,7 +265,7 @@ export default function RoutingComponent(
             .then((response) => response.json())
             .then((data) => {
                 if (data.items.length === 0) {
-                    window.alert("No results");
+                    alert("No results");
                     return "";
                 }
                 const address1 = data.items[0].address.district;
@@ -290,7 +293,7 @@ export default function RoutingComponent(
     const getRoute = async () => {
         if (origin.isCoordinateNull() || destination.isCoordinateNull()) {
             if (myOrigin === "" || myDestination === "") {
-                window.alert("Please fill in both fields");
+                alert("Please fill in both fields");
                 clearRoute();
                 return;
             } else if (origin.isCoordinateNull()) {
@@ -334,7 +337,12 @@ export default function RoutingComponent(
         if (!currentBounds.contains(bounds)) {
             mapFitBounds(bounds);
         }
-        setNames(newNames);
+        let newName = newNames[0];
+        for (let i = 1; i < newNames.length-1; i++) {
+            newName += "__" + newNames[i].split(",")[0];
+        }
+        newName += "__" + newNames[newNames.length-1];
+        setName(newName);
         setMyPoints(newMyPoints);
         setGettingRoute(true);
         setOnlyInfo(true);
@@ -361,7 +369,7 @@ export default function RoutingComponent(
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.paths.length === 0) {
-                        window.alert("No results");
+                        alert("No results");
                         return;
                     }
                     const points = data.paths[0].points.coordinates;
@@ -381,7 +389,7 @@ export default function RoutingComponent(
                     for (let point of points) {
                         points2.push(new LatLng(point[1], point[0]));
                     }
-                    setPoints([points2]);
+                    setPoints(points2);
                     let directions = [];
                     for (let instruction of data.paths[0].instructions) {
                         directions.push(
@@ -411,14 +419,6 @@ export default function RoutingComponent(
             Authorization: `Bearer ${TOKEN}`,
         };
         const url = new URL(URL_API + "route/create");
-        let name = "";
-        for (let i = 0; i < names.length; i++) {
-            if (i === names.length - 1) {
-                name += names[i];
-            } else {
-                name += names[i] + "__";
-            }
-        }
         const body = {
             name: name,
             points: myPoints,
@@ -461,7 +461,7 @@ export default function RoutingComponent(
 
     return (
         showRouting && (
-            onlyInfo ? (
+            (onlyInfo && isMobile) ? (
                 <div id={"card-ori-dest"} className="card p-3">
                     <div className="flex flex-col overflow-y-auto max-h-48 sm:max-h-72"></div>
                     <div className="flex flex-col mt-2 mr-auto">
@@ -589,9 +589,9 @@ export default function RoutingComponent(
                                         id={"save-route-btn"}
                                         onClick={async () => {
                                             if (await saveRoute()) {
-                                                window.alert("Route saved");
+                                                alert("Route saved");
                                             } else {
-                                                window.alert("Error saving route");
+                                                alert("Error saving route");
                                             }
                                         }}
                                         style={{ borderWidth: "3px", borderStyle: "solid" }}
