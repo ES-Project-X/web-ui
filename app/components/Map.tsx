@@ -478,6 +478,7 @@ export default function MapComponent({
 						setShowDirections(false);
 					}
 					else {
+						setShowDetails(false);
 						setHideRouting(false);
 						setShowRouting(lastStates[1]);
 						setFilterBoard(lastStates[4]);
