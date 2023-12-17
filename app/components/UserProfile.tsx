@@ -28,8 +28,46 @@ export default function UserProfile() {
 
     const [image, setImage] = useState<File | null>(null);
     const [imageChanged, setImageChanged] = useState(false);
+    const [imageBase64, setImageBase64] = useState("");
     const [image_type, setImageType] = useState("");
     let userChanges = {};
+
+    useEffect(() => {
+        if (!TOKEN) {
+            redirect("/map");
+        }
+
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+        };
+        const url = new URL(URL_API + "user");
+
+        fetch(url.toString(), { headers })
+            .then(async (res) => {
+                if (res.status !== 200) {
+                    redirect("/map");
+                }
+                const user: UserData = await res.json();
+
+                if (user) {
+                    setAvatar(user.image_url);
+                    setFname(user.first_name);
+                    setLname(user.last_name);
+                    setUsername(user.username);
+                    setEmail(user.email);
+                    setFormUsername(user.username);
+                    setTotal_xp(user.total_xp);
+                    setAddedPoiCount(user.added_pois_count);
+                    setReceivedRatingCount(user.received_ratings_count);
+                    setGivenRatingCount(user.given_ratings_count);
+                    setLevelInfo(calculateLevelAndXP(user.total_xp));
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
 
     function redirect(path: string) {
         window.location.replace(path);
@@ -73,43 +111,6 @@ export default function UserProfile() {
         userChanges = {};
     };
 
-    useEffect(() => {
-        if (!TOKEN) {
-            redirect("/map");
-        }
-
-        const headers = {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${TOKEN}`,
-        };
-        const url = new URL(URL_API + "user");
-
-        fetch(url.toString(), { headers })
-            .then(async (res) => {
-                if (res.status !== 200) {
-                    redirect("/map");
-                }
-                const user: UserData = await res.json();
-
-                if (user) {
-                    setAvatar(user.image_url);
-                    setFname(user.first_name);
-                    setLname(user.last_name);
-                    setUsername(user.username);
-                    setEmail(user.email);
-                    setFormUsername(user.username);
-                    setTotal_xp(user.total_xp);
-                    setAddedPoiCount(user.added_pois_count);
-                    setReceivedRatingCount(user.received_ratings_count);
-                    setGivenRatingCount(user.given_ratings_count);
-                    setLevelInfo(calculateLevelAndXP(user.total_xp));
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    }, []);
-
     function logout() {
         Cookies.remove("COGNITO_TOKEN");
         localStorage.removeItem("user");
@@ -151,37 +152,20 @@ export default function UserProfile() {
         };
     }
 
-    //@ts-ignore
-    const fileToBase642 = (file) => {
-        return new Promise((resolve, reject) => {
-            const reader2 = new FileReader();
-
-            reader2.onload = () => {
-                //@ts-ignore
-                resolve(reader2.result.split(",")[1]);
-                //@ts-ignore
-                setImageType(reader2.result.split(",")[0].split(":")[1].split(";")[0]);
-            };
-
-            reader2.onerror = (error) => {
-                reject(error);
-            };
-
-            reader2.readAsDataURL(file);
-        });
-    };
-
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedImage = e.target.files?.[0];
 
         const maxFileSize = 4 * 1024 * 1024; // file needs to be less than 4MB (change as needed)
 
+        if (!selectedImage) {
+            return;
+        }
+
         if (selectedImage && selectedImage.size > maxFileSize) {
             alert("Image must be less than 4MB");
             return;
         }
-
-        setImage(selectedImage || null);
+        setImage(selectedImage);
         setImageChanged(true);
 
         // Reset the value of the file input field
@@ -193,18 +177,31 @@ export default function UserProfile() {
             return;
         }
 
-        const base64String = await fileToBase642(image);
-        axios
-            .post(
-                URL_API + "s3/upload",
-                { base64_image: base64String, image_type: image_type },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${TOKEN}`,
-                    },
-                }
-            )
+        const reader = new FileReader();    
+        reader.onloadend = () => {
+            const base64String = reader.result?.toString();
+            if (base64String) {
+                setImageType(image.type);
+                setImageBase64(base64String);
+            }
+        }
+        reader.readAsDataURL(image);
+    };
+
+    useEffect(() => {
+        if (!imageBase64) {
+            return;
+        }
+        axios.post(
+            URL_API + "s3/upload",
+            { base64_image: imageBase64, image_type: image_type },
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${TOKEN}`,
+                },
+            }
+        )
             .then((res) => {
                 if (res.status === 200) {
                     return res.data;
@@ -220,7 +217,9 @@ export default function UserProfile() {
 
         userChanges = {};
         setImageChanged(false);
-    };
+        setImage(null);
+        setIsEditing(false);
+    }, [imageBase64]);
 
     const cancelUpload = () => {
         setImageChanged(false);
@@ -235,53 +234,53 @@ export default function UserProfile() {
         <div className="min-h-screen bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80% to-white to-100%">
             <div className="h-screen/3 flex items-center justify-center overflow-hidden flex-col">
                 <div className="flex p-4 w-full">
-                        <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10 mr-auto" onClick={() => { redirect("/map") }}>
-                            Map
-                        </button>
-                        <button
-                            className="bg-white text-black py-2 px-4 rounded h-10 ml-auto"
-                            onClick={() => {
-                                redirect("/routes");
-                            }}
-                        >
-                            Routes
-                        </button>
+                    <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded mr-auto" onClick={() => { redirect("/map") }}>
+                        Map
+                    </button>
+                    <button
+                        className="bg-white text-black py-2 px-4 rounded ml-auto"
+                        onClick={() => {
+                            redirect("/routes");
+                        }}
+                    >
+                        Routes
+                    </button>
                 </div>
                 {/* Content */}
                 <div className="text-center z-20 flex flex-col items-center justify-center">
                     {/* Adjusted image and XP bar */}
                     <div className="flex flex-col items-center">
                         {isMobile ? (
-                            <div>
+                            <div className="flex flex-col items-center relative">
                                 <img
                                     src={avatar}
                                     alt={`${fname} ${lname}'s avatar`}
                                     className="w-48 h-48 object-cover rounded-full cursor-pointer border-4 border-white"
                                 />
                                 {isEditing && (
-                                    <label htmlFor="image" className="mt-2">
-                                        <button className="bg-gray-300 text-white py-2 px-4 rounded cursor-pointer w-full">
+                                    <div className="flex flex-col items-center mt-2 w-56">
+                                        <label className="absolute w-full bg-gray-400 text-white py-2 px-4 rounded cursor-pointer">
                                             Change Profile Picture
-                                        </button>
+                                        </label>
                                         <input
                                             type="file"
                                             id="image"
                                             accept="image/*"
-                                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                                            className="w-full py-2 rounded cursor-pointer z-10 opacity-0"
                                             onChange={handleImageChange}
                                         />
-                                    </label>
+                                    </div>
                                 )}
                             </div>
                         ) : (
-                            <div className="flex group">
+                            <div className="flex group justify-center">
                                 <img
                                     src={avatar}
                                     alt={`${fname} ${lname}`}
-                                    className="absolute w-32 h-32 object-cover rounded-full opacity-90 group-hover:opacity-50 border-4 border-white"
+                                    className="absolute w-48 h-48 object-cover rounded-full opacity-90 group-hover:opacity-50 border-4 border-white"
                                 />
                                 <label
-                                    className="absolute flex justify-center items-center w-32 h-32 text-white rounded-full opacity-5 group-hover:opacity-70"
+                                    className="absolute flex justify-center items-center w-48 h-48 text-white rounded-full opacity-5 group-hover:opacity-70"
                                     htmlFor="image"
                                 >
                                     Change Profile Picture
@@ -290,7 +289,7 @@ export default function UserProfile() {
                                     type="file"
                                     id="image"
                                     accept="image/*"
-                                    className="w-32 h-32 opacity-0 cursor-pointer rounded-full"
+                                    className="w-48 h-48 opacity-0 cursor-pointer rounded-full"
                                     onChange={handleImageChange}
                                 />
                             </div>
@@ -319,7 +318,7 @@ export default function UserProfile() {
                                 <h1 className="text-2xl font-semibold mt-2">
                                     {fname} {lname}
                                 </h1>
-                                <h5 className="text-sm">{username} - {email}</h5>
+                                <h2 className="text-sm">{username} - {email}</h2>
                                 <div className="w-full bg-gray-300 rounded-full overflow-hidden">
                                     <div
                                         className="bg-green-500 h-4"
@@ -341,7 +340,7 @@ export default function UserProfile() {
                             )}
                         {!isEditing && (
                             <button
-                                className="bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
+                                className="bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded"
                                 onClick={() => setIsEditing(!isEditing)}
                             >
                                 Modify Profile
@@ -356,7 +355,7 @@ export default function UserProfile() {
                     {!isEditing ? (
                         <>
                             <details className="dropdown bg-white rounded-lg shadow-md p-8 justify-center text-center ">
-                                <summary className="flex text-2xl font-semibold text-center btn justify-center">
+                                <summary className="flex text-center justify-center text-gray-800 active:border-gray-200 active:border-2 p-2 rounded-lg uppercase">
                                     <div className="flex">
                                         <span className="mr-1">User Statistics</span>
                                         <svg
@@ -454,13 +453,13 @@ export default function UserProfile() {
                                     {isEditing && (
                                         <>
                                             <button
-                                                className="mr-2 bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
+                                                className="mr-2 bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded"
                                                 onClick={() => updateProfile()}
                                             >
                                                 Save Changes
                                             </button>
                                             <button
-                                                className="bg-red-500 border-red-500 text-white py-2 px-4 rounded h-10"
+                                                className="bg-red-500 border-red-500 text-white py-2 px-4 rounded"
                                                 onClick={() => cancelUpload()}
                                             >
                                                 Cancel Changes
@@ -475,7 +474,7 @@ export default function UserProfile() {
                 <div className="flex justify-center mt-4">
                     {!isEditing && (
                         <button
-                            className="bg-red-500 border-red-500 text-white py-2 px-4 rounded h-10"
+                            className="bg-red-500 border-red-500 text-white py-2 px-4 rounded"
                             onClick={() => {
                                 logout();
                             }}

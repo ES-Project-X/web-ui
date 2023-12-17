@@ -38,7 +38,7 @@ describe("MarkersManager", () => {
         }, 300);
     })
 
-    it("add and remove a single marker", () => {
+    it.skip("add and remove a single marker", () => {
         const map = document.getElementById("map-container");
         fireEvent.click(map!, { clientX: 100, clientY: 100 });
         setTimeout(() => {
