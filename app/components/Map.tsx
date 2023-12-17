@@ -95,7 +95,7 @@ export default function MapComponent({
 	const [lastStates, setLastStates] = useState([] as boolean[]);
 
 	const [gettingRoute, setGettingRoute] = useState(false);
-	const [isRecording, setIsRecording] = useState(false);
+	const [isRecording, setIsRecording] = useState<boolean | any>(undefined);
 
 	const [trackedPoints, setTrackedPoints] = useState<string[]>([]);
 	const [trackID, setTrackID] = useState(0);
@@ -533,7 +533,7 @@ export default function MapComponent({
 	}
 
 	useEffect(() => {
-		if (!isRecording) {
+		if (isRecording === false) {
 			navigator.geolocation.clearWatch(trackID);
 			const todaysDate = new Date();
 			const date = todaysDate.getDate();
@@ -543,9 +543,9 @@ export default function MapComponent({
 			const minutes = todaysDate.getMinutes();
 			const seconds = todaysDate.getSeconds();
 			const trackedDate = `${date}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+			alert(trackedDate);
 			saveRoute(trackedDate, trackedPoints);
-		}
-		else {
+		} else if (isRecording === true) {
 			const id = navigator.geolocation.watchPosition(
 				(position) => {
 					let newTrackedPoints = trackedPoints;
