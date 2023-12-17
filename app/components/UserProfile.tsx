@@ -32,6 +32,43 @@ export default function UserProfile() {
     const [image_type, setImageType] = useState("");
     let userChanges = {};
 
+    useEffect(() => {
+        if (!TOKEN) {
+            redirect("/map");
+        }
+
+        const headers = {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+        };
+        const url = new URL(URL_API + "user");
+
+        fetch(url.toString(), { headers })
+            .then(async (res) => {
+                if (res.status !== 200) {
+                    redirect("/map");
+                }
+                const user: UserData = await res.json();
+
+                if (user) {
+                    setAvatar(user.image_url);
+                    setFname(user.first_name);
+                    setLname(user.last_name);
+                    setUsername(user.username);
+                    setEmail(user.email);
+                    setFormUsername(user.username);
+                    setTotal_xp(user.total_xp);
+                    setAddedPoiCount(user.added_pois_count);
+                    setReceivedRatingCount(user.received_ratings_count);
+                    setGivenRatingCount(user.given_ratings_count);
+                    setLevelInfo(calculateLevelAndXP(user.total_xp));
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
+
     function redirect(path: string) {
         window.location.replace(path);
     }
@@ -197,11 +234,11 @@ export default function UserProfile() {
         <div className="min-h-screen bg-white text-black bg-gradient-to-b from-0% from-green-500 via-white via-80% to-white to-100%">
             <div className="h-screen/3 flex items-center justify-center overflow-hidden flex-col">
                 <div className="flex p-4 w-full">
-                    <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10 mr-auto" onClick={() => { redirect("/map") }}>
+                    <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded mr-auto" onClick={() => { redirect("/map") }}>
                         Map
                     </button>
                     <button
-                        className="bg-white text-black py-2 px-4 rounded h-10 ml-auto"
+                        className="bg-white text-black py-2 px-4 rounded ml-auto"
                         onClick={() => {
                             redirect("/routes");
                         }}
@@ -214,25 +251,25 @@ export default function UserProfile() {
                     {/* Adjusted image and XP bar */}
                     <div className="flex flex-col items-center">
                         {isMobile ? (
-                            <div className="flex flex-col items-center">
+                            <div className="flex flex-col items-center relative">
                                 <img
                                     src={avatar}
                                     alt={`${fname} ${lname}'s avatar`}
                                     className="w-48 h-48 object-cover rounded-full cursor-pointer border-4 border-white"
                                 />
                                 {isEditing && (
-                                    <label htmlFor="image" className="mt-2">
-                                        <button className="bg-gray-300 text-white py-2 px-4 rounded cursor-pointer w-full">
+                                    <div className="flex flex-col items-center mt-2 w-56">
+                                        <label className="absolute w-full bg-gray-400 text-white py-2 px-4 rounded cursor-pointer">
                                             Change Profile Picture
-                                        </button>
+                                        </label>
                                         <input
                                             type="file"
                                             id="image"
                                             accept="image/*"
-                                            className="absolute opacity-0 cursor-pointer rounded-full"
+                                            className="w-full py-2 rounded cursor-pointer z-10 opacity-0"
                                             onChange={handleImageChange}
                                         />
-                                    </label>
+                                    </div>
                                 )}
                             </div>
                         ) : (
@@ -303,7 +340,7 @@ export default function UserProfile() {
                             )}
                         {!isEditing && (
                             <button
-                                className="bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
+                                className="bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded"
                                 onClick={() => setIsEditing(!isEditing)}
                             >
                                 Modify Profile
@@ -416,13 +453,13 @@ export default function UserProfile() {
                                     {isEditing && (
                                         <>
                                             <button
-                                                className="mr-2 bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded h-10"
+                                                className="mr-2 bg-green-900 text-black bg-opacity-20 py-2 px-4 rounded"
                                                 onClick={() => updateProfile()}
                                             >
                                                 Save Changes
                                             </button>
                                             <button
-                                                className="bg-red-500 border-red-500 text-white py-2 px-4 rounded h-10"
+                                                className="bg-red-500 border-red-500 text-white py-2 px-4 rounded"
                                                 onClick={() => cancelUpload()}
                                             >
                                                 Cancel Changes
@@ -437,7 +474,7 @@ export default function UserProfile() {
                 <div className="flex justify-center mt-4">
                     {!isEditing && (
                         <button
-                            className="bg-red-500 border-red-500 text-white py-2 px-4 rounded h-10"
+                            className="bg-red-500 border-red-500 text-white py-2 px-4 rounded"
                             onClick={() => {
                                 logout();
                             }}

@@ -82,7 +82,7 @@ export default function RoutesComponent() {
         <div className="absolute h-full w-full bg-gradient-to-b from-0% from-green-500 via-white via-80% to-white to-100%">
             <div>
                 <div className="absolute top-0 left-0 p-4">
-                    <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded h-10" onClick={() => redirect("/profile")}>
+                    <button className="bg-white text-black bg-opacity-20 py-2 px-4 rounded" onClick={() => redirect("/profile")}>
                         Back
                     </button>
                 </div>

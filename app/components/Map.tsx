@@ -631,8 +631,8 @@ export default function MapComponent({
 									<img
 										src={avatar}
 										alt={`${fname}'s profile`}
-										className="rounded-circle shadow"
-										style={{ height: "100%", objectFit: "cover" }}
+										className="rounded-circle shadow object-cover"
+										style={{ height: "100%", width: "100%"}}
 									/>
 								</button>
 							</a>
