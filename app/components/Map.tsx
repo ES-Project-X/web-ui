@@ -436,7 +436,7 @@ export default function MapComponent({
 			}
 		};
 		const distance = getDistanceFrom(input);
-		if (distance > 50) {
+		if (distance < 50) {
 			setShowPOIButton(true);
 		}
 		else {
