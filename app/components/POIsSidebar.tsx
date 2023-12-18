@@ -68,7 +68,7 @@ const POIsSidebar = ({
                 },
                 point: selectedPOI,
             });
-            if (distance < 50) {
+            if (distance > 50) {
                 setCloseEnough(true);
             } else {
                 setCloseEnough(false);
