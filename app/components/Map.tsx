@@ -541,7 +541,7 @@ export default function MapComponent({
 			const hours = todaysDate.getHours();
 			const minutes = todaysDate.getMinutes();
 			const seconds = todaysDate.getSeconds();
-			const trackedDate = `${date}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+			const trackedDate = `${date}-${month}-${year}__${hours}:${minutes}:${seconds}`;
 			saveRoute(trackedDate, trackedPoints);
 		} else if (isRecording === true) {
 			navigator.permissions.query({ name: "geolocation" }).then((result) => {
